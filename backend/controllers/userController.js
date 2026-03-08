@@ -3,21 +3,19 @@ const crypto = require("crypto");
 const nodemailer = require("nodemailer");
 
 const User = require("../models/User");
-const Candidate = require("../models/Candidate");
+const SafetyOfficer = require("../models/SafetyOfficer");
 
 // Show login form
 exports.showLoginForm = (req, res) => {
-  res.render("login", {
-    success: req.flash("success"),
-    error: req.flash("error"),
-  });
+  res.render("login");
 };
 
 // Handle login with role-based redirect
-
 exports.loginUser = (req, res, next) => {
   passport.authenticate("local", async (err, user, info) => {
-    if (err) return next(err);
+    if (err) {
+      return next(err);
+    }
 
     if (!user) {
       req.flash("error", "Invalid email or password");
@@ -25,7 +23,9 @@ exports.loginUser = (req, res, next) => {
     }
 
     req.logIn(user, async (err) => {
-      if (err) return next(err);
+      if (err) {
+        return next(err);
+      }
 
       try {
         if (user.role === "system_admin") {
@@ -33,19 +33,30 @@ exports.loginUser = (req, res, next) => {
           return res.redirect("/admin-dashboard");
         }
 
-        if (user.role === "candidate") {
+        if (user.role === "safety_officer") {
           const populatedUser = await User.findById(user._id).populate(
-            "candidate"
+            "safetyOfficer",
           );
 
-          if (!populatedUser || !populatedUser.candidate) {
-            req.flash("error", "Candidate data not found.");
+          if (!populatedUser || !populatedUser.safetyOfficer) {
+            req.flash("error", "Safety officer data not found.");
             return res.redirect("/api/users/login");
           }
 
-          const name = populatedUser.candidate.name || populatedUser.email;
+          const name = populatedUser.safetyOfficer.name || populatedUser.email;
           req.flash("success", `Welcome back, ${name}!`);
-          return res.redirect("/candidate-dashboard");
+          // FIXED: Removed /api/ from the path
+          return res.redirect("/safety-officers/dashboard");
+        }
+
+        if (user.role === "supervisor") {
+          req.flash("success", "Welcome supervisor!");
+          return res.redirect("/supervisor-dashboard");
+        }
+
+        if (user.role === "worker") {
+          req.flash("success", "Welcome worker!");
+          return res.redirect("/worker-dashboard");
         }
 
         req.flash("error", "Access denied: Role not recognized.");
@@ -59,6 +70,65 @@ exports.loginUser = (req, res, next) => {
   })(req, res, next);
 };
 
+// // Handle login with role-based redirect
+// exports.loginUser = (req, res, next) => {
+//   passport.authenticate("local", async (err, user, info) => {
+//     if (err) {
+//       return next(err);
+//     }
+
+//     if (!user) {
+//       req.flash("error", "Invalid email or password");
+//       return res.redirect("/api/users/login");
+//     }
+
+//     req.logIn(user, async (err) => {
+//       if (err) {
+//         return next(err);
+//       }
+
+//       try {
+//         if (user.role === "system_admin") {
+//           req.flash("success", "Welcome system admin!");
+//           return res.redirect("/admin-dashboard");
+//         }
+
+//         if (user.role === "safety_officer") {
+//           const populatedUser = await User.findById(user._id).populate(
+//             "safetyOfficer",
+//           );
+
+//           if (!populatedUser || !populatedUser.safetyOfficer) {
+//             req.flash("error", "Safety officer data not found.");
+//             return res.redirect("/api/users/login");
+//           }
+
+//           const name = populatedUser.safetyOfficer.name || populatedUser.email;
+//           req.flash("success", `Welcome back, ${name}!`);
+//           return res.redirect("/api/safety-officers/dashboard");
+//         }
+
+//         if (user.role === "supervisor") {
+//           req.flash("success", "Welcome supervisor!");
+//           return res.redirect("/supervisor-dashboard");
+//         }
+
+//         if (user.role === "worker") {
+//           req.flash("success", "Welcome worker!");
+//           return res.redirect("/worker-dashboard");
+//         }
+
+//         req.flash("error", "Access denied: Role not recognized.");
+//         return res.redirect("/api/users/login");
+//       } catch (error) {
+//         console.error("Login error:", error);
+//         req.flash("error", "Unexpected error occurred during login.");
+//         return res.redirect("/api/users/login");
+//       }
+//     });
+//   })(req, res, next);
+// };
+
 // Logout user
 exports.logoutUser = (req, res) => {
   req.logout(() => {
@@ -68,7 +138,6 @@ exports.logoutUser = (req, res) => {
 };
 
 // Show change password form
-
 exports.showChangePasswordForm = (req, res) => {
   res.render("change-password", {
     title: "Change Password",
@@ -144,7 +213,7 @@ exports.requestResetPassword = async (req, res) => {
 
     const token = crypto.randomBytes(32).toString("hex");
     user.resetPasswordToken = token;
-    user.resetPasswordExpires = Date.now() + 3600000; // 1 hour
+    user.resetPasswordExpires = Date.now() + 3600000;
     await user.save();
 
     const resetLink = `http://${req.headers.host}/users/reset-password/${token}`;
@@ -167,12 +236,12 @@ exports.requestResetPassword = async (req, res) => {
     });
 
     return res.redirect(
-      "/users/forgot-password?success=Reset+link+sent+to+your+email"
+      "/users/forgot-password?success=Reset+link+sent+to+your+email",
     );
   } catch (err) {
     console.error("Error sending reset email:", err);
     return res.redirect(
-      "/users/forgot-password?error=Error+processing+request"
+      "/users/forgot-password?error=Error+processing+request",
     );
   }
 };
@@ -188,7 +257,7 @@ exports.showResetForm = async (req, res) => {
 
   if (!user) {
     return res.redirect(
-      "/users/forgot-password?error=Invalid+or+expired+reset+token"
+      "/users/forgot-password?error=Invalid+or+expired+reset+token",
     );
   }
 
@@ -201,7 +270,6 @@ exports.showResetForm = async (req, res) => {
 };
 
 // Handle new password submission
-
 exports.resetPassword = async (req, res) => {
   const { token } = req.params;
   const { newPassword, confirmPassword } = req.body;

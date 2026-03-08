@@ -5,10 +5,10 @@ const userSchema = new mongoose.Schema({
   email: { type: String, unique: true, required: true },
   role: {
     type: String,
-    enum: ["system_admin", "candidate"],
+    enum: ["system_admin", "safety_officer", "supervisor", "worker"],
     required: true,
   },
-  candidate: { type: mongoose.Schema.Types.ObjectId, ref: "Candidate" },
+  safetyOfficer: { type: mongoose.Schema.Types.ObjectId, ref: "SafetyOfficer" },
   hadLoggedIn: { type: Boolean, default: false },
 
   // 🔐 Forgot/reset password fields
@@ -16,9 +16,9 @@ const userSchema = new mongoose.Schema({
   resetPasswordExpires: Date,
 });
 
-// 🔑 Passport-Local Mongoose plugin (adds hashing, salting, auth methods)
+// 🔑 Passport-Local Mongoose plugin
 userSchema.plugin(passportLocalMongoose, {
-  usernameField: "email", // Use email as the username
+  usernameField: "email",
   errorMessages: {
     UserExistsError: "A user with the given email already exists",
   },
