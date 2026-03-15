@@ -1,0 +1,226 @@
+<%- include('../partials/header') %>
+<%- include('../partials/navbar') %>
+
+<div class="container py-5">
+  <div class="row justify-content-center">
+    <div class="col-md-8">
+      <div class="card shadow-lg border-0">
+        <div class="card-header bg-transparent border-0 pt-4 px-4">
+          <h3 class="fw-bold mb-0" style="color: #26a69a">
+            <i class="fas fa-plus-circle me-2"></i>Create New Work Area
+          </h3>
+          <p class="text-muted">Add a new work area to a worksite</p>
+        </div>
+        <div class="card-body p-4">
+          <form action="/work-areas/create" method="POST">
+            <!-- Worksite Selection -->
+            <div class="mb-4">
+              <h5 class="fw-bold mb-3" style="color: #1e3c5c">Select Worksite</h5>
+              <div class="row g-3">
+                <div class="col-12">
+                  <label for="worksiteId" class="form-label fw-semibold">Worksite *</label>
+                  <select class="form-select form-select-lg" id="worksiteId" name="worksiteId" required>
+                    <option value="">Select a worksite</option>
+                    <% worksites.forEach(worksite => { %>
+                    <option value="<%= worksite._id %>" <%= preselectedWorksite === worksite._id.toString() ? 'selected' : '' %>>
+                      <%= worksite.name %> - <%= worksite.location %>
+                    </option>
+                    <% }) %>
+                  </select>
+                </div>
+              </div>
+            </div>
+
+            <!-- Basic Information -->
+            <div class="mb-4">
+              <h5 class="fw-bold mb-3" style="color: #1e3c5c">Basic Information</h5>
+              <div class="row g-3">
+                <div class="col-md-6">
+                  <label for="name" class="form-label fw-semibold">Work Area Name *</label>
+                  <input type="text" class="form-control form-control-lg" id="name" name="name" 
+                         placeholder="e.g., North Wing Foundation" required>
+                </div>
+                <div class="col-md-6">
+                  <label for="code" class="form-label fw-semibold">Area Code</label>
+                  <input type="text" class="form-control form-control-lg" id="code" name="code" 
+                         placeholder="e.g., NW-FND-01">
+                  <small class="text-muted">Auto-generated if left blank</small>
+                </div>
+                <div class="col-12">
+                  <label for="location" class="form-label fw-semibold">Location/Zone</label>
+                  <input type="text" class="form-control form-control-lg" id="location" name="location" 
+                         placeholder="e.g., Zone A, Level 2">
+                </div>
+                <div class="col-12">
+                  <label for="description" class="form-label fw-semibold">Description</label>
+                  <textarea class="form-control" id="description" name="description" rows="3" 
+                            placeholder="Brief description of this work area..."></textarea>
+                </div>
+              </div>
+            </div>
+
+            <!-- Status & Schedule -->
+            <div class="mb-4">
+              <h5 class="fw-bold mb-3" style="color: #1e3c5c">Status & Schedule</h5>
+              <div class="row g-3">
+                <div class="col-md-4">
+                  <label for="status" class="form-label fw-semibold">Status</label>
+                  <select class="form-select form-select-lg" id="status" name="status">
+                    <option value="planned">Planned</option>
+                    <option value="active" selected>Active</option>
+                    <option value="on_hold">On Hold</option>
+                    <option value="completed">Completed</option>
+                    <option value="inspecting">Inspecting</option>
+                  </select>
+                </div>
+                <div class="col-md-4">
+                  <label for="plannedStart" class="form-label fw-semibold">Planned Start</label>
+                  <input type="date" class="form-control form-control-lg" id="plannedStart" name="plannedStart">
+                </div>
+                <div class="col-md-4">
+                  <label for="plannedEnd" class="form-label fw-semibold">Planned End</label>
+                  <input type="date" class="form-control form-control-lg" id="plannedEnd" name="plannedEnd">
+                </div>
+              </div>
+            </div>
+
+            <!-- Work Types -->
+            <div class="mb-4">
+              <h5 class="fw-bold mb-3" style="color: #1e3c5c">Work Types</h5>
+              <p class="text-muted small">Select the types of work performed in this area</p>
+              <div class="row g-3">
+                <div class="col-md-6">
+                  <div class="form-check">
+                    <input class="form-check-input" type="checkbox" name="currentWorkTypes" value="excavation" id="workExcavation">
+                    <label class="form-check-label" for="workExcavation">Excavation</label>
+                  </div>
+                  <div class="form-check">
+                    <input class="form-check-input" type="checkbox" name="currentWorkTypes" value="foundation" id="workFoundation">
+                    <label class="form-check-label" for="workFoundation">Foundation</label>
+                  </div>
+                  <div class="form-check">
+                    <input class="form-check-input" type="checkbox" name="currentWorkTypes" value="structural" id="workStructural">
+                    <label class="form-check-label" for="workStructural">Structural</label>
+                  </div>
+                  <div class="form-check">
+                    <input class="form-check-input" type="checkbox" name="currentWorkTypes" value="masonry" id="workMasonry">
+                    <label class="form-check-label" for="workMasonry">Masonry</label>
+                  </div>
+                  <div class="form-check">
+                    <input class="form-check-input" type="checkbox" name="currentWorkTypes" value="roofing" id="workRoofing">
+                    <label class="form-check-label" for="workRoofing">Roofing</label>
+                  </div>
+                </div>
+                <div class="col-md-6">
+                  <div class="form-check">
+                    <input class="form-check-input" type="checkbox" name="currentWorkTypes" value="electrical" id="workElectrical">
+                    <label class="form-check-label" for="workElectrical">Electrical</label>
+                  </div>
+                  <div class="form-check">
+                    <input class="form-check-input" type="checkbox" name="currentWorkTypes" value="plumbing" id="workPlumbing">
+                    <label class="form-check-label" for="workPlumbing">Plumbing</label>
+                  </div>
+                  <div class="form-check">
+                    <input class="form-check-input" type="checkbox" name="currentWorkTypes" value="hvac" id="workHvac">
+                    <label class="form-check-label" for="workHvac">HVAC</label>
+                  </div>
+                  <div class="form-check">
+                    <input class="form-check-input" type="checkbox" name="currentWorkTypes" value="finishing" id="workFinishing">
+                    <label class="form-check-label" for="workFinishing">Finishing</label>
+                  </div>
+                  <div class="form-check">
+                    <input class="form-check-input" type="checkbox" name="currentWorkTypes" value="general" id="workGeneral">
+                    <label class="form-check-label" for="workGeneral">General</label>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Shifts - Updated to only morning, afternoon, night -->
+            <div class="mb-4">
+              <h5 class="fw-bold mb-3" style="color: #1e3c5c">Shifts</h5>
+              <div class="row g-3">
+                <div class="col-md-4">
+                  <div class="form-check">
+                    <input class="form-check-input" type="checkbox" name="shifts" value="morning" id="shiftMorning">
+                    <label class="form-check-label" for="shiftMorning">
+                      <i class="fas fa-sun text-warning me-1"></i> Morning Shift
+                    </label>
+                  </div>
+                </div>
+                <div class="col-md-4">
+                  <div class="form-check">
+                    <input class="form-check-input" type="checkbox" name="shifts" value="afternoon" id="shiftAfternoon">
+                    <label class="form-check-label" for="shiftAfternoon">
+                      <i class="fas fa-cloud-sun text-info me-1"></i> Afternoon Shift
+                    </label>
+                  </div>
+                </div>
+                <div class="col-md-4">
+                  <div class="form-check">
+                    <input class="form-check-input" type="checkbox" name="shifts" value="night" id="shiftNight">
+                    <label class="form-check-label" for="shiftNight">
+                      <i class="fas fa-moon text-secondary me-1"></i> Night Shift
+                    </label>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- NEW: Initial Context Section -->
+            <div class="mb-4">
+              <h5 class="fw-bold mb-3" style="color: #1e3c5c">Initial Safety Context</h5>
+              <p class="text-muted small">Provide initial safety information about this work area (optional)</p>
+              
+              <div class="row g-3">
+                <div class="col-12">
+                  <label for="initialContextDesc" class="form-label fw-semibold">Context Description</label>
+                  <textarea class="form-control" id="initialContextDesc" name="initialContextDesc" rows="2" 
+                            placeholder="Describe the overall safety context of this work area..."></textarea>
+                </div>
+                
+                <div class="col-md-6">
+                  <label for="initialRiskLevel" class="form-label fw-semibold">Initial Risk Level</label>
+                  <select class="form-select" id="initialRiskLevel" name="initialRiskLevel">
+                    <option value="low">Low</option>
+                    <option value="medium" selected>Medium</option>
+                    <option value="high">High</option>
+                    <option value="critical">Critical</option>
+                  </select>
+                </div>
+                
+                <div class="col-12">
+                  <label for="initialConcerns" class="form-label fw-semibold">Initial Concerns (one per line)</label>
+                  <textarea class="form-control" id="initialConcerns" name="initialConcerns" rows="3" 
+                            placeholder="e.g., Unstable ground near excavation
+Working at height on north wall
+Confined space in pump room"></textarea>
+                  <small class="text-muted">List each concern on a new line</small>
+                </div>
+                
+                <div class="col-12">
+                  <label for="requiredPPEItems" class="form-label fw-semibold">Required PPE Items (one per line)</label>
+                  <textarea class="form-control" id="requiredPPEItems" name="requiredPPEItems" rows="3" 
+                            placeholder="e.g., Hard hat
+Safety glasses
+Steel-toed boots
+High-visibility vest"></textarea>
+                  <small class="text-muted">List each required PPE item on a new line</small>
+                </div>
+              </div>
+            </div>
+
+            <div class="d-flex gap-2 justify-content-end mt-4">
+              <a href="/worksites/my-worksites" class="btn btn-secondary btn-lg px-4">Cancel</a>
+              <button type="submit" class="btn btn-primary btn-lg px-4" style="background: linear-gradient(135deg, #26a69a 0%, #00897b 100%); border: none;">
+                <i class="fas fa-save me-2"></i> Create Work Area
+              </button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<%- include('../partials/footer') %>

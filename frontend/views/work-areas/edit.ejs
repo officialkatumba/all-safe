@@ -1,0 +1,201 @@
+<%- include('../partials/header') %>
+<%- include('../partials/navbar') %>
+
+<div class="container py-5">
+  <div class="row justify-content-center">
+    <div class="col-md-8">
+      <div class="card shadow-lg border-0">
+        <div class="card-header bg-transparent border-0 pt-4 px-4">
+          <h3 class="fw-bold mb-0" style="color: #26a69a">
+            <i class="fas fa-edit me-2"></i>Edit Work Area
+          </h3>
+          <p class="text-muted">Update work area information</p>
+        </div>
+        <div class="card-body p-4">
+          <form action="/work-areas/<%= workArea._id %>/edit" method="POST">
+            <!-- Worksite (Read-only) -->
+            <div class="mb-4">
+              <h5 class="fw-bold mb-3" style="color: #1e3c5c">Worksite</h5>
+              <div class="row g-3">
+                <div class="col-12">
+                  <label class="form-label fw-semibold">Worksite</label>
+                  <input type="text" class="form-control form-control-lg" value="<%= workArea.worksite.name %>" readonly disabled>
+                  <small class="text-muted">Worksite cannot be changed</small>
+                </div>
+              </div>
+            </div>
+
+            <!-- Basic Information -->
+            <div class="mb-4">
+              <h5 class="fw-bold mb-3" style="color: #1e3c5c">Basic Information</h5>
+              <div class="row g-3">
+                <div class="col-md-6">
+                  <label for="name" class="form-label fw-semibold">Work Area Name *</label>
+                  <input type="text" class="form-control form-control-lg" id="name" name="name" 
+                         value="<%= workArea.name %>" required>
+                </div>
+                <div class="col-md-6">
+                  <label for="code" class="form-label fw-semibold">Area Code</label>
+                  <input type="text" class="form-control form-control-lg" id="code" name="code" 
+                         value="<%= workArea.code || '' %>">
+                </div>
+                <div class="col-12">
+                  <label for="location" class="form-label fw-semibold">Location/Zone</label>
+                  <input type="text" class="form-control form-control-lg" id="location" name="location" 
+                         value="<%= workArea.location || '' %>">
+                </div>
+                <div class="col-12">
+                  <label for="description" class="form-label fw-semibold">Description</label>
+                  <textarea class="form-control" id="description" name="description" rows="3"><%= workArea.description || '' %></textarea>
+                </div>
+              </div>
+            </div>
+
+            <!-- Status & Schedule -->
+            <div class="mb-4">
+              <h5 class="fw-bold mb-3" style="color: #1e3c5c">Status & Schedule</h5>
+              <div class="row g-3">
+                <div class="col-md-4">
+                  <label for="status" class="form-label fw-semibold">Status</label>
+                  <select class="form-select form-select-lg" id="status" name="status">
+                    <option value="planned" <%= workArea.status === 'planned' ? 'selected' : '' %>>Planned</option>
+                    <option value="active" <%= workArea.status === 'active' ? 'selected' : '' %>>Active</option>
+                    <option value="on_hold" <%= workArea.status === 'on_hold' ? 'selected' : '' %>>On Hold</option>
+                    <option value="completed" <%= workArea.status === 'completed' ? 'selected' : '' %>>Completed</option>
+                    <option value="inspecting" <%= workArea.status === 'inspecting' ? 'selected' : '' %>>Inspecting</option>
+                  </select>
+                </div>
+                <div class="col-md-4">
+                  <label for="plannedStart" class="form-label fw-semibold">Planned Start</label>
+                  <input type="date" class="form-control form-control-lg" id="plannedStart" name="plannedStart"
+                         value="<%= workArea.plannedStart ? new Date(workArea.plannedStart).toISOString().split('T')[0] : '' %>">
+                </div>
+                <div class="col-md-4">
+                  <label for="plannedEnd" class="form-label fw-semibold">Planned End</label>
+                  <input type="date" class="form-control form-control-lg" id="plannedEnd" name="plannedEnd"
+                         value="<%= workArea.plannedEnd ? new Date(workArea.plannedEnd).toISOString().split('T')[0] : '' %>">
+                </div>
+              </div>
+            </div>
+
+            <!-- Work Types -->
+            <div class="mb-4">
+              <h5 class="fw-bold mb-3" style="color: #1e3c5c">Work Types</h5>
+              <p class="text-muted small">Select the types of work performed in this area</p>
+              <div class="row g-3">
+                <div class="col-md-6">
+                  <div class="form-check">
+                    <input class="form-check-input" type="checkbox" name="currentWorkTypes" value="excavation" id="workExcavation"
+                           <%= workArea.currentWorkTypes && workArea.currentWorkTypes.includes('excavation') ? 'checked' : '' %>>
+                    <label class="form-check-label" for="workExcavation">Excavation</label>
+                  </div>
+                  <div class="form-check">
+                    <input class="form-check-input" type="checkbox" name="currentWorkTypes" value="foundation" id="workFoundation"
+                           <%= workArea.currentWorkTypes && workArea.currentWorkTypes.includes('foundation') ? 'checked' : '' %>>
+                    <label class="form-check-label" for="workFoundation">Foundation</label>
+                  </div>
+                  <div class="form-check">
+                    <input class="form-check-input" type="checkbox" name="currentWorkTypes" value="structural" id="workStructural"
+                           <%= workArea.currentWorkTypes && workArea.currentWorkTypes.includes('structural') ? 'checked' : '' %>>
+                    <label class="form-check-label" for="workStructural">Structural</label>
+                  </div>
+                  <div class="form-check">
+                    <input class="form-check-input" type="checkbox" name="currentWorkTypes" value="masonry" id="workMasonry"
+                           <%= workArea.currentWorkTypes && workArea.currentWorkTypes.includes('masonry') ? 'checked' : '' %>>
+                    <label class="form-check-label" for="workMasonry">Masonry</label>
+                  </div>
+                  <div class="form-check">
+                    <input class="form-check-input" type="checkbox" name="currentWorkTypes" value="roofing" id="workRoofing"
+                           <%= workArea.currentWorkTypes && workArea.currentWorkTypes.includes('roofing') ? 'checked' : '' %>>
+                    <label class="form-check-label" for="workRoofing">Roofing</label>
+                  </div>
+                </div>
+                <div class="col-md-6">
+                  <div class="form-check">
+                    <input class="form-check-input" type="checkbox" name="currentWorkTypes" value="electrical" id="workElectrical"
+                           <%= workArea.currentWorkTypes && workArea.currentWorkTypes.includes('electrical') ? 'checked' : '' %>>
+                    <label class="form-check-label" for="workElectrical">Electrical</label>
+                  </div>
+                  <div class="form-check">
+                    <input class="form-check-input" type="checkbox" name="currentWorkTypes" value="plumbing" id="workPlumbing"
+                           <%= workArea.currentWorkTypes && workArea.currentWorkTypes.includes('plumbing') ? 'checked' : '' %>>
+                    <label class="form-check-label" for="workPlumbing">Plumbing</label>
+                  </div>
+                  <div class="form-check">
+                    <input class="form-check-input" type="checkbox" name="currentWorkTypes" value="hvac" id="workHvac"
+                           <%= workArea.currentWorkTypes && workArea.currentWorkTypes.includes('hvac') ? 'checked' : '' %>>
+                    <label class="form-check-label" for="workHvac">HVAC</label>
+                  </div>
+                  <div class="form-check">
+                    <input class="form-check-input" type="checkbox" name="currentWorkTypes" value="finishing" id="workFinishing"
+                           <%= workArea.currentWorkTypes && workArea.currentWorkTypes.includes('finishing') ? 'checked' : '' %>>
+                    <label class="form-check-label" for="workFinishing">Finishing</label>
+                  </div>
+                  <div class="form-check">
+                    <input class="form-check-input" type="checkbox" name="currentWorkTypes" value="general" id="workGeneral"
+                           <%= workArea.currentWorkTypes && workArea.currentWorkTypes.includes('general') ? 'checked' : '' %>>
+                    <label class="form-check-label" for="workGeneral">General</label>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Shifts -->
+            <div class="mb-4">
+              <h5 class="fw-bold mb-3" style="color: #1e3c5c">Shifts</h5>
+              <div class="row g-3">
+                <div class="col-md-4">
+                  <div class="form-check">
+                    <input class="form-check-input" type="checkbox" name="shifts" value="morning" id="shiftMorning"
+                           <%= workArea.activeShifts && workArea.activeShifts.includes('morning') ? 'checked' : '' %>>
+                    <label class="form-check-label" for="shiftMorning">
+                      <i class="fas fa-sun text-warning me-1"></i> Morning Shift
+                    </label>
+                  </div>
+                </div>
+                <div class="col-md-4">
+                  <div class="form-check">
+                    <input class="form-check-input" type="checkbox" name="shifts" value="afternoon" id="shiftAfternoon"
+                           <%= workArea.activeShifts && workArea.activeShifts.includes('afternoon') ? 'checked' : '' %>>
+                    <label class="form-check-label" for="shiftAfternoon">
+                      <i class="fas fa-cloud-sun text-info me-1"></i> Afternoon Shift
+                    </label>
+                  </div>
+                </div>
+                <div class="col-md-4">
+                  <div class="form-check">
+                    <input class="form-check-input" type="checkbox" name="shifts" value="night" id="shiftNight"
+                           <%= workArea.activeShifts && workArea.activeShifts.includes('night') ? 'checked' : '' %>>
+                    <label class="form-check-label" for="shiftNight">
+                      <i class="fas fa-moon text-secondary me-1"></i> Night Shift
+                    </label>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Hazards Section (Optional JSON input) -->
+            <div class="mb-4">
+              <h5 class="fw-bold mb-3" style="color: #1e3c5c">Hazards (Advanced)</h5>
+              <div class="form-group">
+                <label for="identifiedHazards" class="form-label fw-semibold">Identified Hazards (JSON format)</label>
+                <textarea class="form-control" id="identifiedHazards" name="identifiedHazards" rows="5" 
+                          placeholder='[{"hazard":"Working at height","riskLevel":"high","controls":"Use harness"}]'><%= workArea.identifiedHazards ? JSON.stringify(workArea.identifiedHazards, null, 2) : '' %></textarea>
+                <small class="text-muted">For advanced users - enter hazards in JSON format</small>
+              </div>
+            </div>
+
+            <div class="d-flex gap-2 justify-content-end mt-4">
+              <a href="/work-areas/<%= workArea._id %>" class="btn btn-secondary btn-lg px-4">Cancel</a>
+              <button type="submit" class="btn btn-primary btn-lg px-4" style="background: linear-gradient(135deg, #26a69a 0%, #00897b 100%); border: none;">
+                <i class="fas fa-save me-2"></i> Update Work Area
+              </button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<%- include('../partials/footer') %>
