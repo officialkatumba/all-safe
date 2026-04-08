@@ -41,7 +41,7 @@
       </div>
 
       <!-- Daily Safety Talk Section (Collapsible) -->
-      <div class="safety-talk-container text-center mb-4">
+      <!-- <div class="safety-talk-container text-center mb-4">
         <div class="d-flex justify-content-between align-items-center">
           <div class="timer-label" id="safetyTalkLabel">TODAY'S SAFETY TALK</div>
           <button class="btn btn-sm btn-outline-primary" type="button" data-bs-toggle="collapse" data-bs-target="#safetyTalkContent" aria-expanded="false">
@@ -59,7 +59,98 @@
             </small>
           </div>
         </div>
+      </div> -->
+
+
+      <!-- Daily Safety Talk Section -->
+<div class="safety-talk-container mb-4">
+  <div class="d-flex justify-content-between align-items-center flex-wrap gap-2">
+    <div class="timer-label" id="safetyTalkLabel">
+      <i class="fas fa-chalkboard-teacher me-2" style="color: #5f2c82;"></i>
+      TODAY'S SAFETY TALK
+    </div>
+    <% if (todaySafetyTalk) { %>
+      <a href="/safety-talks/<%= todaySafetyTalk._id %>" class="btn btn-sm btn-outline-primary">
+        <i class="fas fa-eye me-1"></i> View Full Talk
+      </a>
+    <% } else if (user.role === 'safety_officer') { %>
+      <form method="POST" action="/safety-talks/generate/<%= workArea._id %>" class="d-inline">
+        <button type="submit" class="btn btn-sm" style="background: #5f2c82; color: white; border-radius: 40px;">
+          <i class="fas fa-robot me-1"></i> Generate Today's Talk
+        </button>
+      </form>
+    <% } %>
+  </div>
+  
+  <div class="safety-talk-content mt-3 p-3 rounded" style="background: #f8f9fa; border-left: 4px solid #5f2c82;">
+    <% if (todaySafetyTalk) { %>
+      <!-- Display excerpt from today's safety talk -->
+      <div class="mb-2">
+        <strong class="text-primary"><%= todaySafetyTalk.title %></strong>
       </div>
+      
+      <!-- Opening statement excerpt -->
+      <% if (todaySafetyTalk.sections?.opening) { %>
+        <p class="mb-2"><%= todaySafetyTalk.sections.opening.substring(0, 150) %><%= todaySafetyTalk.sections.opening.length > 150 ? '...' : '' %></p>
+      <% } else if (todaySafetyTalk.content) { %>
+        <p class="mb-2"><%= todaySafetyTalk.content.substring(0, 200) %><%= todaySafetyTalk.content.length > 200 ? '...' : '' %></p>
+      <% } %>
+      
+      <!-- Main points preview -->
+      <% if (todaySafetyTalk.sections?.mainPoints && todaySafetyTalk.sections.mainPoints.length > 0) { %>
+        <div class="small text-muted mt-2">
+          <i class="fas fa-list-check me-1"></i> Key points: 
+          <%= todaySafetyTalk.sections.mainPoints.slice(0, 2).join(' • ') %>
+          <% if (todaySafetyTalk.sections.mainPoints.length > 2) { %> • +<%= todaySafetyTalk.sections.mainPoints.length - 2 %> more<% } %>
+        </div>
+      <% } %>
+      
+      <div class="timer-meta mt-2 pt-2 border-top">
+        <small class="text-muted">
+          <i class="fas fa-clock me-1"></i> <%= todaySafetyTalk.duration || 5 %> min read
+          | <i class="fas fa-calendar me-1"></i> <%= new Date(todaySafetyTalk.date || todaySafetyTalk.createdAt).toLocaleDateString() %>
+          | <i class="fas fa-robot me-1" style="color: #5f2c82;"></i> AI-Generated
+        </small>
+      </div>
+      
+    <% } else { %>
+      <!-- No safety talk for today -->
+      <div class="text-center py-3">
+        <i class="fas fa-chalkboard-teacher fa-2x text-muted mb-2"></i>
+        <p class="text-muted mb-0">No safety talk generated for today.</p>
+        <% if (user.role === 'safety_officer') { %>
+          <form method="POST" action="/safety-talks/generate/<%= workArea._id %>" class="mt-2">
+            <button type="submit" class="btn btn-sm" style="background: #5f2c82; color: white;">
+              <i class="fas fa-robot me-1"></i> Generate Safety Talk
+            </button>
+          </form>
+        <% } else { %>
+          <p class="small text-muted mt-2">Check back later for daily safety briefing.</p>
+        <% } %>
+      </div>
+    <% } %>
+  </div>
+</div>
+
+<style>
+  .safety-talk-container {
+    background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+    border-radius: 12px;
+    padding: 1rem;
+  }
+  .timer-label {
+    font-weight: bold;
+    color: #5f2c82;
+    letter-spacing: 1px;
+  }
+  .safety-talk-content {
+    transition: all 0.3s ease;
+  }
+  .safety-talk-content:hover {
+    background: #fff !important;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+  }
+</style>
 
       <!-- Compact Action Buttons Row - Conditional based on user role -->
       <div class="d-flex gap-2 justify-content-center flex-wrap mb-4">
@@ -430,7 +521,7 @@
             </div>
 
             <!-- Safety Talks Tab -->
-            <div class="tab-pane fade" id="safety-talks" role="tabpanel">
+            <!-- <div class="tab-pane fade" id="safety-talks" role="tabpanel">
               <div class="d-flex justify-content-between align-items-center mb-3">
                 <h5 class="fw-bold mb-0"><i class="fas fa-chalkboard-teacher me-2" style="color: #5f2c82;"></i>Safety Talks</h5>
                 <% if (user.role === 'safety_officer') { %>
@@ -470,7 +561,65 @@
               <% } else { %>
                 <p class="text-muted text-center py-4">No safety talks generated yet.</p>
               <% } %>
+            </div> -->
+
+            <!-- Safety Talks Tab -->
+<div class="tab-pane fade" id="safety-talks" role="tabpanel">
+  <div class="d-flex justify-content-between align-items-center mb-3">
+    <h5 class="fw-bold mb-0"><i class="fas fa-chalkboard-teacher me-2" style="color: #5f2c82;"></i>Safety Talks</h5>
+    <% if (user.role === 'safety_officer') { %>
+      <form method="POST" action="/safety-talks/generate/<%= workArea._id %>" class="d-inline">
+        <button type="submit" class="btn btn-sm" style="background: #5f2c82; color: white; border-radius: 40px;">
+          <i class="fas fa-robot me-1"></i> Generate New Talk
+        </button>
+      </form>
+    <% } %>
+  </div>
+  
+  <% if (safetyTalks && safetyTalks.length > 0) { %>
+    <div class="list-group">
+      <% safetyTalks.slice(0, 5).forEach(talk => { %>
+        <a href="/safety-talks/<%= talk._id %>" class="list-group-item list-group-item-action d-flex justify-content-between align-items-center">
+          <div>
+            <strong><%= talk.title %></strong>
+            <span class="badge <%= 
+              talk.status === 'conducted' ? 'bg-success' : 
+              talk.status === 'published' ? 'bg-primary' : 
+              'bg-secondary' 
+            %> ms-2"><%= talk.status || 'published' %></span>
+            <div class="small text-muted">
+              <i class="fas fa-calendar me-1"></i> <%= new Date(talk.date || talk.createdAt).toLocaleDateString() %>
+              | <i class="fas fa-clock me-1"></i> <%= talk.duration %> min
+              <% if (talk.attendance?.totalAttendees) { %>
+                | <i class="fas fa-users me-1"></i> <%= talk.attendance.totalAttendees %> attendees
+              <% } %>
             </div>
+          </div>
+          <i class="fas fa-chevron-right text-muted"></i>
+        </a>
+      <% }) %>
+    </div>
+    <% if (safetyTalks.length > 5) { %>
+      <div class="text-center mt-3">
+        <a href="/safety-talks?workAreaId=<%= workArea._id %>" class="btn btn-sm btn-outline-secondary">
+          View All <%= safetyTalks.length %> Talks
+        </a>
+      </div>
+    <% } %>
+  <% } else { %>
+    <div class="text-center py-4">
+      <i class="fas fa-chalkboard-teacher fa-3x text-muted mb-3"></i>
+      <p class="text-muted">No safety talks generated yet.</p>
+      <% if (user.role === 'safety_officer') { %>
+        <form method="POST" action="/safety-talks/generate/<%= workArea._id %>">
+          <button type="submit" class="btn btn-primary btn-sm">
+            <i class="fas fa-robot me-1"></i> Generate Your First Safety Talk
+          </button>
+        </form>
+      <% } %>
+    </div>
+  <% } %>
+</div>
 
             <!-- Permits Tab -->
             <div class="tab-pane fade" id="permits" role="tabpanel">

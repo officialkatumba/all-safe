@@ -1,0 +1,253 @@
+<%- include('../partials/header') %>
+<%- include('../partials/navbar') %>
+
+<div class="container py-4">
+  <!-- Header -->
+  <div class="p-4 mb-4 rounded-3" style="background: linear-gradient(135deg, #5f2c82, #49a09d)">
+    <div class="d-flex justify-content-between align-items-center flex-wrap">
+      <div>
+        <div class="d-flex align-items-center gap-2 mb-2">
+          <i class="fas fa-chalkboard-teacher fa-2x text-white"></i>
+          <h2 class="text-white fw-bold mb-0"><%= talk.title %></h2>
+        </div>
+        <p class="text-white-50 mb-0">
+          Talk #<%= talk.talkNumber %> | 
+          <%= talk.targetWorkAreas.map(wa => wa.name).join(", ") %> |
+          <%= new Date(talk.date).toLocaleDateString() %>
+        </p>
+      </div>
+      <div>
+        <span class="badge bg-light text-dark px-3 py-2">
+          <i class="fas fa-clock me-1"></i> <%= talk.duration %> min
+        </span>
+        <span class="badge <%= talk.status === 'conducted' ? 'bg-success' : 'bg-primary' %> ms-2 px-3 py-2">
+          <i class="fas fa-<%= talk.status === 'conducted' ? 'check-circle' : 'magic' %> me-1"></i>
+          <%= talk.status?.toUpperCase() %>
+        </span>
+      </div>
+    </div>
+  </div>
+
+  <div class="row">
+    <div class="col-lg-8">
+      <!-- Main Talk Content -->
+      <div class="card shadow-sm mb-4 border-0">
+        <div class="card-body p-4">
+          
+          <!-- Opening Statement -->
+          <% if (talk.sections?.opening) { %>
+          <div class="mb-4">
+            <h5 class="fw-bold text-primary"><i class="fas fa-microphone-alt me-2"></i>Opening Statement</h5>
+            <div class="p-3 bg-light rounded">
+              <p class="mb-0"><%= talk.sections.opening %></p>
+            </div>
+          </div>
+          <% } %>
+
+          <!-- Main Points -->
+          <% if (talk.sections?.mainPoints && talk.sections.mainPoints.length > 0) { %>
+          <div class="mb-4">
+            <h5 class="fw-bold text-primary"><i class="fas fa-list-check me-2"></i>Main Safety Points</h5>
+            <div class="p-3 bg-light rounded">
+              <ul class="mb-0">
+                <% talk.sections.mainPoints.forEach(point => { %>
+                  <li class="mb-2"><%= point %></li>
+                <% }) %>
+              </ul>
+            </div>
+          </div>
+          <% } %>
+
+          <!-- Discussion Questions -->
+          <% if (talk.sections?.discussionQuestions && talk.sections.discussionQuestions.length > 0) { %>
+          <div class="mb-4">
+            <h5 class="fw-bold text-warning"><i class="fas fa-comments me-2"></i>Discussion Questions</h5>
+            <div class="p-3 bg-light rounded">
+              <ul class="mb-0">
+                <% talk.sections.discussionQuestions.forEach(q => { %>
+                  <li class="mb-2">❓ <%= q %></li>
+                <% }) %>
+              </ul>
+            </div>
+          </div>
+          <% } %>
+
+          <!-- Key Takeaways -->
+          <% if (talk.sections?.keyTakeaways && talk.sections.keyTakeaways.length > 0) { %>
+          <div class="mb-4">
+            <h5 class="fw-bold text-success"><i class="fas fa-lightbulb me-2"></i>Key Takeaways</h5>
+            <div class="p-3 bg-light rounded">
+              <ul class="mb-0">
+                <% talk.sections.keyTakeaways.forEach(takeaway => { %>
+                  <li class="mb-2">✓ <%= takeaway %></li>
+                <% }) %>
+              </ul>
+            </div>
+          </div>
+          <% } %>
+
+          <!-- Closing -->
+          <% if (talk.sections?.closing) { %>
+          <div class="mb-4">
+            <h5 class="fw-bold text-danger"><i class="fas fa-hand-peace me-2"></i>Closing Reminder</h5>
+            <div class="p-3 bg-light rounded">
+              <p class="mb-0"><%= talk.sections.closing %></p>
+            </div>
+          </div>
+          <% } %>
+
+          <!-- Full Content (fallback) -->
+          <% if (!talk.sections?.opening && talk.content) { %>
+          <div class="mb-4">
+            <div class="p-3 bg-light rounded">
+              <div style="white-space: pre-wrap;"><%= talk.content %></div>
+            </div>
+          </div>
+          <% } %>
+        </div>
+      </div>
+
+      <!-- AI Context (for safety officers) -->
+      <% if (user.role === 'safety_officer' && talk.basedOn) { %>
+      <div class="card shadow-sm mb-4 border-0">
+        <div class="card-header bg-info text-white">
+          <h6 class="mb-0"><i class="fas fa-robot me-2"></i>AI Generation Context</h6>
+        </div>
+        <div class="card-body">
+          <div class="small">
+            <p class="mb-1"><strong>Based on:</strong></p>
+            <ul class="small">
+              <% if (talk.basedOn.recentIncidents && talk.basedOn.recentIncidents.length > 0) { %>
+                <li><%= talk.basedOn.recentIncidents.length %> recent incidents</li>
+              <% } %>
+              <% if (talk.basedOn.identifiedHazards && talk.basedOn.identifiedHazards.length > 0) { %>
+                <li><%= talk.basedOn.identifiedHazards.length %> active hazards</li>
+              <% } %>
+              <li>AI Model: <%= talk.aiModel || 'GPT-3.5' %></li>
+            </ul>
+            <% if (talk.basedOn.aiReasoning) { %>
+              <p class="mb-0 text-muted"><%= talk.basedOn.aiReasoning %></p>
+            <% } %>
+          </div>
+        </div>
+      </div>
+      <% } %>
+    </div>
+
+    <!-- Sidebar -->
+    <div class="col-lg-4">
+      <!-- Actions Card -->
+      <div class="card shadow-sm mb-4 border-0">
+        <div class="card-body">
+          <h6 class="fw-bold mb-3"><i class="fas fa-cog me-2 text-primary"></i>Actions</h6>
+          <div class="d-grid gap-2">
+            <button class="btn btn-outline-secondary" onclick="window.print()">
+              <i class="fas fa-print me-2"></i>Print / Save as PDF
+            </button>
+            
+            <% if (talk.status !== 'conducted' && user.role === 'safety_officer') { %>
+            <button class="btn btn-success" data-bs-toggle="modal" data-bs-target="#conductModal">
+              <i class="fas fa-check-circle me-2"></i>Mark as Conducted
+            </button>
+            <% } %>
+            
+            <a href="/work-areas/<%= talk.targetWorkAreas[0]?._id %>" class="btn btn-outline-primary">
+              <i class="fas fa-arrow-left me-2"></i>Back to Work Area
+            </a>
+          </div>
+        </div>
+      </div>
+
+      <!-- Talk Info Card -->
+      <div class="card shadow-sm mb-4 border-0">
+        <div class="card-body">
+          <h6 class="fw-bold mb-3"><i class="fas fa-info-circle me-2 text-primary"></i>Talk Information</h6>
+          <table class="table table-sm">
+            <tr>
+              <td><strong>Talk Number:</strong></td>
+              <td>#<%= talk.talkNumber %></td>
+            </tr>
+            <tr>
+              <td><strong>Duration:</strong></td>
+              <td><%= talk.duration %> minutes</td>
+            </tr>
+            <tr>
+              <td><strong>Generated:</strong></td>
+              <td><%= new Date(talk.createdAt).toLocaleDateString() %></td>
+            </tr>
+            <tr>
+              <td><strong>Status:</strong></td>
+              <td><span class="badge <%= talk.status === 'conducted' ? 'bg-success' : 'bg-primary' %>"><%= talk.status %></span></td>
+            </tr>
+            <% if (talk.attendance?.totalAttendees > 0) { %>
+            <tr>
+              <td><strong>Attendees:</strong></td>
+              <td><%= talk.attendance.totalAttendees %></td>
+            </tr>
+            <% } %>
+          </table>
+        </div>
+      </div>
+
+      <!-- Topics Card -->
+      <% if (talk.topics && talk.topics.length > 0) { %>
+      <div class="card shadow-sm mb-4 border-0">
+        <div class="card-body">
+          <h6 class="fw-bold mb-3"><i class="fas fa-tags me-2 text-primary"></i>Topics Covered</h6>
+          <div class="d-flex flex-wrap gap-2">
+            <% talk.topics.forEach(topic => { %>
+              <span class="badge bg-secondary"><%= topic %></span>
+            <% }) %>
+          </div>
+        </div>
+      </div>
+      <% } %>
+    </div>
+  </div>
+</div>
+
+<!-- Mark as Conducted Modal -->
+<div class="modal fade" id="conductModal" tabindex="-1">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header bg-success text-white">
+        <h5 class="modal-title"><i class="fas fa-check-circle me-2"></i>Mark Safety Talk as Conducted</h5>
+        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+      </div>
+      <form method="POST" action="/safety-talks/<%= talk._id %>/conduct">
+        <div class="modal-body">
+          <div class="mb-3">
+            <label class="form-label fw-bold">Number of Attendees</label>
+            <input type="number" name="attendeeCount" class="form-control" required min="1">
+          </div>
+          <div class="mb-3">
+            <label class="form-label fw-bold">Notes / Effectiveness</label>
+            <textarea name="notes" class="form-control" rows="3" placeholder="How did the talk go? Any feedback from workers?"></textarea>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+          <button type="submit" class="btn btn-success">Confirm & Save</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+
+<style>
+  @media print {
+    .navbar, .btn, .modal, .card-header .btn, .actions-card, .no-print {
+      display: none !important;
+    }
+    .container {
+      padding: 0;
+      margin: 0;
+    }
+    .card {
+      border: none;
+      box-shadow: none;
+    }
+  }
+</style>
+
+<%- include('../partials/footer') %>

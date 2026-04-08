@@ -455,6 +455,10 @@ const incidentRoutes = require("./routes/incidentRoutes");
 
 // Add this line with your other route registrations
 app.use("/incidents", incidentRoutes);
+
+// Safety talk routes
+const safetyTalkRoutes = require("./routes/safetyTalkRoutes");
+app.use("/safety-talks", safetyTalkRoutes);
 // -------------------- SERVER --------------------
 const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => console.log(`✅ Server running on port ${PORT}`));
