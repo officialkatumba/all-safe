@@ -462,6 +462,12 @@ app.use("/safety-talks", safetyTalkRoutes);
 
 const safetyObservationRoutes = require("./routes/safetyObservationRoutes");
 app.use("/safety-observations", safetyObservationRoutes);
+
+const ppeRoutes = require("./routes/ppeRoutes");
+app.use("/ppe", ppeRoutes);
+
+const jsaRoutes = require("./routes/jsaRoutes");
+app.use("/jsa", jsaRoutes);
 // -------------------- SERVER --------------------
 const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => console.log(`✅ Server running on port ${PORT}`));

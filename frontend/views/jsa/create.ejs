@@ -1,0 +1,423 @@
+<%- include('../partials/header') %> <%- include('../partials/navbar') %>
+
+<div class="container py-4">
+  <div
+    class="card shadow-lg border-0"
+    style="border-radius: 20px; overflow: hidden"
+  >
+    <div
+      class="card-header"
+      style="
+        background: linear-gradient(135deg, #1e3c72, #2a5298);
+        color: white;
+      "
+    >
+      <h4 class="mb-0">
+        <i class="fas fa-tasks me-2"></i>Create Job Safety Analysis (JSA)
+      </h4>
+      <p class="mb-0 small opacity-75">Work Area: <%= workArea.name %></p>
+    </div>
+
+    <div class="card-body p-4">
+      <!-- Step Indicator -->
+      <div class="mb-4">
+        <div
+          class="d-flex justify-content-between align-items-center flex-wrap gap-2"
+        >
+          <div class="step-indicator">
+            <span class="step-circle active" id="step1Circle">1</span
+            ><span class="step-label">Basic Info</span>
+          </div>
+          <div class="step-line"></div>
+          <div class="step-indicator">
+            <span class="step-circle" id="step2Circle">2</span
+            ><span class="step-label">PPE & Tools</span>
+          </div>
+          <div class="step-line"></div>
+          <div class="step-indicator">
+            <span class="step-circle" id="step3Circle">3</span
+            ><span class="step-label">Job Steps</span>
+          </div>
+          <div class="step-line"></div>
+          <div class="step-indicator">
+            <span class="step-circle" id="step4Circle">4</span
+            ><span class="step-label">Hazards</span>
+          </div>
+          <div class="step-line"></div>
+          <div class="step-indicator">
+            <span class="step-circle" id="step5Circle">5</span
+            ><span class="step-label">Controls</span>
+          </div>
+          <div class="step-line"></div>
+          <div class="step-indicator">
+            <span class="step-circle" id="step6Circle">6</span
+            ><span class="step-label">Emergency</span>
+          </div>
+        </div>
+      </div>
+
+      <form id="jsaForm" method="POST">
+        <!-- STEP 1: Basic Information -->
+        <div id="step1" class="form-step active">
+          <div class="mb-3">
+            <label class="form-label fw-bold"
+              >Job/Task Title <span class="text-danger">*</span></label
+            >
+            <input
+              type="text"
+              name="jobTask"
+              class="form-control"
+              required
+              placeholder="e.g., Operating Forklift, Welding Pipeline, Scaffold Erection"
+            />
+          </div>
+          <div class="mb-3">
+            <label class="form-label fw-bold">JSA Title</label>
+            <input
+              type="text"
+              name="title"
+              class="form-control"
+              placeholder="e.g., JSA - Forklift Operation - April 2026"
+            />
+          </div>
+          <div class="row">
+            <div class="col-md-6 mb-3">
+              <label>Location</label
+              ><input
+                type="text"
+                name="location"
+                class="form-control"
+                value="<%= workArea.name %>"
+              />
+            </div>
+            <div class="col-md-6 mb-3">
+              <label>Shift</label
+              ><select name="shift" class="form-select">
+                <option value="all">All Shifts</option>
+                <option value="morning">Morning</option>
+                <option value="afternoon">Afternoon</option>
+                <option value="night">Night</option>
+              </select>
+            </div>
+          </div>
+          <div class="d-flex justify-content-end">
+            <button type="button" class="btn btn-primary" onclick="nextStep(2)">
+              Next: PPE & Tools <i class="fas fa-arrow-right ms-2"></i>
+            </button>
+          </div>
+        </div>
+
+        <!-- STEP 2: PPE and Tools -->
+        <div id="step2" class="form-step">
+          <div class="alert alert-info mb-3">
+            <i class="fas fa-info-circle me-2"></i>Add required PPE and tools
+            for this job
+          </div>
+          <div class="mb-3">
+            <label class="fw-bold">Required PPE</label>
+            <div id="ppeContainer">
+              <div class="input-group mb-2">
+                <input
+                  type="text"
+                  name="ppeItems[]"
+                  class="form-control"
+                  placeholder="e.g., Hard Hat"
+                /><input
+                  type="text"
+                  name="ppeCondition[]"
+                  class="form-control"
+                  placeholder="Condition"
+                /><button
+                  type="button"
+                  class="btn btn-danger"
+                  onclick="this.closest('.input-group').remove()"
+                >
+                  ×
+                </button>
+              </div>
+            </div>
+            <button
+              type="button"
+              class="btn btn-sm btn-outline-primary"
+              onclick="addPPE()"
+            >
+              <i class="fas fa-plus me-1"></i>Add PPE Item
+            </button>
+          </div>
+          <div class="mb-3">
+            <label class="fw-bold">Tools & Equipment</label>
+            <div id="toolsContainer">
+              <div class="input-group mb-2">
+                <input
+                  type="text"
+                  name="tools[]"
+                  class="form-control"
+                  placeholder="e.g., Forklift"
+                /><input
+                  type="text"
+                  name="toolCondition[]"
+                  class="form-control"
+                  placeholder="Condition"
+                /><button
+                  type="button"
+                  class="btn btn-danger"
+                  onclick="this.closest('.input-group').remove()"
+                >
+                  ×
+                </button>
+              </div>
+            </div>
+            <button
+              type="button"
+              class="btn btn-sm btn-outline-primary"
+              onclick="addTool()"
+            >
+              <i class="fas fa-plus me-1"></i>Add Tool
+            </button>
+          </div>
+          <div class="mb-3">
+            <label class="fw-bold">Required Training/Certifications</label
+            ><textarea
+              name="requiredTraining"
+              class="form-control"
+              rows="3"
+              placeholder="One per line&#10;e.g., Forklift Operator Certification&#10;Fall Protection Training&#10;Confined Space Entry"
+            ></textarea>
+          </div>
+          <div class="d-flex justify-content-between">
+            <button
+              type="button"
+              class="btn btn-outline-secondary"
+              onclick="prevStep(1)"
+            >
+              <i class="fas fa-arrow-left me-2"></i>Back</button
+            ><button
+              type="button"
+              class="btn btn-primary"
+              onclick="nextStep(3)"
+            >
+              Next: Job Steps <i class="fas fa-arrow-right ms-2"></i>
+            </button>
+          </div>
+        </div>
+
+        <!-- STEP 3: Job Steps -->
+        <div id="step3" class="form-step">
+          <div class="alert alert-secondary mb-3">
+            <i class="fas fa-lightbulb text-warning me-2"></i><%=
+            jsaSections.find(s => s.key === 'jobSteps').guide %>
+          </div>
+          <textarea
+            name="jobSteps"
+            class="form-control"
+            rows="12"
+            required
+          ></textarea>
+          <div class="d-flex justify-content-between mt-3">
+            <button
+              type="button"
+              class="btn btn-outline-secondary"
+              onclick="prevStep(2)"
+            >
+              <i class="fas fa-arrow-left me-2"></i>Back</button
+            ><button
+              type="button"
+              class="btn btn-primary"
+              onclick="nextStep(4)"
+            >
+              Next: Hazard Analysis <i class="fas fa-arrow-right ms-2"></i>
+            </button>
+          </div>
+        </div>
+
+        <!-- STEP 4: Hazard Analysis -->
+        <div id="step4" class="form-step">
+          <div class="alert alert-secondary mb-3">
+            <i class="fas fa-lightbulb text-warning me-2"></i><%=
+            jsaSections.find(s => s.key === 'hazardAnalysis').guide %>
+          </div>
+          <textarea
+            name="hazardAnalysis"
+            class="form-control"
+            rows="12"
+            required
+          ></textarea>
+          <div class="d-flex justify-content-between mt-3">
+            <button
+              type="button"
+              class="btn btn-outline-secondary"
+              onclick="prevStep(3)"
+            >
+              <i class="fas fa-arrow-left me-2"></i>Back</button
+            ><button
+              type="button"
+              class="btn btn-primary"
+              onclick="nextStep(5)"
+            >
+              Next: Control Measures <i class="fas fa-arrow-right ms-2"></i>
+            </button>
+          </div>
+        </div>
+
+        <!-- STEP 5: Control Measures -->
+        <div id="step5" class="form-step">
+          <div class="alert alert-secondary mb-3">
+            <i class="fas fa-lightbulb text-warning me-2"></i><%=
+            jsaSections.find(s => s.key === 'controlMeasures').guide %>
+          </div>
+          <textarea
+            name="controlMeasures"
+            class="form-control"
+            rows="12"
+            required
+          ></textarea>
+          <div class="d-flex justify-content-between mt-3">
+            <button
+              type="button"
+              class="btn btn-outline-secondary"
+              onclick="prevStep(4)"
+            >
+              <i class="fas fa-arrow-left me-2"></i>Back</button
+            ><button
+              type="button"
+              class="btn btn-primary"
+              onclick="nextStep(6)"
+            >
+              Next: Emergency <i class="fas fa-arrow-right ms-2"></i>
+            </button>
+          </div>
+        </div>
+
+        <!-- STEP 6: Emergency Procedures -->
+        <div id="step6" class="form-step">
+          <div class="alert alert-secondary mb-3">
+            <i class="fas fa-lightbulb text-warning me-2"></i><%=
+            jsaSections.find(s => s.key === 'emergencyProcedures').guide %>
+          </div>
+          <textarea
+            name="emergencyProcedures"
+            class="form-control"
+            rows="10"
+            required
+          ></textarea>
+          <div class="mb-3 mt-3">
+            <label class="fw-bold">Approval Section</label
+            ><textarea
+              name="approvalSection"
+              class="form-control"
+              rows="6"
+              placeholder="List approvers and signature lines"
+            ></textarea>
+          </div>
+          <div class="d-flex justify-content-between mt-3">
+            <button
+              type="button"
+              class="btn btn-outline-secondary"
+              onclick="prevStep(5)"
+            >
+              <i class="fas fa-arrow-left me-2"></i>Back</button
+            ><button type="submit" class="btn btn-success btn-lg">
+              <i class="fas fa-save me-2"></i>Create JSA
+            </button>
+          </div>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+
+<script>
+  let currentStep = 1;
+  function showStep(step) {
+    document
+      .querySelectorAll(".form-step")
+      .forEach((el, i) => el.classList.toggle("active", i + 1 === step));
+    for (let i = 1; i <= 6; i++) {
+      const circle = document.getElementById(`step${i}Circle`);
+      if (circle) circle.classList.remove("active", "completed");
+      if (i < step) circle.classList.add("completed");
+      else if (i === step) circle.classList.add("active");
+    }
+    currentStep = step;
+  }
+  function nextStep(step) {
+    showStep(step);
+  }
+  function prevStep(step) {
+    showStep(step);
+  }
+
+  let ppeCount = 1,
+    toolCount = 1;
+  function addPPE() {
+    const div = document.createElement("div");
+    div.className = "input-group mb-2";
+    div.innerHTML =
+      '<input type="text" name="ppeItems[]" class="form-control" placeholder="e.g., Hard Hat"><input type="text" name="ppeCondition[]" class="form-control" placeholder="Condition"><button type="button" class="btn btn-danger" onclick="this.closest(\'.input-group\').remove()">×</button>';
+    document.getElementById("ppeContainer").appendChild(div);
+  }
+  function addTool() {
+    const div = document.createElement("div");
+    div.className = "input-group mb-2";
+    div.innerHTML =
+      '<input type="text" name="tools[]" class="form-control" placeholder="e.g., Forklift"><input type="text" name="toolCondition[]" class="form-control" placeholder="Condition"><button type="button" class="btn btn-danger" onclick="this.closest(\'.input-group\').remove()">×</button>';
+    document.getElementById("toolsContainer").appendChild(div);
+  }
+</script>
+
+<style>
+  .form-step {
+    display: none;
+  }
+  .form-step.active {
+    display: block;
+  }
+  .step-indicator {
+    text-align: center;
+    flex: 1;
+  }
+  .step-circle {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    background: #e9ecef;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: bold;
+    color: #6c757d;
+  }
+  .step-circle.active {
+    background: #2a5298;
+    color: white;
+  }
+  .step-circle.completed {
+    background: #28a745;
+    color: white;
+  }
+  .step-label {
+    display: block;
+    font-size: 12px;
+    margin-top: 5px;
+    color: #6c757d;
+  }
+  .step-line {
+    flex: 1;
+    height: 2px;
+    background: #e9ecef;
+    margin: 0 5px;
+    margin-top: 20px;
+  }
+  @media (max-width: 768px) {
+    .step-label {
+      display: none;
+    }
+    .step-circle {
+      width: 30px;
+      height: 30px;
+      font-size: 12px;
+    }
+  }
+</style>
+
+<%- include('../partials/footer') %>

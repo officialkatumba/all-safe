@@ -1,0 +1,62 @@
+<%- include('../partials/header') %>
+<%- include('../partials/navbar') %>
+
+<div class="container py-4">
+  <div class="card shadow-lg border-0">
+    <div class="card-header" style="background: linear-gradient(135deg, #26a69a, #1e8a7a); color: white;">
+      <h4 class="mb-0"><i class="fas fa-helmet-safety me-2"></i>PPE Requirements</h4>
+      <p class="mb-0 small opacity-75">Checklist #<%= checklist.checklistNumber %> | <%= new Date(checklist.date).toLocaleDateString() %></p>
+    </div>
+    <div class="card-body p-4">
+      <h5 class="mb-3"><%= checklist.title %></h5>
+      
+      <!-- PPE Items Table -->
+      <h6 class="fw-bold mt-3"><i class="fas fa-list-check me-2 text-success"></i>Required PPE</h6>
+      <div class="table-responsive">
+        <table class="table table-bordered">
+          <thead class="table-light">
+            <tr><th>PPE Item</th><th>Required</th><th>Condition</th><th>Quantity</th></tr>
+          </thead>
+          <tbody>
+            <% checklist.ppeItems.forEach(item => { %>
+            <tr>
+              <td><%= item.item === 'other' ? item.customItem : item.item.replace(/_/g, ' ') %></td>
+              <td><%= item.required ? '✓ Yes' : '✗ No' %></td>
+              <td><%= item.condition %></td>
+              <td><%= item.quantity || 'As needed' %></td>
+            </tr>
+            <% }) %>
+          </tbody>
+        </table>
+      </div>
+
+      <!-- Inspection Items -->
+      <% if (checklist.inspectionItems && checklist.inspectionItems.length > 0) { %>
+      <h6 class="fw-bold mt-4"><i class="fas fa-clipboard-list me-2 text-info"></i>Inspection Checklist</h6>
+      <div class="table-responsive">
+        <table class="table table-bordered">
+          <thead class="table-light"><tr><th>Item to Inspect</th><th>Pass Criteria</th></tr></thead>
+          <tbody>
+            <% checklist.inspectionItems.forEach(item => { %>
+            <tr><td><%= item.item %></td><td><%= item.passCriteria %></td></tr>
+            <% }) %>
+          </tbody>
+        </table>
+      </div>
+      <% } %>
+
+      <!-- Action Buttons -->
+      <div class="mt-4 d-flex gap-2">
+        <button class="btn btn-outline-secondary" onclick="window.print()"><i class="fas fa-print me-2"></i>Print</button>
+        <% if (checklist.status !== 'completed' && user.role === 'safety_officer') { %>
+          <form method="POST" action="/ppe/<%= checklist._id %>/complete" class="d-inline">
+            <button type="submit" class="btn btn-success"><i class="fas fa-check-circle me-2"></i>Mark as Completed</button>
+          </form>
+        <% } %>
+        <a href="/work-areas/<%= checklist.worksite?._id %>" class="btn btn-outline-primary">Back to Work Area</a>
+      </div>
+    </div>
+  </div>
+</div>
+
+<%- include('../partials/footer') %>

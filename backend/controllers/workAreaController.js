@@ -1178,6 +1178,100 @@ exports.createWorkArea = async (req, res) => {
 //   }
 // };
 
+// exports.getWorkArea = async (req, res) => {
+//   try {
+//     const workArea = await WorkArea.findById(req.params.id)
+//       .populate("worksite", "name location")
+//       .populate("assignedSafetyOfficers.officer", "name email")
+//       .populate("activePermits");
+
+//     if (!workArea) {
+//       req.flash("error", "Work area not found");
+//       return res.redirect("/dashboard");
+//     }
+
+//     // Get recent incidents
+//     const recentIncidents = await Incident.find({ workArea: workArea._id })
+//       .sort({ createdAt: -1 })
+//       .limit(5);
+
+//     // Get active risk assessments
+//     const activeAssessments = await RiskAssessment.find({
+//       workArea: workArea._id,
+//       status: "active",
+//     }).limit(5);
+
+//     // Get all risk assessments (for the Risk Assessments tab)
+//     const riskAssessments = await RiskAssessment.find({
+//       workArea: workArea._id,
+//     })
+//       .sort({ createdAt: -1 })
+//       .limit(10);
+
+//     // Get safety talks
+//     const safetyTalks = await SafetyTalk.find({
+//       targetWorkAreas: workArea._id,
+//     })
+//       .sort({ date: -1 })
+//       .limit(10);
+
+//     // Get TODAY's safety talk (most recent published/conducted)
+//     const todaySafetyTalk = await SafetyTalk.findOne({
+//       targetWorkAreas: workArea._id,
+//       status: { $in: ["published", "conducted"] },
+//     })
+//       .sort({ date: -1, createdAt: -1 })
+//       .limit(1);
+
+//     // Get permits
+//     const permits = await Permit.find({
+//       workArea: workArea._id,
+//     })
+//       .sort({ createdAt: -1 })
+//       .limit(10);
+
+//     // Get JSA (Job Safety Analysis)
+//     const JSA = require("../models/JSA");
+//     const jsa = await JSA.find({
+//       workArea: workArea._id,
+//     })
+//       .sort({ createdAt: -1 })
+//       .limit(10);
+
+//     // Get PPE Checklists
+//     const PPEChecklist = require("../models/PPEChecklist");
+//     const ppeChecklists = await PPEChecklist.find({
+//       workArea: workArea._id,
+//     })
+//       .sort({ createdAt: -1 })
+//       .limit(10);
+
+//     const safetyObservations = await SafetyObservation.find({
+//       workArea: workArea._id,
+//     })
+//       .sort({ createdAt: -1 })
+//       .limit(10);
+
+//     res.render("work-areas/view", {
+//       user: req.user,
+//       workArea,
+//       recentIncidents,
+//       activeAssessments,
+//       riskAssessments,
+//       safetyTalks,
+//       todaySafetyTalk, // ADD THIS LINE - for the excerpt display
+//       permits,
+//       jsa,
+//       ppeChecklists,
+//       safetyObservations,
+//     });
+//   } catch (error) {
+//     console.error("Error viewing work area:", error);
+//     req.flash("error", "Error loading work area");
+//     res.redirect("/dashboard");
+//   }
+// };
+
 exports.getWorkArea = async (req, res) => {
   try {
     const workArea = await WorkArea.findById(req.params.id)
@@ -1238,10 +1332,10 @@ exports.getWorkArea = async (req, res) => {
       .sort({ createdAt: -1 })
       .limit(10);
 
-    // Get PPE Checklists
+    // Get PPE Checklists - FIXED: use worksite instead of workArea
     const PPEChecklist = require("../models/PPEChecklist");
     const ppeChecklists = await PPEChecklist.find({
-      workArea: workArea._id,
+      worksite: workArea.worksite._id, // ← CHANGED: from workArea: workArea._id to worksite: workArea.worksite._id
     })
       .sort({ createdAt: -1 })
       .limit(10);
@@ -1259,7 +1353,7 @@ exports.getWorkArea = async (req, res) => {
       activeAssessments,
       riskAssessments,
       safetyTalks,
-      todaySafetyTalk, // ADD THIS LINE - for the excerpt display
+      todaySafetyTalk,
       permits,
       jsa,
       ppeChecklists,
