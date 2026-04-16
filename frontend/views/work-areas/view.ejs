@@ -417,6 +417,12 @@
                 <span class="badge bg-secondary ms-1"><%= safetyObservations?.length || 0 %></span>
               </button>
             </li>
+            <li class="nav-item" role="presentation">
+    <button class="nav-link" id="training-tab" data-bs-toggle="tab" data-bs-target="#training" type="button" role="tab">
+      <i class="fas fa-graduation-cap me-1"></i> Training
+      <span class="badge bg-secondary ms-1"><%= trainingRequirements?.length || 0 %></span>
+    </button>
+  </li>
           </ul>
 
           <div class="tab-content p-4 border border-top-0 rounded-bottom shadow-sm" style="background-color: white;">
@@ -570,7 +576,7 @@
 </div>
 
             <!-- Permits Tab -->
-            <div class="tab-pane fade" id="permits" role="tabpanel">
+            <!-- <div class="tab-pane fade" id="permits" role="tabpanel">
               <div class="d-flex justify-content-between align-items-center mb-3">
                 <h5 class="fw-bold mb-0"><i class="fas fa-file-signature me-2" style="color: #f093fb;"></i>Permits</h5>
                 <% if (user.role === 'safety_officer') { %>
@@ -611,7 +617,59 @@
               <% } else { %>
                 <p class="text-muted text-center py-4">No permits created yet.</p>
               <% } %>
+            </div> -->
+
+            <!-- Permits Tab -->
+<div class="tab-pane fade" id="permits" role="tabpanel">
+  <div class="d-flex justify-content-between align-items-center mb-3">
+    <h5 class="fw-bold mb-0"><i class="fas fa-file-signature me-2" style="color: #f093fb;"></i>Permits</h5>
+    <% if (user.role === 'safety_officer') { %>
+      <a href="/permits/generate/<%= workArea._id %>" class="btn btn-sm" style="background: #f093fb; color: white; border-radius: 40px;">
+        <i class="fas fa-magic me-1"></i> Generate Permit
+      </a>
+    <% } %>
+  </div>
+  
+  <% if (permits && permits.length > 0) { %>
+    <div class="list-group">
+      <% permits.slice(0, 5).forEach(permit => { %>
+        <a href="/permits/<%= permit._id %>" class="list-group-item list-group-item-action d-flex justify-content-between align-items-center">
+          <div>
+            <strong><%= permit.title %></strong>
+            <span class="badge <%= 
+              permit.status === 'active' ? 'bg-success' : 
+              permit.status === 'issued' ? 'bg-info' : 
+              permit.status === 'draft' ? 'bg-secondary' : 
+              permit.status === 'expired' ? 'bg-danger' : 
+              'bg-warning' 
+            %> ms-2"><%= permit.status %></span>
+            <div class="small text-muted">
+              <i class="fas fa-calendar me-1"></i> Valid until: <%= new Date(permit.validTo).toLocaleDateString() %>
             </div>
+          </div>
+          <i class="fas fa-chevron-right text-muted"></i>
+        </a>
+      <% }) %>
+    </div>
+    <% if (permits.length > 5) { %>
+      <div class="text-center mt-3">
+        <a href="/permits?workAreaId=<%= workArea._id %>" class="btn btn-sm btn-outline-secondary">
+          View All <%= permits.length %> Permits
+        </a>
+      </div>
+    <% } %>
+  <% } else { %>
+    <div class="text-center py-4">
+      <i class="fas fa-file-signature fa-3x text-muted mb-3"></i>
+      <p class="text-muted">No permits generated yet.</p>
+      <% if (user.role === 'safety_officer') { %>
+        <a href="/permits/generate/<%= workArea._id %>" class="btn btn-primary btn-sm">
+          <i class="fas fa-magic me-1"></i> Generate Your First Permit
+        </a>
+      <% } %>
+    </div>
+  <% } %>
+</div>
 
             
           
@@ -687,7 +745,57 @@
   <% } %>
 </div>
 
-            <!-- Safety Observations Tab -->
+<!-- Training Tab -->
+<div class="tab-pane fade" id="training" role="tabpanel">
+  <div class="d-flex justify-content-between align-items-center mb-3">
+    <h5 class="fw-bold mb-0"><i class="fas fa-graduation-cap me-2" style="color: #667eea;"></i>Training Requirements</h5>
+    <% if (user.role === 'safety_officer') { %>
+      <a href="/training/generate/<%= workArea._id %>" class="btn btn-sm" style="background: #667eea; color: white; border-radius: 40px;">
+        <i class="fas fa-magic me-1"></i> Generate Training
+      </a>
+    <% } %>
+  </div>
+  
+  <% if (trainingRequirements && trainingRequirements.length > 0) { %>
+    <div class="list-group">
+      <% trainingRequirements.slice(0, 5).forEach(training => { %>
+        <a href="/training/<%= training._id %>" class="list-group-item list-group-item-action d-flex justify-content-between align-items-center">
+          <div>
+            <strong><%= training.title %></strong>
+            <span class="badge <%= 
+              training.priority === 'critical' ? 'bg-danger' : 
+              training.priority === 'high' ? 'bg-warning text-dark' : 
+              training.priority === 'medium' ? 'bg-info' : 
+              'bg-secondary' 
+            %> ms-2"><%= training.priority?.toUpperCase() %></span>
+            <div class="small text-muted">
+              <i class="fas fa-calendar me-1"></i> Generated: <%= new Date(training.generatedDate).toLocaleDateString() %>
+              | Compliance: <%= training.complianceRate || 0 %>%
+            </div>
+          </div>
+          <i class="fas fa-chevron-right text-muted"></i>
+        </a>
+      <% }) %>
+    </div>
+    <% if (trainingRequirements.length > 5) { %>
+      <div class="text-center mt-3">
+        <a href="/training?workAreaId=<%= workArea._id %>" class="btn btn-sm btn-outline-secondary">
+          View All <%= trainingRequirements.length %> Training Requirements
+        </a>
+      </div>
+    <% } %>
+  <% } else { %>
+    <div class="text-center py-4">
+      <i class="fas fa-graduation-cap fa-3x text-muted mb-3"></i>
+      <p class="text-muted">No training requirements generated yet.</p>
+      <% if (user.role === 'safety_officer') { %>
+        <a href="/training/generate/<%= workArea._id %>" class="btn btn-primary btn-sm">
+          <i class="fas fa-magic me-1"></i> Generate Your First Training Requirement
+        </a>
+      <% } %>
+    </div>
+  <% } %>
+</div>
             
 
       <!-- Safety Observations Tab -->

@@ -1,0 +1,69 @@
+<%- include('../partials/header') %>
+<%- include('../partials/navbar') %>
+
+<div class="container py-4">
+  <div class="card shadow-lg border-0" style="border-radius: 20px;">
+    <div class="card-header" style="background: linear-gradient(135deg, #f093fb, #f5576c); color: white; border-radius: 20px 20px 0 0;">
+      <h4 class="mb-0"><i class="fas fa-file-signature me-2"></i>Generate Work Permit</h4>
+      <p class="mb-0 small opacity-75">Work Area: <%= workArea.name %></p>
+    </div>
+    <div class="card-body p-4">
+      <div class="alert alert-info mb-4">
+        <i class="fas fa-robot me-2"></i>
+        <strong>AI-Powered Permit Generation</strong><br>
+        Our AI will analyze work area hazards, incidents, and observations to create a comprehensive safety permit.
+      </div>
+
+      <form method="POST">
+        <div class="mb-3">
+          <label class="form-label fw-bold">Permit Type <span class="text-danger">*</span></label>
+          <select name="permitType" class="form-select" required style="border-radius: 40px;">
+            <option value="">Select permit type...</option>
+            <% permitTypes.forEach(type => { %>
+              <option value="<%= type.value %>"><%= type.label %></option>
+            <% }) %>
+          </select>
+        </div>
+
+        <div class="mb-3">
+          <label class="form-label fw-bold">Permit Title <span class="text-danger">*</span></label>
+          <input type="text" name="title" class="form-control" required placeholder="e.g., Welding on Platform 3B">
+        </div>
+
+        <div class="mb-3">
+          <label class="form-label fw-bold">Work Description <span class="text-danger">*</span></label>
+          <textarea name="workDescription" class="form-control" rows="4" required placeholder="Describe the work to be performed..."></textarea>
+        </div>
+
+        <div class="row">
+          <div class="col-md-6 mb-3">
+            <label class="form-label fw-bold">Specific Location</label>
+            <input type="text" name="specificLocation" class="form-control" placeholder="e.g., Level 3, near sump pump">
+          </div>
+          <div class="col-md-6 mb-3">
+            <label class="form-label fw-bold">Valid From <span class="text-danger">*</span></label>
+            <input type="datetime-local" name="validFrom" class="form-control" required>
+          </div>
+        </div>
+
+        <div class="row">
+          <div class="col-md-6 mb-3">
+            <label class="form-label fw-bold">Valid To <span class="text-danger">*</span></label>
+            <input type="datetime-local" name="validTo" class="form-control" required>
+          </div>
+        </div>
+
+        <div class="d-flex justify-content-between gap-3 mt-4">
+          <a href="/work-areas/<%= workArea._id %>" class="btn btn-outline-secondary px-4">
+            <i class="fas fa-times me-2"></i>Cancel
+          </a>
+          <button type="submit" class="btn btn-primary px-5">
+            <i class="fas fa-magic me-2"></i>Generate Permit
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+
+<%- include('../partials/footer') %>

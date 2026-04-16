@@ -468,6 +468,14 @@ app.use("/ppe", ppeRoutes);
 
 const jsaRoutes = require("./routes/jsaRoutes");
 app.use("/jsa", jsaRoutes);
+
+// Permit routes
+const permitRoutes = require("./routes/permitRoutes");
+app.use("/permits", permitRoutes);
+
+// Training routes
+const trainingRoutes = require("./routes/trainingRoutes");
+app.use("/training", trainingRoutes);
 // -------------------- SERVER --------------------
 const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => console.log(`✅ Server running on port ${PORT}`));

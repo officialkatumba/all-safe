@@ -1,0 +1,158 @@
+<%- include('../partials/header') %>
+<%- include('../partials/navbar') %>
+
+<div class="container py-4">
+  <div class="card shadow-lg border-0" style="border-radius: 20px;">
+    <div class="card-header" style="background: linear-gradient(135deg, #667eea, #764ba2); color: white;">
+      <h4 class="mb-0"><i class="fas fa-graduation-cap me-2"></i>Training Requirement #<%= training.requirementNumber %></h4>
+      <p class="mb-0 small opacity-75"><%= training.title %> | <%= training.workArea?.name %></p>
+    </div>
+    <div class="card-body p-4">
+      <div class="row">
+        <div class="col-md-8">
+          <!-- Training Info -->
+          <div class="mb-3">
+            <span class="badge bg-primary me-2"><%= training.category?.replace(/_/g, ' ') %></span>
+            <span class="badge <%= 
+              training.priority === 'critical' ? 'bg-danger' : 
+              training.priority === 'high' ? 'bg-warning text-dark' : 
+              training.priority === 'medium' ? 'bg-info' : 
+              'bg-secondary' 
+            %>"><%= training.priority?.toUpperCase() %> Priority</span>
+          </div>
+
+          <div class="mb-3">
+            <strong>Description:</strong>
+            <p class="mt-1"><%= training.description %></p>
+          </div>
+
+          <div class="mb-3">
+            <strong>Duration:</strong>
+            <p><%= training.duration %></p>
+          </div>
+
+          <div class="mb-3">
+            <strong>Required For Roles:</strong>
+            <ul class="mt-1">
+              <% training.requiredForRoles.forEach(role => { %>
+                <li><%= role %></li>
+              <% }) %>
+            </ul>
+          </div>
+
+          <% if (training.prerequisites && training.prerequisites.length > 0) { %>
+          <div class="mb-3">
+            <strong>Prerequisites:</strong>
+            <ul class="mt-1">
+              <% training.prerequisites.forEach(pre => { %>
+                <li><%= pre %></li>
+              <% }) %>
+            </ul>
+          </div>
+          <% } %>
+
+          <div class="mb-3">
+            <strong>Learning Objectives:</strong>
+            <ul class="mt-1">
+              <% training.learningObjectives.forEach(obj => { %>
+                <li><%= obj %></li>
+              <% }) %>
+            </ul>
+          </div>
+
+          <div class="mb-3">
+            <strong>Key Topics Covered:</strong>
+            <ul class="mt-1">
+              <% training.keyTopics.forEach(topic => { %>
+                <li><%= topic %></li>
+              <% }) %>
+            </ul>
+          </div>
+
+          <% if (training.certificationRequired) { %>
+          <div class="alert alert-info">
+            <i class="fas fa-certificate me-2"></i>
+            <strong>Certification Required</strong><br>
+            Certificate expires after <%= training.certificationExpiry %> months. 
+            Refresher required: <%= training.refresherFrequency %>
+          </div>
+          <% } %>
+        </div>
+
+        <div class="col-md-4">
+          <!-- Status Card -->
+          <div class="card mb-3">
+            <div class="card-body text-center">
+              <h5>Compliance</h5>
+              <div class="progress mb-2" style="height: 20px;">
+                <div class="progress-bar bg-success" style="width: <%= training.complianceRate %>%">
+                  <%= training.complianceRate %>% 
+                </div>
+              </div>
+              <p class="small text-muted">
+                <%= training.targetWorkers.filter(w => w.completed).length %> of <%= training.workerCount || 0 %> workers completed
+              </p>
+              <span class="badge <%= 
+                training.status === 'completed' ? 'bg-success' : 
+                training.status === 'published' ? 'bg-primary' : 
+                'bg-secondary' 
+              %>"><%= training.status %></span>
+            </div>
+          </div>
+
+          <!-- Action Buttons -->
+          <div class="card">
+            <div class="card-body">
+              <h6 class="fw-bold mb-3">Actions</h6>
+              <div class="d-grid gap-2">
+                <button class="btn btn-success" data-bs-toggle="modal" data-bs-target="#completeModal">
+                  <i class="fas fa-check-circle me-2"></i>Mark Worker Complete
+                </button>
+                <button class="btn btn-secondary" onclick="window.print()">
+                  <i class="fas fa-print me-2"></i>Print Report
+                </button>
+                <a href="/work-areas/<%= training.workArea?._id %>" class="btn btn-outline-secondary">
+                  <i class="fas fa-arrow-left me-2"></i>Back to Work Area
+                </a>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Mark Complete Modal -->
+<div class="modal fade" id="completeModal" tabindex="-1">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header bg-success text-white">
+        <h5 class="modal-title">Mark Training Complete</h5>
+        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+      </div>
+      <form method="POST" action="/training/<%= training._id %>/complete">
+        <div class="modal-body">
+          <div class="mb-3">
+            <label class="form-label">Worker Name</label>
+            <input type="text" name="workerName" class="form-control" required>
+          </div>
+          <div class="mb-3">
+            <label class="form-label">Worker ID (Optional)</label>
+            <input type="text" name="workerId" class="form-control">
+          </div>
+          <div class="mb-3">
+            <label class="form-label">Certificate URL (Optional)</label>
+            <input type="url" name="certificateUrl" class="form-control" placeholder="https://...">
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+          <button type="submit" class="btn btn-success">Mark Complete</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+
+<%- include('../partials/footer') %>

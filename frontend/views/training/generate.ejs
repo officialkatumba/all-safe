@@ -1,0 +1,57 @@
+<%- include('../partials/header') %>
+<%- include('../partials/navbar') %>
+
+<div class="container py-4">
+  <div class="card shadow-lg border-0" style="border-radius: 20px;">
+    <div class="card-header" style="background: linear-gradient(135deg, #667eea, #764ba2); color: white; border-radius: 20px 20px 0 0;">
+      <h4 class="mb-0"><i class="fas fa-graduation-cap me-2"></i>Generate Training Requirement</h4>
+      <p class="mb-0 small opacity-75">Work Area: <%= workArea.name %></p>
+    </div>
+    <div class="card-body p-4">
+      <div class="alert alert-info mb-4">
+        <i class="fas fa-robot me-2"></i>
+        <strong>AI-Powered Training Generation</strong><br>
+        AI will analyze work area hazards, incidents, and risk assessments to create comprehensive training requirements.
+      </div>
+
+      <form method="POST">
+        <div class="mb-3">
+          <label class="form-label fw-bold">Training Category <span class="text-danger">*</span></label>
+          <select name="category" class="form-select" required style="border-radius: 40px;">
+            <option value="">Select category...</option>
+            <% categories.forEach(cat => { %>
+              <option value="<%= cat.value %>"><%= cat.label %></option>
+            <% }) %>
+          </select>
+        </div>
+
+        <div class="mb-3">
+          <label class="form-label fw-bold">Custom Title (Optional)</label>
+          <input type="text" name="title" class="form-control" placeholder="e.g., Confined Space Entry Training">
+          <div class="form-text">Leave blank for AI-generated title</div>
+        </div>
+
+        <div class="mb-3">
+          <label class="form-label fw-bold">Priority Level</label>
+          <select name="priority" class="form-select" style="border-radius: 40px;">
+            <option value="critical">Critical - Immediate</option>
+            <option value="high">High - Within 2 weeks</option>
+            <option value="medium" selected>Medium - Within 30 days</option>
+            <option value="low">Low - Within 90 days</option>
+          </select>
+        </div>
+
+        <div class="d-flex justify-content-between gap-3 mt-4">
+          <a href="/work-areas/<%= workArea._id %>" class="btn btn-outline-secondary px-4">
+            <i class="fas fa-times me-2"></i>Cancel
+          </a>
+          <button type="submit" class="btn btn-primary px-5">
+            <i class="fas fa-magic me-2"></i>Generate Training
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+
+<%- include('../partials/footer') %>
