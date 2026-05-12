@@ -2,195 +2,378 @@
 <%- include('../partials/navbar') %>
 
 <div class="container py-4">
-  <div class="p-4 mb-4 rounded-3" style="background: linear-gradient(135deg, #6f42c1, #20c997);">
+  <!-- Header -->
+  <div class="p-4 mb-4 rounded-3" style="background: linear-gradient(135deg, #6f42c1, #20c997)">
     <div class="d-flex justify-content-between align-items-center flex-wrap">
       <div>
-        <h2 class="text-white fw-bold mb-2">
-          <i class="fas fa-brain me-2"></i>
-          AI Safety Insight #<%= insight.insightNumber %>
-        </h2>
+        <div class="d-flex align-items-center gap-2 mb-2">
+          <i class="fas fa-brain fa-2x text-white"></i>
+          <h2 class="text-white fw-bold mb-0"><%= insight.title %></h2>
+        </div>
+
         <p class="text-white-50 mb-0">
-          <%= insight.title %>
+          AI Safety Insight #<%= insight.insightNumber %> |
+          <%= insight.workArea?.name || 'Work Area' %> |
+          <%= insight.periodCovered?.label || 'Recent Safety Data' %> |
+          <%= new Date(insight.createdAt).toLocaleDateString() %>
         </p>
       </div>
 
-      <div class="text-end">
+      <div>
+        <span class="badge bg-light text-dark px-3 py-2">
+          <i class="fas fa-robot me-1"></i>
+          AI Generated
+        </span>
+
         <span class="badge <%= 
           insight.priorityLevel === 'critical' ? 'bg-danger' :
           insight.priorityLevel === 'high' ? 'bg-warning text-dark' :
           insight.priorityLevel === 'medium' ? 'bg-info' :
           'bg-secondary'
-        %> px-3 py-2">
+        %> ms-2 px-3 py-2">
+          <i class="fas fa-exclamation-circle me-1"></i>
           <%= insight.priorityLevel?.toUpperCase() || 'MEDIUM' %>
         </span>
-
-        <p class="text-white-50 small mt-2 mb-0">
-          <i class="fas fa-calendar me-1"></i>
-          <%= new Date(insight.createdAt).toLocaleDateString() %>
-        </p>
       </div>
     </div>
   </div>
 
-  <div class="card shadow-sm border-0 mb-4">
-    <div class="card-body">
-      <h5 class="fw-bold text-primary">
-        <i class="fas fa-info-circle me-2"></i>
-        Executive Summary
-      </h5>
+  <div class="row">
+    <!-- Main Content -->
+    <div class="col-lg-8">
+      <!-- Executive Summary -->
+      <div class="card shadow-sm mb-4 border-0">
+        <div class="card-body p-4">
+          <div class="mb-4">
+            <h5 class="fw-bold text-primary">
+              <i class="fas fa-info-circle me-2"></i>
+              Executive Summary
+            </h5>
 
-      <p class="mb-0">
-        <%= insight.summary || 'No summary provided.' %>
-      </p>
-    </div>
-  </div>
+            <div class="p-3 bg-light rounded">
+              <p class="mb-0">
+                <%= insight.summary || 'No executive summary was generated.' %>
+              </p>
+            </div>
+          </div>
 
-  <div class="row g-3 mb-4">
-    <div class="col-md-3">
-      <div class="card border-0 shadow-sm text-center">
+          <!-- Part 1 -->
+          <div class="mb-4">
+            <h5 class="fw-bold text-primary">
+              <i class="fas fa-eye me-2"></i>
+              Part 1: Comprehensive Site-Wide Safety Concerns and Observations
+            </h5>
+
+            <div class="p-3 bg-light rounded">
+              <div style="white-space: pre-wrap; line-height: 1.7;"><%= insight.safetyConcernsAndObservations || 'No safety concerns and observations were generated.' %></div>
+            </div>
+          </div>
+
+          <!-- Part 2 -->
+          <div class="mb-4">
+            <h5 class="fw-bold text-success">
+              <i class="fas fa-list-check me-2"></i>
+              Part 2: Actionable Recommendations
+            </h5>
+
+            <div class="p-3 bg-light rounded">
+              <div style="white-space: pre-wrap; line-height: 1.7;"><%= insight.actionableRecommendations || 'No actionable recommendations were generated.' %></div>
+            </div>
+          </div>
+
+          <!-- Focus Areas -->
+          <% if (insight.recommendedFocusAreas && insight.recommendedFocusAreas.length > 0) { %>
+          <div class="mb-4">
+            <h5 class="fw-bold text-warning">
+              <i class="fas fa-bullseye me-2"></i>
+              Recommended Areas of Attention
+            </h5>
+
+            <div class="p-3 bg-light rounded">
+              <div class="d-flex flex-wrap gap-2">
+                <% insight.recommendedFocusAreas.forEach(area => { %>
+                  <span class="badge bg-light text-dark border p-2">
+                    <i class="fas fa-bullseye me-1"></i>
+                    <%= area %>
+                  </span>
+                <% }) %>
+              </div>
+            </div>
+          </div>
+          <% } %>
+
+          <!-- Suggested Document Actions -->
+          <div class="mb-4">
+            <h5 class="fw-bold text-danger">
+              <i class="fas fa-file-alt me-2"></i>
+              Suggested Follow-Up Document Actions
+            </h5>
+
+            <div class="p-3 bg-light rounded">
+              <div class="row g-2">
+                <div class="col-md-6">
+                  <div class="p-2 rounded border bg-white">
+                    <strong>Regenerate Risk Assessment:</strong>
+                    <span class="badge <%= insight.recommendedDocumentActions?.regenerateRiskAssessment ? 'bg-danger' : 'bg-secondary' %> ms-1">
+                      <%= insight.recommendedDocumentActions?.regenerateRiskAssessment ? 'YES' : 'NO' %>
+                    </span>
+                  </div>
+                </div>
+
+                <div class="col-md-6">
+                  <div class="p-2 rounded border bg-white">
+                    <strong>Review Risk Assessment:</strong>
+                    <span class="badge <%= insight.recommendedDocumentActions?.reviewRiskAssessment ? 'bg-warning text-dark' : 'bg-secondary' %> ms-1">
+                      <%= insight.recommendedDocumentActions?.reviewRiskAssessment ? 'YES' : 'NO' %>
+                    </span>
+                  </div>
+                </div>
+
+                <div class="col-md-6">
+                  <div class="p-2 rounded border bg-white">
+                    <strong>Generate / Review JSA:</strong>
+                    <span class="badge <%= insight.recommendedDocumentActions?.generateOrReviewJSA ? 'bg-primary' : 'bg-secondary' %> ms-1">
+                      <%= insight.recommendedDocumentActions?.generateOrReviewJSA ? 'YES' : 'NO' %>
+                    </span>
+                  </div>
+                </div>
+
+                <div class="col-md-6">
+                  <div class="p-2 rounded border bg-white">
+                    <strong>Generate Safety Talk:</strong>
+                    <span class="badge <%= insight.recommendedDocumentActions?.generateSafetyTalk ? 'bg-success' : 'bg-secondary' %> ms-1">
+                      <%= insight.recommendedDocumentActions?.generateSafetyTalk ? 'YES' : 'NO' %>
+                    </span>
+                  </div>
+                </div>
+
+                <div class="col-md-6">
+                  <div class="p-2 rounded border bg-white">
+                    <strong>Review Corrective Actions:</strong>
+                    <span class="badge <%= insight.recommendedDocumentActions?.reviewCorrectiveActions ? 'bg-info' : 'bg-secondary' %> ms-1">
+                      <%= insight.recommendedDocumentActions?.reviewCorrectiveActions ? 'YES' : 'NO' %>
+                    </span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- AI Note -->
+          <div class="alert alert-info border-info mb-0">
+            <i class="fas fa-robot me-2"></i>
+            This report is AI-generated from available safety records. It is intended to support safety management attention, trend review, and follow-up planning.
+          </div>
+        </div>
+      </div>
+
+      <!-- Evidence Used -->
+      <div class="card shadow-sm mb-4 border-0">
+        <div class="card-header bg-info text-white">
+          <h6 class="mb-0">
+            <i class="fas fa-database me-2"></i>
+            Data Used by AI
+          </h6>
+        </div>
+
         <div class="card-body">
-          <h4 class="fw-bold text-danger"><%= insight.dataCounts?.incidents || 0 %></h4>
-          <small class="text-muted">Incidents / Near Misses</small>
+          <div class="small">
+            <p class="mb-1"><strong>Based on:</strong></p>
+
+            <ul class="small mb-0">
+              <li><%= insight.dataCounts?.incidents || 0 %> incidents / near misses</li>
+              <li><%= insight.dataCounts?.observations || 0 %> safety observations</li>
+              <li><%= insight.dataCounts?.atRiskObservations || 0 %> at-risk / unsafe condition observations</li>
+              <li><%= insight.dataCounts?.positiveObservations || 0 %> positive observations</li>
+              <li><%= insight.dataCounts?.riskAssessments || 0 %> risk assessments</li>
+              <li><%= insight.dataCounts?.jsas || 0 %> JSAs</li>
+              <li><%= insight.dataCounts?.safetyTalks || 0 %> safety talks</li>
+              <li>AI Model: <%= insight.aiModel || 'GPT-3.5' %></li>
+            </ul>
+          </div>
         </div>
       </div>
     </div>
 
-    <div class="col-md-3">
-      <div class="card border-0 shadow-sm text-center">
+    <!-- Sidebar -->
+    <div class="col-lg-4">
+      <!-- Actions Card -->
+      <div class="card shadow-sm mb-4 border-0">
         <div class="card-body">
-          <h4 class="fw-bold text-warning"><%= insight.dataCounts?.observations || 0 %></h4>
-          <small class="text-muted">Observations</small>
+          <h6 class="fw-bold mb-3">
+            <i class="fas fa-cog me-2 text-primary"></i>
+            Actions
+          </h6>
+
+          <div class="d-grid gap-2">
+            <!-- <button class="btn btn-outline-secondary" onclick="window.print()">
+              <i class="fas fa-print me-2"></i>
+              Print / Save as PDF
+            </button> -->
+
+            <a
+  href="/safety-insights/<%= insight._id %>/download-word"
+  class="btn btn-success"
+>
+  <i class="fas fa-file-word me-2"></i>
+  Download Management Word Document
+</a>
+
+            <a href="/work-areas/<%= insight.workArea?._id || insight.workArea %>#insights" class="btn btn-outline-primary">
+              <i class="fas fa-arrow-left me-2"></i>
+              Back to Work Area
+            </a>
+          </div>
         </div>
       </div>
-    </div>
 
-    <div class="col-md-3">
-      <div class="card border-0 shadow-sm text-center">
+      <!-- Insight Info Card -->
+      <div class="card shadow-sm mb-4 border-0">
         <div class="card-body">
-          <h4 class="fw-bold text-primary"><%= insight.dataCounts?.riskAssessments || 0 %></h4>
-          <small class="text-muted">Risk Assessments</small>
+          <h6 class="fw-bold mb-3">
+            <i class="fas fa-info-circle me-2 text-primary"></i>
+            Insight Information
+          </h6>
+
+          <table class="table table-sm">
+            <tr>
+              <td><strong>Insight Number:</strong></td>
+              <td>#<%= insight.insightNumber %></td>
+            </tr>
+
+            <tr>
+              <td><strong>Work Area:</strong></td>
+              <td><%= insight.workArea?.name || 'N/A' %></td>
+            </tr>
+
+            <tr>
+              <td><strong>Priority:</strong></td>
+              <td>
+                <span class="badge <%= 
+                  insight.priorityLevel === 'critical' ? 'bg-danger' :
+                  insight.priorityLevel === 'high' ? 'bg-warning text-dark' :
+                  insight.priorityLevel === 'medium' ? 'bg-info' :
+                  'bg-secondary'
+                %>">
+                  <%= insight.priorityLevel || 'medium' %>
+                </span>
+              </td>
+            </tr>
+
+            <tr>
+              <td><strong>Period:</strong></td>
+              <td><%= insight.periodCovered?.label || 'Recent safety data' %></td>
+            </tr>
+
+            <tr>
+              <td><strong>Generated:</strong></td>
+              <td><%= new Date(insight.createdAt).toLocaleDateString() %></td>
+            </tr>
+
+            <tr>
+              <td><strong>Status:</strong></td>
+              <td>
+                <span class="badge bg-primary">
+                  <%= insight.status || 'generated' %>
+                </span>
+              </td>
+            </tr>
+          </table>
         </div>
       </div>
-    </div>
 
-    <div class="col-md-3">
-      <div class="card border-0 shadow-sm text-center">
-        <div class="card-body">
-          <h4 class="fw-bold text-success"><%= insight.dataCounts?.jsas || 0 %></h4>
-          <small class="text-muted">JSAs</small>
-        </div>
-      </div>
-    </div>
-  </div>
-
-  <div class="card shadow-sm border-0 mb-4">
-    <div class="card-header text-white" style="background: #6f42c1;">
-      <h5 class="mb-0">
-        <i class="fas fa-eye me-2"></i>
-        Part 1: Comprehensive Site-Wide Safety Concerns and Observations
-      </h5>
-    </div>
-
-    <div class="card-body">
-      <div style="white-space: pre-wrap; line-height: 1.7;">
-        <%= insight.safetyConcernsAndObservations %>
-      </div>
-    </div>
-  </div>
-
-  <div class="card shadow-sm border-0 mb-4">
-    <div class="card-header text-white" style="background: #198754;">
-      <h5 class="mb-0">
-        <i class="fas fa-list-check me-2"></i>
-        Part 2: Actionable Recommendations
-      </h5>
-    </div>
-
-    <div class="card-body">
-      <div style="white-space: pre-wrap; line-height: 1.7;">
-        <%= insight.actionableRecommendations %>
-      </div>
-    </div>
-  </div>
-
-  <div class="card shadow-sm border-0 mb-4">
-    <div class="card-header bg-dark text-white">
-      <h5 class="mb-0">
-        <i class="fas fa-bullseye me-2"></i>
-        Recommended Areas of Attention
-      </h5>
-    </div>
-
-    <div class="card-body">
+      <!-- Focus Areas Card -->
       <% if (insight.recommendedFocusAreas && insight.recommendedFocusAreas.length > 0) { %>
-        <div class="d-flex flex-wrap gap-2">
-          <% insight.recommendedFocusAreas.forEach(area => { %>
-            <span class="badge bg-light text-dark border p-2">
-              <i class="fas fa-bullseye me-1"></i>
-              <%= area %>
-            </span>
-          <% }) %>
+      <div class="card shadow-sm mb-4 border-0">
+        <div class="card-body">
+          <h6 class="fw-bold mb-3">
+            <i class="fas fa-tags me-2 text-primary"></i>
+            Focus Areas
+          </h6>
+
+          <div class="d-flex flex-wrap gap-2">
+            <% insight.recommendedFocusAreas.forEach(area => { %>
+              <span class="badge bg-secondary"><%= area %></span>
+            <% }) %>
+          </div>
         </div>
-      <% } else { %>
-        <p class="text-muted mb-0">No specific focus areas identified.</p>
+      </div>
       <% } %>
-    </div>
-  </div>
 
-  <div class="card shadow-sm border-0 mb-4">
-    <div class="card-header bg-light">
-      <h5 class="mb-0">
-        <i class="fas fa-file-alt me-2"></i>
-        Suggested Document Actions
-      </h5>
-    </div>
+      <!-- Counts Card -->
+      <div class="card shadow-sm mb-4 border-0">
+        <div class="card-body">
+          <h6 class="fw-bold mb-3">
+            <i class="fas fa-chart-bar me-2 text-primary"></i>
+            Safety Data Summary
+          </h6>
 
-    <div class="card-body">
-      <div class="row g-2">
-        <div class="col-md-6">
-          <span class="badge <%= insight.recommendedDocumentActions?.regenerateRiskAssessment ? 'bg-danger' : 'bg-secondary' %> p-2 w-100">
-            Regenerate Risk Assessment:
-            <%= insight.recommendedDocumentActions?.regenerateRiskAssessment ? 'YES' : 'NO' %>
-          </span>
-        </div>
-
-        <div class="col-md-6">
-          <span class="badge <%= insight.recommendedDocumentActions?.reviewRiskAssessment ? 'bg-warning text-dark' : 'bg-secondary' %> p-2 w-100">
-            Review Risk Assessment:
-            <%= insight.recommendedDocumentActions?.reviewRiskAssessment ? 'YES' : 'NO' %>
-          </span>
-        </div>
-
-        <div class="col-md-6">
-          <span class="badge <%= insight.recommendedDocumentActions?.generateOrReviewJSA ? 'bg-primary' : 'bg-secondary' %> p-2 w-100">
-            Generate / Review JSA:
-            <%= insight.recommendedDocumentActions?.generateOrReviewJSA ? 'YES' : 'NO' %>
-          </span>
-        </div>
-
-        <div class="col-md-6">
-          <span class="badge <%= insight.recommendedDocumentActions?.generateSafetyTalk ? 'bg-success' : 'bg-secondary' %> p-2 w-100">
-            Generate Safety Talk:
-            <%= insight.recommendedDocumentActions?.generateSafetyTalk ? 'YES' : 'NO' %>
-          </span>
-        </div>
-
-        <div class="col-md-6">
-          <span class="badge <%= insight.recommendedDocumentActions?.reviewCorrectiveActions ? 'bg-info' : 'bg-secondary' %> p-2 w-100">
-            Review Corrective Actions:
-            <%= insight.recommendedDocumentActions?.reviewCorrectiveActions ? 'YES' : 'NO' %>
-          </span>
+          <table class="table table-sm">
+            <tr>
+              <td><strong>Incidents / Near Misses:</strong></td>
+              <td><%= insight.dataCounts?.incidents || 0 %></td>
+            </tr>
+            <tr>
+              <td><strong>Observations:</strong></td>
+              <td><%= insight.dataCounts?.observations || 0 %></td>
+            </tr>
+            <tr>
+              <td><strong>At-Risk Observations:</strong></td>
+              <td><%= insight.dataCounts?.atRiskObservations || 0 %></td>
+            </tr>
+            <tr>
+              <td><strong>Positive Observations:</strong></td>
+              <td><%= insight.dataCounts?.positiveObservations || 0 %></td>
+            </tr>
+            <tr>
+              <td><strong>Risk Assessments:</strong></td>
+              <td><%= insight.dataCounts?.riskAssessments || 0 %></td>
+            </tr>
+            <tr>
+              <td><strong>JSAs:</strong></td>
+              <td><%= insight.dataCounts?.jsas || 0 %></td>
+            </tr>
+            <tr>
+              <td><strong>Safety Talks:</strong></td>
+              <td><%= insight.dataCounts?.safetyTalks || 0 %></td>
+            </tr>
+          </table>
         </div>
       </div>
     </div>
-  </div>
-
-  <div class="text-center">
-    <a href="/work-areas/<%= insight.workArea?._id || insight.workArea %>#insights" class="btn btn-outline-secondary">
-      <i class="fas fa-arrow-left me-1"></i>
-      Back to Work Area
-    </a>
   </div>
 </div>
+
+<style>
+  @media print {
+    .navbar,
+    .btn,
+    .modal,
+    .card-header .btn,
+    .actions-card,
+    .no-print {
+      display: none !important;
+    }
+
+    .container {
+      padding: 0;
+      margin: 0;
+      max-width: 100%;
+    }
+
+    .card {
+      border: none;
+      box-shadow: none !important;
+    }
+
+    .card-body {
+      padding: 1rem !important;
+    }
+
+    body {
+      background: white !important;
+    }
+  }
+</style>
 
 <%- include('../partials/footer') %>

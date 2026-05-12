@@ -6,6 +6,9 @@ const RiskAssessment = require("../models/RiskAssessment");
 const JSA = require("../models/JSA");
 const SafetyTalk = require("../models/SafetyTalk");
 const { OpenAI } = require("openai");
+const {
+  generateSafetyInsightWordBuffer,
+} = require("../utils/safetyInsightWordGenerator");
 
 const openai = new OpenAI({
   apiKey: process.env.OPENAI_API_KEY,
@@ -374,5 +377,43 @@ exports.getSafetyInsight = async (req, res) => {
     console.error("Error viewing safety insight:", error);
     req.flash("error", "Error loading safety insight.");
     res.redirect("/dashboard");
+  }
+};
+
+exports.downloadWord = async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    const insight = await SafetyInsight.findById(id)
+      .populate("workArea", "name")
+      .populate("generatedBy", "name")
+      .populate("evidenceUsed.incidents", "incidentNumber type severity status")
+      .populate("evidenceUsed.safetyObservations", "type status description")
+      .populate("evidenceUsed.riskAssessments", "assessmentNumber title status")
+      .populate("evidenceUsed.jsas", "jsaNumber jobTask status")
+      .populate("evidenceUsed.safetyTalks", "talkNumber title status");
+
+    if (!insight) {
+      return res.status(404).send("Safety insight not found");
+    }
+
+    const buffer = await generateSafetyInsightWordBuffer({ insight });
+
+    const safeNumber = insight.insightNumber || Date.now();
+    const fileName = `ai_safety_insight_${safeNumber}.docx`;
+
+    res.setHeader(
+      "Content-Type",
+      "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+    );
+
+    res.setHeader("Content-Disposition", `attachment; filename="${fileName}"`);
+
+    return res.send(buffer);
+  } catch (error) {
+    console.error("Error downloading Safety Insight Word document:", error);
+    return res
+      .status(500)
+      .send("Error generating Safety Insight Word document");
   }
 };
