@@ -12,6 +12,9 @@ router.post(
   trainingController.generateTrainingRequirement,
 );
 
+// Download Word document
+router.get("/:id/download-word", trainingController.downloadWord);
+
 // View training
 router.get("/:id", trainingController.getTrainingRequirement);
 

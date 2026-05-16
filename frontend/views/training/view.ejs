@@ -1,158 +1,328 @@
 <%- include('../partials/header') %>
 <%- include('../partials/navbar') %>
 
+<%
+  const recommendedTrainingsList = training.recommendedTrainings || [];
+  const trainingChecklistList = training.trainingChecklist || [];
+%>
+
 <div class="container py-4">
-  <div class="card shadow-lg border-0" style="border-radius: 20px;">
-    <div class="card-header" style="background: linear-gradient(135deg, #667eea, #764ba2); color: white;">
-      <h4 class="mb-0"><i class="fas fa-graduation-cap me-2"></i>Training Requirement #<%= training.requirementNumber %></h4>
-      <p class="mb-0 small opacity-75"><%= training.title %> | <%= training.workArea?.name %></p>
-    </div>
-    <div class="card-body p-4">
-      <div class="row">
-        <div class="col-md-8">
-          <!-- Training Info -->
-          <div class="mb-3">
-            <span class="badge bg-primary me-2"><%= training.category?.replace(/_/g, ' ') %></span>
-            <span class="badge <%= 
-              training.priority === 'critical' ? 'bg-danger' : 
-              training.priority === 'high' ? 'bg-warning text-dark' : 
-              training.priority === 'medium' ? 'bg-info' : 
-              'bg-secondary' 
-            %>"><%= training.priority?.toUpperCase() %> Priority</span>
-          </div>
-
-          <div class="mb-3">
-            <strong>Description:</strong>
-            <p class="mt-1"><%= training.description %></p>
-          </div>
-
-          <div class="mb-3">
-            <strong>Duration:</strong>
-            <p><%= training.duration %></p>
-          </div>
-
-          <div class="mb-3">
-            <strong>Required For Roles:</strong>
-            <ul class="mt-1">
-              <% training.requiredForRoles.forEach(role => { %>
-                <li><%= role %></li>
-              <% }) %>
-            </ul>
-          </div>
-
-          <% if (training.prerequisites && training.prerequisites.length > 0) { %>
-          <div class="mb-3">
-            <strong>Prerequisites:</strong>
-            <ul class="mt-1">
-              <% training.prerequisites.forEach(pre => { %>
-                <li><%= pre %></li>
-              <% }) %>
-            </ul>
-          </div>
-          <% } %>
-
-          <div class="mb-3">
-            <strong>Learning Objectives:</strong>
-            <ul class="mt-1">
-              <% training.learningObjectives.forEach(obj => { %>
-                <li><%= obj %></li>
-              <% }) %>
-            </ul>
-          </div>
-
-          <div class="mb-3">
-            <strong>Key Topics Covered:</strong>
-            <ul class="mt-1">
-              <% training.keyTopics.forEach(topic => { %>
-                <li><%= topic %></li>
-              <% }) %>
-            </ul>
-          </div>
-
-          <% if (training.certificationRequired) { %>
-          <div class="alert alert-info">
-            <i class="fas fa-certificate me-2"></i>
-            <strong>Certification Required</strong><br>
-            Certificate expires after <%= training.certificationExpiry %> months. 
-            Refresher required: <%= training.refresherFrequency %>
-          </div>
-          <% } %>
+  <div class="p-4 mb-4 rounded-3" style="background: linear-gradient(135deg, #667eea, #764ba2); color: white;">
+    <div class="d-flex justify-content-between align-items-center flex-wrap gap-3">
+      <div>
+        <div class="d-flex align-items-center gap-2 mb-2">
+          <i class="fas fa-graduation-cap fa-2x text-white"></i>
+          <h3 class="fw-bold mb-0">Training Requirements</h3>
         </div>
 
-        <div class="col-md-4">
-          <!-- Status Card -->
-          <div class="card mb-3">
-            <div class="card-body text-center">
-              <h5>Compliance</h5>
-              <div class="progress mb-2" style="height: 20px;">
-                <div class="progress-bar bg-success" style="width: <%= training.complianceRate %>%">
-                  <%= training.complianceRate %>% 
+        <p class="mb-0 opacity-75">
+          Requirement #<%= training.requirementNumber || 'N/A' %> |
+          <%= training.generatedDate ? new Date(training.generatedDate).toLocaleDateString() : 'N/A' %>
+        </p>
+      </div>
+
+      <div class="text-end">
+        <span class="badge bg-light text-dark px-3 py-2">
+          <i class="fas fa-robot me-1"></i>
+          AI Generated
+        </span>
+
+        <span class="badge <%= 
+          training.priority === 'critical' ? 'bg-danger' :
+          training.priority === 'high' ? 'bg-warning text-dark' :
+          training.priority === 'medium' ? 'bg-info' :
+          'bg-secondary'
+        %> px-3 py-2 ms-2">
+          <%= training.priority?.toUpperCase() || 'MEDIUM' %>
+        </span>
+      </div>
+    </div>
+  </div>
+
+  <div class="row">
+    <div class="col-lg-8">
+      <div class="card shadow-sm border-0 mb-4">
+        <div class="card-body p-4">
+          <h4 class="fw-bold mb-3">
+            <i class="fas fa-chalkboard-user me-2 text-primary"></i>
+            <%= training.title || 'AI Recommended Training' %>
+          </h4>
+
+          <div class="alert alert-info border-info">
+            <i class="fas fa-circle-info me-2"></i>
+            This page displays the AI-recommended training for this work area. Use the Word download button to get an editable training checklist that the safety officer can print, tick, sign, and file.
+          </div>
+
+          <% if (training.description) { %>
+            <div class="mb-4">
+              <h5 class="fw-bold">
+                <i class="fas fa-align-left me-2 text-primary"></i>
+                Training Overview
+              </h5>
+              <p class="text-muted"><%= training.description %></p>
+            </div>
+          <% } %>
+
+          <h5 class="fw-bold mt-4 mb-3">
+            <i class="fas fa-list-check me-2 text-success"></i>
+            AI-Recommended Training List
+          </h5>
+
+          <% if (recommendedTrainingsList.length > 0) { %>
+            <div class="row g-3">
+              <% recommendedTrainingsList.forEach(item => { %>
+                <div class="col-md-6">
+                  <div class="training-card h-100 border rounded-3 p-3 bg-light">
+                    <div class="d-flex align-items-start gap-3">
+                      <div class="training-icon">
+                        <i class="fas fa-graduation-cap"></i>
+                      </div>
+
+                      <div class="flex-grow-1">
+                        <h6 class="fw-bold mb-1">
+                          <%= item.trainingTitle || 'Recommended Training' %>
+                        </h6>
+
+                        <div class="small text-muted mb-2">
+                          <i class="fas fa-clock me-1"></i>
+                          Duration:
+                          <strong><%= item.duration || 'To be determined' %></strong>
+                        </div>
+
+                        <div class="d-flex flex-wrap gap-2 mb-2">
+                          <span class="badge <%= 
+                            item.priority === 'critical' ? 'bg-danger' :
+                            item.priority === 'high' ? 'bg-warning text-dark' :
+                            item.priority === 'medium' ? 'bg-info' :
+                            'bg-secondary'
+                          %>">
+                            <%= item.priority || 'medium' %>
+                          </span>
+
+                          <span class="badge bg-light text-dark border">
+                            <%= String(item.category || 'training').replace(/_/g, ' ') %>
+                          </span>
+                        </div>
+
+                        <% if (item.reason) { %>
+                          <p class="small text-muted mb-2">
+                            <i class="fas fa-circle-info me-1 text-primary"></i>
+                            <%= item.reason %>
+                          </p>
+                        <% } %>
+
+                        <% if (item.targetRoles && item.targetRoles.length > 0) { %>
+                          <div class="small text-muted">
+                            <i class="fas fa-users me-1"></i>
+                            <%= item.targetRoles.join(', ') %>
+                          </div>
+                        <% } %>
+                      </div>
+                    </div>
+                  </div>
                 </div>
-              </div>
-              <p class="small text-muted">
-                <%= training.targetWorkers.filter(w => w.completed).length %> of <%= training.workerCount || 0 %> workers completed
-              </p>
-              <span class="badge <%= 
-                training.status === 'completed' ? 'bg-success' : 
-                training.status === 'published' ? 'bg-primary' : 
-                'bg-secondary' 
-              %>"><%= training.status %></span>
+              <% }) %>
             </div>
-          </div>
+          <% } else { %>
+            <div class="p-3 bg-light rounded">
+              <h6 class="fw-bold"><%= training.title %></h6>
+              <p class="text-muted mb-0"><%= training.description || 'No specific training list was generated.' %></p>
+            </div>
+          <% } %>
 
-          <!-- Action Buttons -->
-          <div class="card">
-            <div class="card-body">
-              <h6 class="fw-bold mb-3">Actions</h6>
-              <div class="d-grid gap-2">
-                <button class="btn btn-success" data-bs-toggle="modal" data-bs-target="#completeModal">
-                  <i class="fas fa-check-circle me-2"></i>Mark Worker Complete
-                </button>
-                <button class="btn btn-secondary" onclick="window.print()">
-                  <i class="fas fa-print me-2"></i>Print Report
-                </button>
-                <a href="/work-areas/<%= training.workArea?._id %>" class="btn btn-outline-secondary">
-                  <i class="fas fa-arrow-left me-2"></i>Back to Work Area
-                </a>
-              </div>
+          <% if (training.learningObjectives && training.learningObjectives.length > 0) { %>
+            <h5 class="fw-bold mt-5 mb-3">
+              <i class="fas fa-bullseye me-2 text-warning"></i>
+              Learning Objectives
+            </h5>
+
+            <ul class="list-group mb-4">
+              <% training.learningObjectives.forEach(obj => { %>
+                <li class="list-group-item">
+                  <i class="fas fa-check-circle text-success me-2"></i>
+                  <%= obj %>
+                </li>
+              <% }) %>
+            </ul>
+          <% } %>
+
+          <% if (training.keyTopics && training.keyTopics.length > 0) { %>
+            <h5 class="fw-bold mt-4 mb-3">
+              <i class="fas fa-book-open me-2 text-info"></i>
+              Key Topics
+            </h5>
+
+            <div class="d-flex flex-wrap gap-2">
+              <% training.keyTopics.forEach(topic => { %>
+                <span class="badge bg-light text-dark border p-2">
+                  <i class="fas fa-tag me-1"></i>
+                  <%= topic %>
+                </span>
+              <% }) %>
             </div>
+          <% } %>
+
+          <div class="mt-5 p-4 rounded-3" style="background: linear-gradient(135deg, #eef1ff, #f8f9fa); border-left: 5px solid #667eea;">
+            <h5 class="fw-bold text-primary">
+              <i class="fas fa-file-word me-2"></i>
+              Editable Word Training Checklist Available
+            </h5>
+
+            <p class="mb-3 text-muted">
+              The downloadable Word document includes a printable checklist with tick boxes for safety officer verification.
+            </p>
+
+            <a
+              href="/training/<%= training._id %>/download-word"
+              class="btn btn-primary btn-lg mt-2"
+            >
+              <i class="fas fa-file-word me-2"></i>
+              Download Editable Training Word Checklist
+            </a>
           </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="col-lg-4">
+      <div class="card shadow-sm border-0 mb-4">
+        <div class="card-body">
+          <h6 class="fw-bold mb-3">
+            <i class="fas fa-cog me-2 text-primary"></i>
+            Actions
+          </h6>
+
+          <div class="d-grid gap-2">
+            <a
+              href="/training/<%= training._id %>/download-word"
+              class="btn btn-primary"
+            >
+              <i class="fas fa-file-word me-2"></i>
+              Download Word Checklist
+            </a>
+
+            <a
+              href="/work-areas/<%= training.workArea?._id || training.workArea %>"
+              class="btn btn-outline-primary"
+            >
+              <i class="fas fa-arrow-left me-2"></i>
+              Back to Work Area
+            </a>
+          </div>
+        </div>
+      </div>
+
+      <div class="card shadow-sm border-0 mb-4">
+        <div class="card-body">
+          <h6 class="fw-bold mb-3">
+            <i class="fas fa-info-circle me-2 text-primary"></i>
+            Training Information
+          </h6>
+
+          <table class="table table-sm">
+            <tr>
+              <td><strong>Requirement No:</strong></td>
+              <td>#<%= training.requirementNumber || 'N/A' %></td>
+            </tr>
+
+            <tr>
+              <td><strong>Work Area:</strong></td>
+              <td><%= training.workArea?.name || 'N/A' %></td>
+            </tr>
+
+            <tr>
+              <td><strong>Category:</strong></td>
+              <td><%= String(training.category || 'N/A').replace(/_/g, ' ') %></td>
+            </tr>
+
+            <tr>
+              <td><strong>Priority:</strong></td>
+              <td>
+                <span class="badge <%= 
+                  training.priority === 'critical' ? 'bg-danger' :
+                  training.priority === 'high' ? 'bg-warning text-dark' :
+                  training.priority === 'medium' ? 'bg-info' :
+                  'bg-secondary'
+                %>">
+                  <%= training.priority || 'medium' %>
+                </span>
+              </td>
+            </tr>
+
+            <tr>
+              <td><strong>Duration:</strong></td>
+              <td><%= training.duration || 'N/A' %></td>
+            </tr>
+
+            <tr>
+              <td><strong>Refresher:</strong></td>
+              <td><%= training.refresherFrequency || 'N/A' %></td>
+            </tr>
+
+            <tr>
+              <td><strong>Training Items:</strong></td>
+              <td><%= recommendedTrainingsList.length || 1 %></td>
+            </tr>
+
+            <tr>
+              <td><strong>Checklist Items:</strong></td>
+              <td><%= trainingChecklistList.length %></td>
+            </tr>
+          </table>
+        </div>
+      </div>
+
+      <div class="card shadow-sm border-0">
+        <div class="card-body">
+          <h6 class="fw-bold mb-2">
+            <i class="fas fa-user-shield me-2 text-primary"></i>
+            Human Verification
+          </h6>
+
+          <p class="small text-muted mb-0">
+            AI recommends the training, but the safety officer should use the downloaded Word checklist to verify that training was delivered, understood, recorded, and signed off.
+          </p>
         </div>
       </div>
     </div>
   </div>
 </div>
 
-<!-- Mark Complete Modal -->
-<div class="modal fade" id="completeModal" tabindex="-1">
-  <div class="modal-dialog">
-    <div class="modal-content">
-      <div class="modal-header bg-success text-white">
-        <h5 class="modal-title">Mark Training Complete</h5>
-        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
-      </div>
-      <form method="POST" action="/training/<%= training._id %>/complete">
-        <div class="modal-body">
-          <div class="mb-3">
-            <label class="form-label">Worker Name</label>
-            <input type="text" name="workerName" class="form-control" required>
-          </div>
-          <div class="mb-3">
-            <label class="form-label">Worker ID (Optional)</label>
-            <input type="text" name="workerId" class="form-control">
-          </div>
-          <div class="mb-3">
-            <label class="form-label">Certificate URL (Optional)</label>
-            <input type="url" name="certificateUrl" class="form-control" placeholder="https://...">
-          </div>
-        </div>
-        <div class="modal-footer">
-          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-          <button type="submit" class="btn btn-success">Mark Complete</button>
-        </div>
-      </form>
-    </div>
-  </div>
-</div>
+<style>
+  .training-card {
+    transition: all 0.2s ease;
+  }
+
+  .training-card:hover {
+    background: #ffffff !important;
+    box-shadow: 0 6px 18px rgba(0, 0, 0, 0.08);
+    transform: translateY(-2px);
+  }
+
+  .training-icon {
+    width: 42px;
+    height: 42px;
+    min-width: 42px;
+    border-radius: 50%;
+    background: #667eea;
+    color: white;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  @media print {
+    .navbar,
+    .btn,
+    form {
+      display: none !important;
+    }
+
+    .card {
+      border: none !important;
+      box-shadow: none !important;
+    }
+  }
+</style>
 
 <%- include('../partials/footer') %>

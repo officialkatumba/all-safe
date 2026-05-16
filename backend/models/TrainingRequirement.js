@@ -35,6 +35,42 @@ const trainingRequirementSchema = new mongoose.Schema(
       required: true,
     },
 
+    recommendedTrainings: [
+      {
+        trainingTitle: {
+          type: String,
+          required: true,
+        },
+        category: {
+          type: String,
+          default: "hazard_specific",
+        },
+        priority: {
+          type: String,
+          enum: ["critical", "high", "medium", "low"],
+          default: "medium",
+        },
+        targetRoles: [String],
+        duration: String,
+        reason: String,
+        keyTopics: [String],
+        verificationMethod: String,
+      },
+    ],
+
+    trainingChecklist: [
+      {
+        checkItem: {
+          type: String,
+          required: true,
+        },
+        passCriteria: {
+          type: String,
+          default: "Training delivered and understood by affected workers.",
+        },
+      },
+    ],
+
     // Priority level
     priority: {
       type: String,
