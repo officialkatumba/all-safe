@@ -3,6 +3,10 @@ const WorkArea = require("../models/WorkArea");
 const Incident = require("../models/Incident");
 const SafetyTalk = require("../models/SafetyTalk");
 const { OpenAI } = require("openai");
+const {
+  professionalSafetyGuidance,
+  miningContextGuidance,
+} = require("../utils/aiPromptGuidance");
 const fs = require("fs");
 const path = require("path");
 
@@ -310,12 +314,17 @@ exports.enhanceSection = async (req, res) => {
       Approvals: "Approvals",
     };
 
-    const prompt = `You are a senior Health and Safety Officer. Enhance the following **${sectionTitles[sectionKey]}** section.
+    const prompt = `You are a senior Health and Safety Officer enhancing a professional work-area risk assessment.
+
+${professionalSafetyGuidance}
+${miningContextGuidance}
+
+Enhance the following **${sectionTitles[sectionKey]}** section.
 
 HUMAN WRITTEN CONTENT:
 ${humanContent}
 
-Enhance by: 1) Improving clarity and professionalism 2) Adding specific recommendations 3) Incorporating safety regulations 4) Making it more comprehensive. Return ONLY enhanced content.`;
+Enhance by improving clarity, adding practical controls, noting evidence gaps, applying hierarchy of controls, and keeping the final text suitable for review and approval by a competent safety officer. Return ONLY enhanced content.`;
 
     const completion = await openai.chat.completions.create({
       model: "gpt-3.5-turbo-16k",

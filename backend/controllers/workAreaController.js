@@ -15,10 +15,11 @@ const SafetyInsight = require("../models/SafetyInsight");
 const EmergencyProtocol = require("../models/EmergencyProtocol");
 const SafetyAuditScorecard = require("../models/SafetyAuditScorecard");
 const OHSComplianceAudit = require("../models/OHSComplianceAudit");
+const EnvironmentalAssessment = require("../models/EnvironmentalAssessment");
 
 // Helper function to check if user has access to worksite
 async function checkWorksiteAccess(user, worksite) {
-  if (user.role === "system_admin") return true;
+  if (user.role === "enterprise_admin" || user.role === "system_admin") return true;
   if (user.safetyOfficer) {
     return (
       worksite.assignedSafetyOfficers?.some(
@@ -612,6 +613,12 @@ exports.getWorkArea = async (req, res) => {
       .sort({ createdAt: -1 })
       .limit(10);
 
+    const environmentalAssessments = await EnvironmentalAssessment.find({
+      workArea: workArea._id,
+    })
+      .sort({ createdAt: -1 })
+      .limit(10);
+
     // ===========================================
 
     res.render("work-areas/view", {
@@ -629,6 +636,7 @@ exports.getWorkArea = async (req, res) => {
       trainingRequirements,
       safetyInsights,
       emergencyProtocols,
+      environmentalAssessments,
       safetyAudits,
       ohsComplianceAudits,
     });

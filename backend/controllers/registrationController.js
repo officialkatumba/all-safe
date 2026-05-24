@@ -245,13 +245,13 @@ exports.registerEnterpriseAdmin = async (req, res) => {
     const pinExpiry = new Date();
     pinExpiry.setDate(pinExpiry.getDate() + 7); // PIN expires in 7 days
 
-    // Create User as system_admin with company info and PIN
+    // Create User as enterprise admin with company info and PIN
     const user = await new Promise((resolve, reject) => {
       User.register(
         new User({
           email,
           name,
-          role: "system_admin",
+          role: "enterprise_admin",
           companyName: companyName || null,
           companySize: companySize || null,
           companyRegistrationNumber: companyRegistrationNumber || null,
@@ -359,7 +359,10 @@ exports.regenerateCompanyPin = async (req, res) => {
     // Find the admin user
     const admin = await User.findById(req.user._id);
 
-    if (!admin || admin.role !== "system_admin") {
+    if (
+      !admin ||
+      (admin.role !== "enterprise_admin" && admin.role !== "system_admin")
+    ) {
       req.flash("error", "Unauthorized access");
       return res.redirect("/dashboard");
     }

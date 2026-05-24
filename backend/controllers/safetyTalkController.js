@@ -3,10 +3,15 @@ const WorkArea = require("../models/WorkArea");
 const Incident = require("../models/Incident");
 const RiskAssessment = require("../models/RiskAssessment");
 const { OpenAI } = require("openai");
+const {
+  professionalSafetyGuidance,
+  miningContextGuidance,
+} = require("../utils/aiPromptGuidance");
 
 const {
   generateSafetyTalkWordBuffer,
 } = require("../utils/safetyTalkWordGenerator");
+const { trackUsage } = require("../utils/usageTracker");
 
 const openai = new OpenAI({
   apiKey: process.env.OPENAI_API_KEY,
@@ -46,7 +51,10 @@ exports.generateSafetyTalk = async (req, res) => {
       workArea.identifiedHazards?.filter((h) => h.status === "active") || [];
 
     // Build AI prompt
-    const prompt = `You are a professional safety officer creating a DAILY SAFETY TALK (5-10 minutes) for workers.
+    const prompt = `You are creating a professional DAILY SAFETY TALK for workers. The talk must be practical, field-ready, and specific to the real work-area data below.
+
+${professionalSafetyGuidance}
+${miningContextGuidance}
 
 ## WORK AREA CONTEXT:
 - Name: ${workArea.name}
@@ -67,28 +75,34 @@ ${recentRiskAssessments.map((ra) => `- ${ra.title}: ${ra.overallFindings?.substr
 ${previousTalks.map((t) => `- ${t.title} (${new Date(t.date).toLocaleDateString()})`).join("\n") || "No previous talks"}
 
 ## YOUR TASK:
-Generate a practical, engaging 5-10 minute safety talk that:
-1. Addresses the most critical current risk based on the data above
-2. Is specific to this work area's actual conditions
-3. Includes real examples from the incidents listed
-4. Provides actionable safety tips
+Generate a practical, professional 5-10 minute toolbox talk that:
+1. Identifies why this topic matters today based on the evidence.
+2. Addresses the most important current risk without exaggeration.
+3. Links controls to actual hazards, incidents, or risk findings.
+4. Tells supervisors exactly what to verify in the field.
+5. Includes worker discussion questions that invite real participation.
+6. Ends with a clear reminder that the safety officer/facilitator must review and adapt the talk before delivery.
 
 ## OUTPUT FORMAT (use exactly this structure):
 # [Engaging Title]
 
 ## Opening Statement
-[2-3 sentences to grab attention]
+[2-3 sentences explaining why this talk matters today]
 
 ## Main Safety Points
-1. [First point with example]
-2. [Second point with example]
-3. [Third point with example]
-4. [Fourth point if needed]
+1. [Hazard or risk and what workers must do]
+2. [Control measure and how it should be verified]
+3. [Supervisor or team check before work starts]
+4. [Environmental or housekeeping point if relevant]
 
 ## Discussion Questions
 - [Question 1 for workers]
 - [Question 2 for workers]
 - [Question 3 for workers]
+
+## Supervisor Verification
+- [Specific item to check before or during work]
+- [Specific evidence or observation expected]
 
 ## Key Takeaways
 - [Takeaway 1]
@@ -96,9 +110,9 @@ Generate a practical, engaging 5-10 minute safety talk that:
 - [Takeaway 3]
 
 ## Closing Reminder
-[1-2 sentences to end positively]
+[1-2 sentences, including that the facilitator must adapt this draft to actual site conditions]
 
-Generate the talk in 120-200 words total. Be direct, practical, and specific to this work area.`;
+Generate the talk in 220-320 words total. Be direct, professional, and specific to this work area.`;
 
     const completion = await openai.chat.completions.create({
       model: "gpt-3.5-turbo-16k",
@@ -180,7 +194,7 @@ Generate the talk in 120-200 words total. Be direct, practical, and specific to 
       sections,
       generatedBy: req.user.safetyOfficer,
       conductedBy: req.user.safetyOfficer,
-      status: "published",
+      status: "draft",
       date: new Date(),
       aiGenerated: true,
       aiModel: "gpt-3.5-turbo-16k",
@@ -196,6 +210,18 @@ Generate the talk in 120-200 words total. Be direct, practical, and specific to 
 
     await safetyTalk.save();
 
+    await trackUsage({
+      user: req.user?._id,
+      company: req.user?.companyId,
+      worksite: workArea.worksite?._id || workArea.worksite,
+      workArea: workArea._id,
+      eventType: "ai_generation",
+      module: "safety_talk",
+      description: "Safety talk draft generated",
+      relatedModel: "SafetyTalk",
+      relatedId: safetyTalk._id,
+    });
+
     // Add to work area's documents
     if (!workArea.documents) workArea.documents = {};
     if (!workArea.documents.safetyTalks) workArea.documents.safetyTalks = [];
@@ -207,7 +233,10 @@ Generate the talk in 120-200 words total. Be direct, practical, and specific to 
       (workArea.statistics.safetyTalks || 0) + 1;
     await workArea.save();
 
-    req.flash("success", "Safety talk generated successfully!");
+    req.flash(
+      "success",
+      "Safety talk draft generated successfully. Please review before use.",
+    );
     res.redirect(`/safety-talks/${safetyTalk._id}`);
   } catch (error) {
     console.error("Error generating safety talk:", error);
@@ -285,6 +314,38 @@ exports.markAsConducted = async (req, res) => {
     console.error("Error marking talk:", error);
     req.flash("error", "Error updating safety talk");
     res.redirect(`/safety-talks/${req.params.id}`);
+  }
+};
+
+exports.reviewAndConfirm = async (req, res) => {
+  try {
+    const talk = await SafetyTalk.findById(req.params.id);
+    const { reviewComments } = req.body;
+
+    if (!talk) {
+      req.flash("error", "Safety talk not found");
+      return res.redirect("/dashboard");
+    }
+
+    talk.status = "published";
+    talk.review = {
+      status: "confirmed",
+      reviewedBy: req.user.safetyOfficer,
+      reviewedAt: new Date(),
+      comments: reviewComments || "",
+    };
+
+    await talk.save();
+
+    req.flash(
+      "success",
+      "Safety talk reviewed and confirmed. It is ready for use.",
+    );
+    return res.redirect(`/safety-talks/${talk._id}`);
+  } catch (error) {
+    console.error("Error confirming safety talk:", error);
+    req.flash("error", "Error confirming safety talk");
+    return res.redirect(`/safety-talks/${req.params.id}`);
   }
 };
 

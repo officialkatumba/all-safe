@@ -11,6 +11,10 @@ const SafetyTalk = require("../models/SafetyTalk");
 const SafetyInsight = require("../models/SafetyInsight");
 const Permit = require("../models/Permit");
 const { OpenAI } = require("openai");
+const {
+  professionalSafetyGuidance,
+  miningContextGuidance,
+} = require("../utils/aiPromptGuidance");
 
 const {
   generateSafetyAuditWordBuffer,
@@ -359,6 +363,9 @@ exports.generateAuditQuestions = async (req, res) => {
     const prompt = `
 You are an expert Health, Safety and Environment auditor conducting an AI-led work area safety audit interview.
 
+${professionalSafetyGuidance}
+${miningContextGuidance}
+
 Your task is to analyze all available safety documents and records, then generate audit interview questions for the safety officer.
 
 Do NOT calculate the safety score yet.
@@ -560,6 +567,9 @@ Officer Evidence Note: ${q.officerResponse?.evidenceNote || ""}
 
     const scoringPrompt = `
 You are an expert Health, Safety and Environment auditor.
+
+${professionalSafetyGuidance}
+${miningContextGuidance}
 
 You must now compute a safety audit score out of 100 based on:
 1. The safety documents and records

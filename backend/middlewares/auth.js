@@ -16,7 +16,10 @@ exports.ensureAuthenticated = (req, res, next) => {
 
 // Middleware to check if user is admin
 exports.ensureAdmin = (req, res, next) => {
-  if (req.isAuthenticated() && req.user.role === "system_admin") {
+  if (
+    req.isAuthenticated() &&
+    (req.user.role === "enterprise_admin" || req.user.role === "system_admin")
+  ) {
     return next();
   }
   req.flash("error", "Access denied. Admin privileges required.");

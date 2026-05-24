@@ -55,6 +55,10 @@ const transporter = nodemailer.createTransport({
   },
 });
 
+function hasEmailConfig() {
+  return Boolean(process.env.EMAIL_USER && process.env.EMAIL_PASS);
+}
+
 /**
  * Sends an email using configured SMTP settings
  * @param {Object} options - Email options
@@ -63,17 +67,24 @@ const transporter = nodemailer.createTransport({
  * @param {string} options.text - Email plain text content
  */
 const sendEmail = async ({ to, subject, text }) => {
+  if (!hasEmailConfig()) {
+    console.warn("Email not sent: EMAIL_USER or EMAIL_PASS is not configured.");
+    return false;
+  }
+
   try {
     await transporter.sendMail({
-      from: `"Real Vote" <${process.env.EMAIL_USER}>`, // Branded sender name
+      from: `"Katumba True Safe" <${process.env.EMAIL_USER}>`,
       to,
       subject,
       text,
-      // html: '<p>HTML version here</p>' // Uncomment to add HTML version
     });
     console.log(`Email sent to ${to}`);
+    return true;
   } catch (error) {
-    console.error("Error sending email:", error);
+    console.error(
+      `Email not sent: ${error.responseCode || error.code || "SMTP"} ${error.message}`,
+    );
     throw new Error("Failed to send email");
   }
 };

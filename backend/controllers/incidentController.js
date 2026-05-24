@@ -2,6 +2,11 @@ const Incident = require("../models/Incident");
 const WorkArea = require("../models/WorkArea");
 const SafetyOfficer = require("../models/SafetyOfficer");
 const User = require("../models/User");
+const {
+  createIncidentAlert,
+  shouldAlertForIncident,
+} = require("../utils/alertService");
+const { trackUsage } = require("../utils/usageTracker");
 
 // ========== PUBLIC ROUTES (No Login Required) ==========
 
@@ -164,11 +169,23 @@ exports.submitIncidentReport = async (req, res) => {
 
     await newIncident.save();
 
-    // Update work area statistics
-    if (type === "incident") {
-      await workArea.updateStatistics("incident");
-    } else if (type === "near_miss") {
-      await workArea.updateStatistics("nearMiss");
+    await trackUsage({
+      user: req.user?._id,
+      worksite: workArea.worksite,
+      workArea: workArea._id,
+      eventType: "incident_reported",
+      module: "incidents",
+      description: `${type} reported in ${workArea.name}`,
+      relatedModel: "Incident",
+      relatedId: newIncident._id,
+      metadata: { severity: newIncident.severity, anonymous: newIncident.anonymous },
+    });
+
+    if (shouldAlertForIncident(newIncident)) {
+      await createIncidentAlert({
+        incident: newIncident,
+        createdBy: req.user?._id,
+      });
     }
 
     req.flash(
@@ -332,6 +349,13 @@ exports.updateIncident = async (req, res) => {
     if (locationDetails) incident.locationDetails = locationDetails;
 
     await incident.save();
+
+    if (shouldAlertForIncident(incident)) {
+      await createIncidentAlert({
+        incident,
+        createdBy: req.user?._id,
+      });
+    }
 
     req.flash("success", "Incident updated successfully");
     res.redirect(`/incidents/${incident._id}`);

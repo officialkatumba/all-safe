@@ -13,6 +13,10 @@ const Permit = require("../models/Permit");
 const ohsRequirements = require("../data/compliance/ohsRequirements");
 const { OpenAI } = require("openai");
 const {
+  professionalSafetyGuidance,
+  miningContextGuidance,
+} = require("../utils/aiPromptGuidance");
+const {
   generateOHSComplianceWordBuffer,
 } = require("../utils/ohsComplianceWordGenerator");
 
@@ -432,6 +436,9 @@ Target Date: ${q.officerResponse?.targetDate || "N/A"}
 
     const prompt = `
 You are an Occupational Health and Safety compliance auditor.
+
+${professionalSafetyGuidance}
+${miningContextGuidance}
 
 You are evaluating compliance with the Occupational Health and Safety Bill, 2025.
 

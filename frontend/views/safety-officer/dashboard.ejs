@@ -9,7 +9,7 @@
         <div>
           <h3 class="mb-1">
             <i class="fas fa-user-shield me-2" style="color: #26a69a;"></i>
-            Safety Officer Dashboards
+            Safety Officer Dashboard
           </h3>
           <div class="d-flex gap-2">
             <span class="badge text-bg-secondary">
@@ -108,6 +108,17 @@
       </div>
 
       <hr /> -->
+
+      <div class="d-flex gap-2 justify-content-end flex-wrap mb-4">
+        <a href="/alerts" class="btn btn-outline-danger btn-sm">
+          <i class="fas fa-bell me-1"></i> Alerts
+        </a>
+        <% if (workAreas && workAreas.length > 0) { %>
+          <a href="/incidents" class="btn btn-outline-secondary btn-sm">
+            <i class="fas fa-clipboard-list me-1"></i> Incidents
+          </a>
+        <% } %>
+      </div>
 
       <hr />
 

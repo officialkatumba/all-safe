@@ -82,6 +82,8 @@ router.use(ensureAuthenticated);
 router.get("/", incidentController.getMyIncidents);
 router.get("/report/:workAreaId", incidentController.showIncidentReportForm);
 router.post("/report/:workAreaId", incidentController.submitIncidentReport);
+router.get("/thank-you", incidentController.thankYou);
+router.get("/api/recent/:workAreaId", incidentController.getRecentIncidents);
 router.get("/:id", incidentController.getIncident);
 router.get("/:id/edit", incidentController.showEditIncidentForm);
 router.post("/:id/edit", incidentController.updateIncident);
@@ -92,6 +94,5 @@ router.post(
   incidentController.completeCorrectiveAction,
 );
 router.post("/:id/close", incidentController.closeIncident);
-router.get("/api/recent/:workAreaId", incidentController.getRecentIncidents);
 
 module.exports = router;

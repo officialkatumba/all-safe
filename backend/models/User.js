@@ -166,7 +166,14 @@ const userSchema = new mongoose.Schema(
     // Role determines what the user can do
     role: {
       type: String,
-      enum: ["system_admin", "safety_officer", "supervisor", "worker"],
+      enum: [
+        "system_owner",
+        "enterprise_admin",
+        "system_admin",
+        "safety_officer",
+        "supervisor",
+        "worker",
+      ],
       required: true,
       default: "worker",
     },
@@ -277,6 +284,26 @@ const userSchema = new mongoose.Schema(
       default: true,
     },
 
+    isSystemOwner: {
+      type: Boolean,
+      default: false,
+    },
+
+    subscription: {
+      plan: {
+        type: String,
+        enum: ["pilot", "solo", "contractor", "company", "enterprise"],
+        default: "pilot",
+      },
+      status: {
+        type: String,
+        enum: ["trial", "active", "past_due", "paused", "cancelled"],
+        default: "trial",
+      },
+      trialEndsAt: Date,
+      billingEmail: String,
+    },
+
     hadLoggedIn: {
       type: Boolean,
       default: false,
@@ -301,7 +328,12 @@ userSchema.plugin(passportLocalMongoose, {
 
 // Method to check if user is admin
 userSchema.methods.isAdmin = function () {
-  return this.role === "system_admin";
+  return this.role === "enterprise_admin" || this.role === "system_admin";
+};
+
+// Method to check if user is the software owner
+userSchema.methods.isSoftwareOwner = function () {
+  return this.role === "system_owner" || this.isSystemOwner === true;
 };
 
 // Method to check if user is safety officer

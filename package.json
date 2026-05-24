@@ -1,15 +1,16 @@
 {
-  "name": "true-vote",
+  "name": "katumba-true-safe",
   "version": "1.0.0",
   "main": "backend/server.js",
   "scripts": {
     "start": "node backend/server.js",
-    "dev": "nodemon backend/server.js"
+    "dev": "nodemon backend/server.js",
+    "seed:system-owner": "node backend/utils/seedSystemOwner.js"
   },
   "keywords": [],
   "author": "",
   "license": "ISC",
-  "description": "",
+  "description": "AI-assisted safety and environmental management system for worksites",
   "dependencies": {
     "@google-cloud/storage": "^7.16.0",
     "bcrypt": "^6.0.0",
@@ -33,6 +34,6 @@
     "pdfmake": "^0.2.23"
   },
   "devDependencies": {
-    "nodemon": "^3.1.9"
+    "nodemon": "^3.1.14"
   }
 }

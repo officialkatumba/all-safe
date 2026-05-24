@@ -1,0 +1,105 @@
+<%- include('../partials/header') %>
+<%- include('../partials/navbar') %>
+
+<div class="container py-4">
+  <div class="d-flex justify-content-between align-items-center mb-3 flex-wrap gap-2">
+    <div>
+      <h3 class="fw-bold mb-1"><%= assessment.title %></h3>
+      <p class="text-muted mb-0">
+        Assessment #<%= assessment.assessmentNumber || 'N/A' %> ·
+        <%= assessment.workArea?.name || 'Work area' %> ·
+        <%= String(assessment.approval?.status || 'draft').replace(/_/g, ' ') %>
+      </p>
+    </div>
+    <div class="d-flex gap-2">
+      <a href="/environmental-assessments/<%= assessment._id %>/download-word" class="btn btn-outline-primary btn-sm">
+        <i class="fas fa-file-word me-1"></i> Word
+      </a>
+      <a href="/work-areas/<%= assessment.workArea?._id || assessment.workArea %>" class="btn btn-outline-secondary btn-sm">Back</a>
+    </div>
+  </div>
+
+  <div class="row g-4">
+    <div class="col-lg-8">
+      <div class="card border-0 shadow-sm mb-4">
+        <div class="card-header bg-white">
+          <h5 class="mb-0 fw-bold">Summary</h5>
+        </div>
+        <div class="card-body">
+          <p><%= assessment.aiSummary?.executiveSummary || 'No summary provided.' %></p>
+          <h6 class="fw-bold">Key Risks</h6>
+          <ul>
+            <% (assessment.aiSummary?.keyRisks || []).forEach(item => { %>
+              <li><%= item %></li>
+            <% }) %>
+          </ul>
+          <h6 class="fw-bold">Recommended Actions</h6>
+          <ul>
+            <% (assessment.aiSummary?.recommendedActions || []).forEach(item => { %>
+              <li><%= item %></li>
+            <% }) %>
+          </ul>
+        </div>
+      </div>
+
+      <div class="card border-0 shadow-sm">
+        <div class="card-header bg-white">
+          <h5 class="mb-0 fw-bold">Impact Register</h5>
+        </div>
+        <div class="table-responsive">
+          <table class="table align-middle mb-0">
+            <thead class="table-light">
+              <tr>
+                <th>Impact</th>
+                <th>Receptor</th>
+                <th>Severity</th>
+                <th>Risk</th>
+                <th>Mitigation</th>
+              </tr>
+            </thead>
+            <tbody>
+              <% (assessment.impacts || []).forEach(impact => { %>
+                <tr>
+                  <td><%= impact.impact %></td>
+                  <td><%= impact.receptor || 'N/A' %></td>
+                  <td><%= impact.severity %></td>
+                  <td>
+                    <span class="badge bg-<%= impact.riskLevel === 'critical' ? 'danger' : impact.riskLevel === 'high' ? 'warning text-dark' : 'secondary' %>">
+                      <%= impact.riskLevel %>
+                    </span>
+                  </td>
+                  <td><%= (impact.mitigationMeasures || []).join('; ') || 'N/A' %></td>
+                </tr>
+              <% }) %>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <div class="col-lg-4">
+      <div class="card border-0 shadow-sm">
+        <div class="card-header bg-white">
+          <h5 class="mb-0 fw-bold">Review</h5>
+        </div>
+        <div class="card-body">
+          <% if (assessment.approval?.status === 'approved') { %>
+            <div class="alert alert-success">Approved by <%= assessment.approval.reviewedBy?.name || 'reviewer' %>.</div>
+          <% } else { %>
+            <form method="POST" action="/environmental-assessments/<%= assessment._id %>/approve">
+              <div class="mb-3">
+                <label class="form-label">Review comments</label>
+                <textarea name="comments" class="form-control" rows="4"></textarea>
+              </div>
+              <button class="btn btn-success w-100">
+                <i class="fas fa-check me-1"></i> Approve Assessment
+              </button>
+            </form>
+          <% } %>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<%- include('../partials/footer') %>

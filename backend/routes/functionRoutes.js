@@ -5,7 +5,11 @@ const { ensureAuthenticated } = require("../middlewares/auth");
 // Admin Functions Page
 router.get("/admin-functions", ensureAuthenticated, (req, res) => {
   // Check if user has admin privileges (solo or enterprise admin)
-  if (!req.user.isDualRole && req.user.role !== "system_admin") {
+  if (
+    !req.user.isDualRole &&
+    req.user.role !== "enterprise_admin" &&
+    req.user.role !== "system_admin"
+  ) {
     req.flash("error", "Access denied - Admin privileges required");
     return res.redirect("/dashboard/solo");
   }

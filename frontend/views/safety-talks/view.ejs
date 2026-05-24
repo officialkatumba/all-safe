@@ -20,8 +20,8 @@
         <span class="badge bg-light text-dark px-3 py-2">
           <i class="fas fa-clock me-1"></i> <%= talk.duration %> min
         </span>
-        <span class="badge <%= talk.status === 'conducted' ? 'bg-success' : 'bg-primary' %> ms-2 px-3 py-2">
-          <i class="fas fa-<%= talk.status === 'conducted' ? 'check-circle' : 'magic' %> me-1"></i>
+        <span class="badge <%= talk.status === 'published' ? 'bg-success' : talk.status === 'draft' ? 'bg-warning text-dark' : 'bg-primary' %> ms-2 px-3 py-2">
+          <i class="fas fa-<%= talk.status === 'published' ? 'check-circle' : 'magic' %> me-1"></i>
           <%= talk.status?.toUpperCase() %>
         </span>
       </div>
@@ -147,10 +147,15 @@
             <a href="/safety-talks/<%= talk._id %>/download-word" class="btn btn-outline-primary">
               <i class="fas fa-download me-2"></i>Download Word Document
             </a>
-            <% if (talk.status !== 'conducted' && user.role === 'safety_officer') { %>
-            <button class="btn btn-success" data-bs-toggle="modal" data-bs-target="#conductModal">
-              <i class="fas fa-check-circle me-2"></i>Mark as Conducted
+            <% if (talk.status === 'draft' && user.role === 'safety_officer') { %>
+            <button class="btn btn-success" data-bs-toggle="modal" data-bs-target="#reviewModal">
+              <i class="fas fa-check-circle me-2"></i>Review & Confirm
             </button>
+            <% } %>
+            <% if (talk.status === 'published') { %>
+              <div class="alert alert-success py-2 mb-0">
+                <i class="fas fa-check-circle me-1"></i> Reviewed and ready for use.
+              </div>
             <% } %>
             
             <a href="/work-areas/<%= talk.targetWorkAreas[0]?._id %>" class="btn btn-outline-primary">
@@ -179,8 +184,14 @@
             </tr>
             <tr>
               <td><strong>Status:</strong></td>
-              <td><span class="badge <%= talk.status === 'conducted' ? 'bg-success' : 'bg-primary' %>"><%= talk.status %></span></td>
+              <td><span class="badge <%= talk.status === 'published' ? 'bg-success' : talk.status === 'draft' ? 'bg-warning text-dark' : 'bg-primary' %>"><%= talk.status %></span></td>
             </tr>
+            <% if (talk.review?.reviewedAt) { %>
+            <tr>
+              <td><strong>Reviewed:</strong></td>
+              <td><%= new Date(talk.review.reviewedAt).toLocaleDateString() %></td>
+            </tr>
+            <% } %>
             <% if (talk.attendance?.totalAttendees > 0) { %>
             <tr>
               <td><strong>Attendees:</strong></td>
@@ -208,28 +219,27 @@
   </div>
 </div>
 
-<!-- Mark as Conducted Modal -->
-<div class="modal fade" id="conductModal" tabindex="-1">
+<!-- Review and Confirm Modal -->
+<div class="modal fade" id="reviewModal" tabindex="-1">
   <div class="modal-dialog">
     <div class="modal-content">
       <div class="modal-header bg-success text-white">
-        <h5 class="modal-title"><i class="fas fa-check-circle me-2"></i>Mark Safety Talk as Conducted</h5>
+        <h5 class="modal-title"><i class="fas fa-check-circle me-2"></i>Review and Confirm Safety Talk</h5>
         <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
       </div>
-      <form method="POST" action="/safety-talks/<%= talk._id %>/conduct">
+      <form method="POST" action="/safety-talks/<%= talk._id %>/review-confirm">
         <div class="modal-body">
-          <div class="mb-3">
-            <label class="form-label fw-bold">Number of Attendees</label>
-            <input type="number" name="attendeeCount" class="form-control" required min="1">
+          <div class="alert alert-warning">
+            Confirm that you have reviewed this AI-generated draft and adapted it to actual site conditions.
           </div>
           <div class="mb-3">
-            <label class="form-label fw-bold">Notes / Effectiveness</label>
-            <textarea name="notes" class="form-control" rows="3" placeholder="How did the talk go? Any feedback from workers?"></textarea>
+            <label class="form-label fw-bold">Review Comments</label>
+            <textarea name="reviewComments" class="form-control" rows="3" placeholder="Record changes made, assumptions checked, or site-specific instructions added."></textarea>
           </div>
         </div>
         <div class="modal-footer">
           <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-          <button type="submit" class="btn btn-success">Confirm & Save</button>
+          <button type="submit" class="btn btn-success">Confirm Reviewed</button>
         </div>
       </form>
     </div>

@@ -540,7 +540,9 @@ const SafetyOfficer = require("../models/SafetyOfficer");
 
 // ===== HELPER FUNCTIONS - MUST BE DEFINED FIRST =====
 async function checkWorksiteAccess(user, worksite) {
-  if (user.role === "system_admin") return true;
+  if (user.role === "enterprise_admin" || user.role === "system_admin") {
+    return true;
+  }
   if (user.safetyOfficer) {
     // Check if assigned as safety officer
     return (
@@ -554,7 +556,9 @@ async function checkWorksiteAccess(user, worksite) {
 }
 
 async function checkWorksiteEditPermission(user, worksite) {
-  if (user.role === "system_admin") return true;
+  if (user.role === "enterprise_admin" || user.role === "system_admin") {
+    return true;
+  }
   if (user.safetyOfficer) {
     // Owners and lead officers can edit
     return (
@@ -611,7 +615,10 @@ exports.getMyWorksites = async (req, res) => {
         .limit(parseInt(limit));
     }
     // If user is admin (enterprise)
-    else if (req.user.role === "system_admin") {
+    else if (
+      req.user.role === "enterprise_admin" ||
+      req.user.role === "system_admin"
+    ) {
       total = await Worksite.countDocuments(query);
       worksites = await Worksite.find(query)
         .populate("assignedSafetyOfficers.officer", "name email")
@@ -645,7 +652,7 @@ exports.showCreateWorksiteForm = async (req, res) => {
   try {
     // Get available safety officers for assignment (if admin)
     let safetyOfficers = [];
-    if (req.user.role === "system_admin") {
+    if (req.user.role === "enterprise_admin" || req.user.role === "system_admin") {
       safetyOfficers = await SafetyOfficer.find({
         verificationStatus: "verified",
       }).select("name email");
@@ -1057,7 +1064,10 @@ exports.createWorksite = async (req, res) => {
 
     // Handle officer assignments
     let officersList = assignedOfficers || body.assignedOfficers;
-    if (officersList && req.user.role === "system_admin") {
+    if (
+      officersList &&
+      (req.user.role === "enterprise_admin" || req.user.role === "system_admin")
+    ) {
       const officers = Array.isArray(officersList)
         ? officersList
         : [officersList];

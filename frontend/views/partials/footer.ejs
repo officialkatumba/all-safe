@@ -167,15 +167,129 @@
   </div>
 </footer>
 
+<button type="button" id="backToTopButton" class="back-to-top-button" aria-label="Back to top">
+  <i class="bi bi-arrow-up"></i>
+</button>
+
+<div id="submitLockOverlay" class="submit-lock-overlay" aria-live="polite" aria-busy="true" hidden>
+  <div class="submit-lock-panel">
+    <div class="submit-lock-spinner" aria-hidden="true"></div>
+    <h5 class="mb-2">Please wait</h5>
+    <p id="submitLockMessage" class="mb-0 text-muted">Submitting your request. Please wait...</p>
+  </div>
+</div>
+
 <style>
   @keyframes float {
     0%, 100% { transform: translateY(0) scale(1); }
     50% { transform: translateY(-20px) scale(1.1); }
   }
+
+  .password-toggle-wrap {
+    position: relative;
+  }
+
+  .password-toggle-wrap > input[type="password"],
+  .password-toggle-wrap > input[data-password-visible="true"] {
+    padding-right: 3rem !important;
+  }
+
+  .password-toggle-btn {
+    align-items: center;
+    background: transparent;
+    border: 0;
+    color: #6c757d;
+    display: inline-flex;
+    height: 2.25rem;
+    justify-content: center;
+    position: absolute;
+    right: 0.5rem;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 2.25rem;
+    z-index: 3;
+  }
+
+  .password-toggle-btn:hover,
+  .password-toggle-btn:focus {
+    color: var(--primary);
+  }
+
+  .back-to-top-button {
+    align-items: center;
+    background: linear-gradient(135deg, #e67e22, #f39c12);
+    border: 0;
+    border-radius: 50%;
+    bottom: 1.5rem;
+    box-shadow: 0 12px 28px rgba(30, 42, 58, 0.25);
+    color: #fff;
+    display: inline-flex;
+    height: 3rem;
+    justify-content: center;
+    opacity: 0;
+    pointer-events: none;
+    position: fixed;
+    right: 1.5rem;
+    transform: translateY(12px);
+    transition: opacity 0.2s ease, transform 0.2s ease;
+    width: 3rem;
+    z-index: 1050;
+  }
+
+  .back-to-top-button.is-visible {
+    opacity: 1;
+    pointer-events: auto;
+    transform: translateY(0);
+  }
+
+  .submit-lock-overlay {
+    align-items: center;
+    background: rgba(11, 28, 47, 0.78);
+    backdrop-filter: blur(4px);
+    display: flex;
+    inset: 0;
+    justify-content: center;
+    padding: 1rem;
+    position: fixed;
+    z-index: 20000;
+  }
+
+  .submit-lock-overlay[hidden] {
+    display: none;
+  }
+
+  .submit-lock-panel {
+    background: #fff;
+    border-top: 5px solid #e67e22;
+    box-shadow: 0 24px 60px rgba(0, 0, 0, 0.28);
+    max-width: 430px;
+    padding: 2rem;
+    text-align: center;
+    width: min(100%, 430px);
+  }
+
+  .submit-lock-spinner {
+    animation: submitSpin 0.85s linear infinite;
+    border: 4px solid rgba(230, 126, 34, 0.18);
+    border-radius: 50%;
+    border-top-color: #e67e22;
+    height: 3rem;
+    margin: 0 auto 1rem;
+    width: 3rem;
+  }
+
+  @keyframes submitSpin {
+    to { transform: rotate(360deg); }
+  }
   
   @media (max-width: 768px) {
     .footer .col-md-4 {
       margin-bottom: 2rem;
+    }
+
+    .back-to-top-button {
+      bottom: 1rem;
+      right: 1rem;
     }
   }
 </style>
@@ -207,6 +321,125 @@
       showConfirmButton: true
     });
   <% } %>
+</script>
+
+<script>
+  document.addEventListener('DOMContentLoaded', function () {
+    const backToTopButton = document.getElementById('backToTopButton');
+    const submitOverlay = document.getElementById('submitLockOverlay');
+    const submitMessage = document.getElementById('submitLockMessage');
+    let submitLocked = false;
+
+    document.querySelectorAll('input[type="password"]').forEach(function (input) {
+      if (input.dataset.passwordToggleReady === 'true') return;
+
+      const wrapper = document.createElement('div');
+      wrapper.className = 'password-toggle-wrap';
+      input.parentNode.insertBefore(wrapper, input);
+      wrapper.appendChild(input);
+
+      const button = document.createElement('button');
+      button.type = 'button';
+      button.className = 'password-toggle-btn';
+      button.setAttribute('aria-label', 'Show password');
+      button.innerHTML = '<i class="fa-solid fa-eye" aria-hidden="true"></i>';
+      wrapper.appendChild(button);
+
+      input.dataset.passwordToggleReady = 'true';
+
+      button.addEventListener('click', function () {
+        const isHidden = input.type === 'password';
+        input.type = isHidden ? 'text' : 'password';
+        input.dataset.passwordVisible = isHidden ? 'true' : 'false';
+        button.setAttribute('aria-label', isHidden ? 'Hide password' : 'Show password');
+        button.innerHTML = isHidden
+          ? '<i class="fa-solid fa-eye-slash" aria-hidden="true"></i>'
+          : '<i class="fa-solid fa-eye" aria-hidden="true"></i>';
+      });
+    });
+
+    if (backToTopButton) {
+      const toggleBackToTop = function () {
+        backToTopButton.classList.toggle('is-visible', window.scrollY > 320);
+      };
+
+      window.addEventListener('scroll', toggleBackToTop, { passive: true });
+      toggleBackToTop();
+
+      backToTopButton.addEventListener('click', function () {
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+      });
+    }
+
+    const submitMessages = [
+      { match: 'incidents', text: 'We are submitting your incident report. Please wait...' },
+      { match: 'safety-talks', text: 'We are working on your safety talk draft. Please wait...' },
+      { match: 'safety-insights', text: 'We are generating your safety insight. Please wait...' },
+      { match: 'environmental-assessments', text: 'We are preparing your environmental screening. Please wait...' },
+      { match: 'risk-assessments', text: 'We are preparing your risk assessment. Please wait...' },
+      { match: 'safety-audits', text: 'We are preparing your safety audit. Please wait...' },
+      { match: 'ohs-compliance-audits', text: 'We are preparing your OHS compliance audit. Please wait...' },
+      { match: 'jsa', text: 'We are preparing your job safety analysis. Please wait...' },
+      { match: 'ppe', text: 'We are preparing your PPE checklist. Please wait...' },
+      { match: 'permits', text: 'We are processing your work permit. Please wait...' },
+      { match: 'training', text: 'We are preparing your training requirement. Please wait...' },
+      { match: 'emergency-protocols', text: 'We are preparing your emergency protocol. Please wait...' },
+      { match: 'safety-observations', text: 'We are submitting your safety observation. Please wait...' },
+      { match: 'work-areas', text: 'We are saving your work area. Please wait...' },
+      { match: 'worksites', text: 'We are saving your worksite. Please wait...' },
+      { match: 'alerts', text: 'We are updating the alert status. Please wait...' },
+      { match: 'login', text: 'We are signing you in. Please wait...' },
+      { match: 'register', text: 'We are submitting your registration. Please wait...' },
+      { match: 'password', text: 'We are updating your password request. Please wait...' }
+    ];
+
+    const getSubmitMessage = function (form) {
+      const action = (form.getAttribute('action') || window.location.pathname || '').toLowerCase();
+      const source = action + ' ' + window.location.pathname.toLowerCase();
+      const found = submitMessages.find(function (item) {
+        return source.includes(item.match);
+      });
+
+      return form.dataset.submitMessage || (found ? found.text : 'Submitting your request. Please wait...');
+    };
+
+    document.addEventListener('submit', function (event) {
+      const form = event.target;
+      if (!form || form.tagName !== 'FORM' || event.defaultPrevented) return;
+      if (form.dataset.submitLock === 'false') return;
+      if ((form.getAttribute('target') || '').toLowerCase() === '_blank') return;
+
+      const method = (form.getAttribute('method') || 'GET').toUpperCase();
+      if (method === 'GET') return;
+
+      if (submitLocked || form.dataset.submitting === 'true') {
+        event.preventDefault();
+        return;
+      }
+
+      submitLocked = true;
+      form.dataset.submitting = 'true';
+
+      const submitter = event.submitter || form.querySelector('button[type="submit"], input[type="submit"]');
+      form.querySelectorAll('button[type="submit"], input[type="submit"]').forEach(function (button) {
+        button.disabled = true;
+      });
+
+      if (submitter) {
+        submitter.dataset.originalHtml = submitter.innerHTML || submitter.value || '';
+        if (submitter.tagName === 'BUTTON') {
+          submitter.innerHTML = '<span class="spinner-border spinner-border-sm me-2" aria-hidden="true"></span>Please wait...';
+        } else {
+          submitter.value = 'Please wait...';
+        }
+      }
+
+      if (submitOverlay && submitMessage) {
+        submitMessage.textContent = getSubmitMessage(form);
+        submitOverlay.hidden = false;
+      }
+    });
+  });
 </script>
 
 </body>

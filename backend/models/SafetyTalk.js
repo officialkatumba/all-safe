@@ -333,6 +333,20 @@ const safetyTalkSchema = new mongoose.Schema(
       reviewedAt: Date,
     },
 
+    review: {
+      status: {
+        type: String,
+        enum: ["pending", "confirmed", "changes_required"],
+        default: "pending",
+      },
+      reviewedBy: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "SafetyOfficer",
+      },
+      reviewedAt: Date,
+      comments: String,
+    },
+
     // AI generation metadata
     aiGenerated: { type: Boolean, default: true },
     aiModel: String,

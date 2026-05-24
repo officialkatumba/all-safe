@@ -1137,7 +1137,11 @@ exports.getWorkArea = async (req, res) => {
           a.isActive !== false,
       );
 
-    if (!isAssigned && req.user.role !== "system_admin") {
+    if (
+      !isAssigned &&
+      req.user.role !== "enterprise_admin" &&
+      req.user.role !== "system_admin"
+    ) {
       req.flash("error", "You don't have access to this work area");
       return res.redirect("/safety-officer/dashboard");
     }

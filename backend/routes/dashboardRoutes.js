@@ -321,7 +321,7 @@ router.get("/worker", ensureAuthenticated, async (req, res) => {
 });
 // Enterprise Admin Dashboard
 router.get("/admin", ensureAuthenticated, (req, res) => {
-  if (req.user.role !== "system_admin") {
+  if (req.user.role !== "enterprise_admin" && req.user.role !== "system_admin") {
     req.flash("error", "Access denied - Admins only");
     return res.redirect("/api/users/login");
   }

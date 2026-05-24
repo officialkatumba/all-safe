@@ -4,6 +4,10 @@ const Incident = require("../models/Incident");
 const SafetyObservation = require("../models/SafetyObservation");
 const PPEChecklist = require("../models/PPEChecklist");
 const { OpenAI } = require("openai");
+const {
+  professionalSafetyGuidance,
+  miningContextGuidance,
+} = require("../utils/aiPromptGuidance");
 const fs = require("fs");
 const path = require("path");
 const { generateJSAWordBuffer } = require("../utils/jsaWordGenerator");
@@ -280,12 +284,17 @@ exports.enhanceSection = async (req, res) => {
       approvalSection: "Approvals & Sign-off",
     };
 
-    const prompt = `You are a senior safety professional. Enhance the following **${sectionTitles[sectionKey]}** section of a Job Safety Analysis (JSA).
+    const prompt = `You are a senior safety professional enhancing a Job Safety Analysis (JSA) for field use.
+
+${professionalSafetyGuidance}
+${miningContextGuidance}
+
+Enhance the following **${sectionTitles[sectionKey]}** section.
 
 HUMAN WRITTEN CONTENT:
 ${humanContent}
 
-Enhance by: 1) Improving clarity and professionalism 2) Adding specific safety measures 3) Identifying missed hazards 4) Following industry best practices. Return ONLY enhanced content.`;
+Enhance by improving task sequence, identifying missed hazards, adding practical controls, clarifying supervisor verification, and keeping the final text suitable for safety officer review. Return ONLY enhanced content.`;
 
     const completion = await openai.chat.completions.create({
       model: "gpt-3.5-turbo-16k",

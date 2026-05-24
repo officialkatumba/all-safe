@@ -648,6 +648,9 @@ const workAreaSchema = new mongoose.Schema(
         { type: mongoose.Schema.Types.ObjectId, ref: "PPEChecklist" },
       ],
       safetyObservations: [{ type: mongoose.Schema.Types.ObjectId }],
+      environmentalAssessments: [
+        { type: mongoose.Schema.Types.ObjectId, ref: "EnvironmentalAssessment" },
+      ],
     },
 
     // Metadata

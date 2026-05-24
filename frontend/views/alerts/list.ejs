@@ -1,0 +1,132 @@
+<%- include('../partials/header') %>
+<%- include('../partials/navbar') %>
+
+<div class="container py-4">
+  <% const urgentAlerts = (alerts || []).filter(alert => ['critical', 'high'].includes(alert.severity) && alert.status !== 'resolved'); %>
+  <div class="d-flex justify-content-between align-items-center mb-3 flex-wrap gap-2">
+    <div>
+      <h3 class="fw-bold mb-1">Alerts</h3>
+      <p class="text-muted mb-0">Operational alerts requiring review or follow-up.</p>
+    </div>
+    <a href="<%= user.role === 'system_owner' ? '/system-owner/dashboard' : ((user.role === 'enterprise_admin' || user.role === 'system_admin') ? '/dashboard/admin' : '/dashboard/officer') %>" class="btn btn-outline-secondary btn-sm">
+      <i class="fas fa-arrow-left me-1"></i> Dashboard
+    </a>
+  </div>
+
+  <% if (urgentAlerts.length > 0) { %>
+    <div class="urgent-alert-panel mb-4">
+      <div class="urgent-alert-pulse">
+        <i class="fas fa-triangle-exclamation me-2"></i>
+        <span>URGENT SAFETY ALERT</span>
+      </div>
+      <div class="urgent-alert-body">
+        <h4 class="fw-bold mb-2"><%= urgentAlerts.length %> high-priority alert<%= urgentAlerts.length === 1 ? '' : 's' %> require immediate review</h4>
+        <p class="mb-3">Do not continue normal review until the responsible officer has checked the alert, confirmed controls, and recorded the response.</p>
+        <div class="d-flex flex-wrap gap-2">
+          <% urgentAlerts.slice(0, 3).forEach(alert => { %>
+            <a href="<%= alert.actionUrl || '#' %>" class="btn btn-light btn-sm fw-semibold">
+              Open #<%= alert.alertNumber || 'Alert' %>: <%= alert.title.substring(0, 45) %><%= alert.title.length > 45 ? '...' : '' %>
+            </a>
+          <% }) %>
+        </div>
+      </div>
+    </div>
+  <% } %>
+
+  <div class="card border-0 shadow-sm">
+    <div class="card-body p-0">
+      <% if (!alerts || alerts.length === 0) { %>
+        <div class="p-4 text-center text-muted">No alerts found.</div>
+      <% } else { %>
+        <div class="table-responsive">
+          <table class="table align-middle mb-0">
+            <thead class="table-light">
+              <tr>
+                <th>Alert</th>
+                <th>Severity</th>
+                <th>Area</th>
+                <th>Status</th>
+                <th>Created</th>
+                <th class="text-end">Action</th>
+              </tr>
+            </thead>
+            <tbody>
+              <% alerts.forEach(alert => { %>
+                <tr class="<%= ['critical', 'high'].includes(alert.severity) && alert.status !== 'resolved' ? 'urgent-row' : '' %>">
+                  <td>
+                    <div class="fw-semibold"><%= alert.title %></div>
+                    <div class="small text-muted"><%= alert.message.substring(0, 140) %><%= alert.message.length > 140 ? '...' : '' %></div>
+                  </td>
+                  <td>
+                    <span class="badge bg-<%= alert.severity === 'critical' ? 'danger' : alert.severity === 'high' ? 'warning text-dark' : 'secondary' %>">
+                      <%= alert.severity %>
+                    </span>
+                  </td>
+                  <td><%= alert.workArea?.name || alert.worksite?.name || 'N/A' %></td>
+                  <td><%= String(alert.status).replace(/_/g, ' ') %></td>
+                  <td><%= new Date(alert.createdAt).toLocaleDateString() %></td>
+                  <td class="text-end">
+                    <% if (alert.actionUrl) { %>
+                      <a href="<%= alert.actionUrl %>" class="btn btn-sm btn-outline-primary">Open</a>
+                    <% } %>
+                    <% if (alert.status === 'open') { %>
+                      <form method="POST" action="/alerts/<%= alert._id %>/acknowledge" class="d-inline">
+                        <button class="btn btn-sm btn-outline-secondary">Acknowledge</button>
+                      </form>
+                    <% } %>
+                    <% if (alert.status !== 'resolved') { %>
+                      <form method="POST" action="/alerts/<%= alert._id %>/resolve" class="d-inline">
+                        <button class="btn btn-sm btn-success">Resolve</button>
+                      </form>
+                    <% } %>
+                  </td>
+                </tr>
+              <% }) %>
+            </tbody>
+          </table>
+        </div>
+      <% } %>
+    </div>
+  </div>
+</div>
+
+<style>
+  .urgent-alert-panel {
+    border: 3px solid #dc3545;
+    border-radius: 10px;
+    overflow: hidden;
+    box-shadow: 0 0 0 0 rgba(220, 53, 69, 0.65);
+    animation: alertPulse 1.4s infinite;
+  }
+
+  .urgent-alert-pulse {
+    background: #dc3545;
+    color: #fff;
+    font-weight: 800;
+    letter-spacing: 0.04em;
+    padding: 0.75rem 1rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-transform: uppercase;
+  }
+
+  .urgent-alert-body {
+    background: #fff5f5;
+    padding: 1rem;
+    border-top: 1px solid rgba(220, 53, 69, 0.35);
+  }
+
+  .urgent-row {
+    background: #fff5f5;
+    border-left: 5px solid #dc3545;
+  }
+
+  @keyframes alertPulse {
+    0% { box-shadow: 0 0 0 0 rgba(220, 53, 69, 0.65); }
+    70% { box-shadow: 0 0 0 12px rgba(220, 53, 69, 0); }
+    100% { box-shadow: 0 0 0 0 rgba(220, 53, 69, 0); }
+  }
+</style>
+
+<%- include('../partials/footer') %>

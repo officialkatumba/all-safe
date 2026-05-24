@@ -12,8 +12,8 @@ router.post("/generate/:workAreaId", safetyTalkController.generateSafetyTalk);
 // View safety talk
 router.get("/:id", safetyTalkController.getSafetyTalk);
 
-// Mark as conducted
-router.post("/:id/conduct", safetyTalkController.markAsConducted);
+// Review and confirm draft safety talk
+router.post("/:id/review-confirm", safetyTalkController.reviewAndConfirm);
 
 // API endpoint for dashboard
 router.get("/api/workarea/:workAreaId", safetyTalkController.getWorkAreaTalks);
