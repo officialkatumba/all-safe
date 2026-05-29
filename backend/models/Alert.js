@@ -25,7 +25,6 @@ const alertSchema = new mongoose.Schema(
       enum: ["low", "medium", "high", "critical"],
       default: "medium",
     },
-    worksite: { type: mongoose.Schema.Types.ObjectId, ref: "Worksite" },
     workArea: { type: mongoose.Schema.Types.ObjectId, ref: "WorkArea" },
     relatedModel: String,
     relatedId: mongoose.Schema.Types.ObjectId,
@@ -35,7 +34,7 @@ const alertSchema = new mongoose.Schema(
         user: { type: mongoose.Schema.Types.ObjectId, ref: "User" },
         safetyOfficer: {
           type: mongoose.Schema.Types.ObjectId,
-          ref: "SafetyOfficer",
+          ref: "User",
         },
         name: String,
         email: String,

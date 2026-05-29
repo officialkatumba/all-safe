@@ -1,7 +1,5 @@
 const Incident = require("../models/Incident");
 const WorkArea = require("../models/WorkArea");
-const SafetyOfficer = require("../models/SafetyOfficer");
-const User = require("../models/User");
 const {
   createIncidentAlert,
   shouldAlertForIncident,
@@ -14,10 +12,7 @@ const { trackUsage } = require("../utils/usageTracker");
 exports.showIncidentReportForm = async (req, res) => {
   try {
     const { workAreaId } = req.params;
-    const workArea = await WorkArea.findById(workAreaId).populate(
-      "worksite",
-      "name",
-    );
+    const workArea = await WorkArea.findById(workAreaId);
 
     if (!workArea) {
       req.flash("error", "Work area not found");
@@ -171,7 +166,6 @@ exports.submitIncidentReport = async (req, res) => {
 
     await trackUsage({
       user: req.user?._id,
-      worksite: workArea.worksite,
       workArea: workArea._id,
       eventType: "incident_reported",
       module: "incidents",
@@ -214,9 +208,7 @@ exports.getMyIncidents = async (req, res) => {
     const { status, type, severity, page = 1, limit = 20 } = req.query;
 
     // Get work areas this officer manages
-    const workAreas = await WorkArea.find({
-      "assignedSafetyOfficers.officer": req.user.safetyOfficer,
-    }).select("_id name");
+    const workAreas = await WorkArea.find({ officerId: req.user._id }).select("_id name");
 
     const workAreaIds = workAreas.map((wa) => wa._id);
 
@@ -282,7 +274,7 @@ exports.getMyIncidents = async (req, res) => {
 exports.getIncident = async (req, res) => {
   try {
     const incident = await Incident.findById(req.params.id)
-      .populate("workArea", "name worksite")
+      .populate("workArea", "name")
       .populate("reportedByUser", "email name")
       .populate("investigation.conductedBy", "name")
       .populate("reviewedBy", "name")
@@ -381,7 +373,7 @@ exports.addInvestigation = async (req, res) => {
 
     incident.investigation = {
       conducted: true,
-      conductedBy: req.user.safetyOfficer,
+      conductedBy: req.user._id,
       investigationDate: new Date(),
       rootCause: rootCause || "",
       contributingFactors: contributingFactors
@@ -453,7 +445,7 @@ exports.completeCorrectiveAction = async (req, res) => {
       action.completed = true;
       action.completedDate = new Date();
       action.completionNotes = notes || "";
-      action.verifiedBy = req.user.safetyOfficer;
+      action.verifiedBy = req.user._id;
       action.verifiedAt = new Date();
     }
 
@@ -489,7 +481,7 @@ exports.closeIncident = async (req, res) => {
 
     incident.status = "closed";
     incident.lessonsLearned = lessonsLearned || "";
-    incident.reviewedBy = req.user.safetyOfficer;
+    incident.reviewedBy = req.user._id;
     incident.reviewedAt = new Date();
 
     await incident.save();
@@ -517,3 +509,4 @@ exports.getRecentIncidents = async (req, res) => {
     res.status(500).json({ success: false, error: error.message });
   }
 };
+

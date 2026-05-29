@@ -4,7 +4,6 @@ const Counter = require("./Counter");
 const environmentalAssessmentSchema = new mongoose.Schema(
   {
     assessmentNumber: { type: Number, unique: true },
-    worksite: { type: mongoose.Schema.Types.ObjectId, ref: "Worksite" },
     workArea: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "WorkArea",
@@ -99,13 +98,13 @@ const environmentalAssessmentSchema = new mongoose.Schema(
         enum: ["draft", "under_review", "approved", "changes_required"],
         default: "draft",
       },
-      reviewedBy: { type: mongoose.Schema.Types.ObjectId, ref: "SafetyOfficer" },
+      reviewedBy: { type: mongoose.Schema.Types.ObjectId, ref: "User" },
       reviewedAt: Date,
       comments: String,
     },
     aiGenerated: { type: Boolean, default: false },
     aiModel: String,
-    generatedBy: { type: mongoose.Schema.Types.ObjectId, ref: "SafetyOfficer" },
+    generatedBy: { type: mongoose.Schema.Types.ObjectId, ref: "User" },
     createdBy: { type: mongoose.Schema.Types.ObjectId, ref: "User" },
     updatedBy: { type: mongoose.Schema.Types.ObjectId, ref: "User" },
   },

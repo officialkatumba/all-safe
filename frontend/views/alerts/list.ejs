@@ -8,7 +8,7 @@
       <h3 class="fw-bold mb-1">Alerts</h3>
       <p class="text-muted mb-0">Operational alerts requiring review or follow-up.</p>
     </div>
-    <a href="<%= user.role === 'system_owner' ? '/system-owner/dashboard' : ((user.role === 'enterprise_admin' || user.role === 'system_admin') ? '/dashboard/admin' : '/dashboard/officer') %>" class="btn btn-outline-secondary btn-sm">
+    <a href="/dashboard/officer" class="btn btn-outline-secondary btn-sm">
       <i class="fas fa-arrow-left me-1"></i> Dashboard
     </a>
   </div>
@@ -62,7 +62,7 @@
                       <%= alert.severity %>
                     </span>
                   </td>
-                  <td><%= alert.workArea?.name || alert.worksite?.name || 'N/A' %></td>
+                  <td><%= alert.workArea?.name || 'N/A' %></td>
                   <td><%= String(alert.status).replace(/_/g, ' ') %></td>
                   <td><%= new Date(alert.createdAt).toLocaleDateString() %></td>
                   <td class="text-end">

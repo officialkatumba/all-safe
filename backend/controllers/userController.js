@@ -22,52 +22,18 @@ exports.loginUser = (req, res, next) => {
       if (loginError) return next(loginError);
 
       try {
-        if (user.role === "safety_officer") {
-          await user.populate("safetyOfficer");
-        }
-
         await trackUsage({
-          company:
-            user.role === "system_owner"
-              ? null
-              : user.companyId ||
-                (["enterprise_admin", "system_admin"].includes(user.role)
-                  ? user._id
-                  : null),
           user: user._id,
           eventType: "login",
           module: "auth",
           description: "User logged in",
         });
 
-        if (user.role === "system_owner" || user.isSystemOwner) {
-          req.flash("success", `Welcome, ${user.name}!`);
-          return res.redirect("/system-owner/dashboard");
-        }
+        user.hadLoggedIn = true;
+        await user.save();
 
-        if (user.role === "enterprise_admin" || user.role === "system_admin") {
-          req.flash("success", `Welcome, ${user.name}!`);
-          return res.redirect("/dashboard/admin");
-        }
-
-        if (user.role === "safety_officer") {
-          const name = user.safetyOfficer?.name || user.name || user.email;
-          req.flash("success", `Welcome back, ${name}!`);
-          return res.redirect("/dashboard/officer");
-        }
-
-        if (user.role === "supervisor") {
-          req.flash("success", `Welcome, ${user.name}!`);
-          return res.redirect("/dashboard/supervisor");
-        }
-
-        if (user.role === "worker") {
-          req.flash("success", `Welcome, ${user.name}!`);
-          return res.redirect("/dashboard/worker");
-        }
-
-        req.flash("error", "Access denied: Role not recognized.");
-        return res.redirect("/api/users/login");
+        req.flash("success", `Welcome back, ${user.name || user.email}!`);
+        return res.redirect("/dashboard/officer");
       } catch (error) {
         console.error("Login error:", error);
         req.flash("error", "Unexpected error occurred during login.");
@@ -239,3 +205,4 @@ exports.resetPassword = async (req, res) => {
     res.redirect(`/api/users/reset-password/${token}`);
   }
 };
+

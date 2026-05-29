@@ -147,7 +147,7 @@ const incidentSchema = new mongoose.Schema(
       conducted: { type: Boolean, default: false },
       conductedBy: {
         type: mongoose.Schema.Types.ObjectId,
-        ref: "SafetyOfficer",
+        ref: "User",
       },
       investigationDate: Date,
       rootCause: String,
@@ -179,7 +179,7 @@ const incidentSchema = new mongoose.Schema(
         completionNotes: String,
         verifiedBy: {
           type: mongoose.Schema.Types.ObjectId,
-          ref: "SafetyOfficer",
+          ref: "User",
         },
         verifiedAt: Date,
       },
@@ -206,7 +206,7 @@ const incidentSchema = new mongoose.Schema(
       enum: ["pending", "approved", "rejected", "not_required"],
       default: "not_required",
     },
-    approvedBy: { type: mongoose.Schema.Types.ObjectId, ref: "SafetyOfficer" },
+    approvedBy: { type: mongoose.Schema.Types.ObjectId, ref: "User" },
     approvedAt: Date,
     approvalComments: String,
 
@@ -214,7 +214,7 @@ const incidentSchema = new mongoose.Schema(
     anonymous: { type: Boolean, default: true },
 
     // Safety officer review (for AI-generated incidents)
-    reviewedBy: { type: mongoose.Schema.Types.ObjectId, ref: "SafetyOfficer" },
+    reviewedBy: { type: mongoose.Schema.Types.ObjectId, ref: "User" },
     reviewedAt: Date,
     aiGenerated: { type: Boolean, default: false },
 

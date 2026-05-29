@@ -66,9 +66,6 @@ function calculateRiskLevel(score) {
 
 async function collectAuditData(workAreaId) {
   const workArea = await WorkArea.findById(workAreaId)
-    .populate("worksite")
-    .populate("assignedSafetyOfficers.officer")
-    .populate("assignedWorkers.worker")
     .populate("activePermits");
 
   if (!workArea) {
@@ -105,9 +102,7 @@ async function collectAuditData(workAreaId) {
     .sort({ createdAt: -1 })
     .limit(10);
 
-  const ppeChecklists = await PPEChecklist.find({
-    $or: [{ workArea: workAreaId }, { worksite: workArea.worksite?._id }],
-  })
+  const ppeChecklists = await PPEChecklist.find({ workArea: workAreaId })
     .sort({ createdAt: -1 })
     .limit(10);
 
@@ -165,7 +160,7 @@ function buildEvidenceSummary(data) {
   return `
 WORK AREA:
 Name: ${data.workArea.name}
-Worksite: ${data.workArea.worksite?.name || "N/A"}
+Location: ${data.workArea.location?.zone || "N/A"}
 Status: ${data.workArea.status || "N/A"}
 Description: ${safeText(data.workArea.description, 500)}
 Location: ${data.workArea.location?.zone || data.workArea.location || "N/A"}
@@ -467,7 +462,7 @@ Return ONLY valid JSON in this exact shape:
       },
       aiGenerated: true,
       aiModel: "gpt-3.5-turbo-16k",
-      initiatedBy: req.user.safetyOfficer,
+      initiatedBy: req.user._id,
     });
 
     await audit.save();
@@ -763,3 +758,4 @@ exports.downloadWord = async (req, res) => {
     return res.status(500).send("Error generating Safety Audit Word document");
   }
 };
+

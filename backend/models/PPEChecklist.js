@@ -5,14 +5,12 @@
 //   {
 //     checklistNumber: { type: Number, unique: true },
 
-//     worksite: {
 //       type: mongoose.Schema.Types.ObjectId,
-//       ref: "Worksite",
 //       required: true,
 //     },
 //     createdBy: {
 //       type: mongoose.Schema.Types.ObjectId,
-//       ref: "SafetyOfficer",
+//       ref: "User",
 //       required: true,
 //     },
 
@@ -67,7 +65,7 @@
 //         comments: String,
 //         inspectedBy: {
 //           type: mongoose.Schema.Types.ObjectId,
-//           ref: "SafetyOfficer",
+//           ref: "User",
 //         },
 //         inspectedAt: Date,
 //       },
@@ -119,14 +117,12 @@
 //   {
 //     checklistNumber: { type: Number, unique: true },
 
-//     worksite: {
 //       type: mongoose.Schema.Types.ObjectId,
-//       ref: "Worksite",
 //       required: true,
 //     },
 //     createdBy: {
 //       type: mongoose.Schema.Types.ObjectId,
-//       ref: "SafetyOfficer",
+//       ref: "User",
 //       required: true,
 //     },
 
@@ -163,7 +159,7 @@
 //         comments: String,
 //         inspectedBy: {
 //           type: mongoose.Schema.Types.ObjectId,
-//           ref: "SafetyOfficer",
+//           ref: "User",
 //         },
 //         inspectedAt: Date,
 //       },
@@ -221,19 +217,10 @@ const ppeChecklistSchema = new mongoose.Schema(
       unique: true,
     },
 
-    // Worksite where this PPE checklist belongs
-    worksite: {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: "Worksite",
-      required: true,
-    },
-
-    // Specific work area where this PPE checklist applies
-    // Kept optional/default null so old PPE checklist records do not break.
     workArea: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "WorkArea",
-      default: null,
+      required: true,
     },
 
     // Checklist details
@@ -307,13 +294,13 @@ const ppeChecklistSchema = new mongoose.Schema(
     // Who generated/prepared the checklist
     generatedBy: {
       type: mongoose.Schema.Types.ObjectId,
-      ref: "SafetyOfficer",
+      ref: "User",
     },
 
     // Completion details
     completedBy: {
       type: mongoose.Schema.Types.ObjectId,
-      ref: "SafetyOfficer",
+      ref: "User",
     },
 
     completedAt: {

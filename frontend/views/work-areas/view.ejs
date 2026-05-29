@@ -3,42 +3,88 @@
 
 <div class="main-wrapper">
   <div class="content container py-4">
-    <div class="workarea-details-container" style="max-width: 900px; margin: 0 auto;">
-      <!-- Work Area Header -->
-      <div class="d-flex justify-content-between align-items-center mb-3 flex-wrap gap-2">
-        <div>
-          <h3 class="mb-1">
-            <i class="fas fa-map-marked-alt me-2" style="color: #26a69a;"></i>
-            <%= workArea.name %>
-          </h3>
-          <div class="d-flex gap-2">
-            <span class="badge text-bg-secondary">
-              #<%= workArea.workAreaNumber || 'N/A' %>
-            </span>
-            <span class="badge <%= 
-              workArea.status === 'active' ? 'text-bg-success' : 
-              workArea.status === 'planned' ? 'text-bg-warning' : 
-              workArea.status === 'on_hold' ? 'text-bg-danger' : 
-              workArea.status === 'completed' ? 'text-bg-info' : 
-              'text-bg-secondary' 
-            %>">
-              <%= (workArea.status || 'unknown').toUpperCase() %>
-            </span>
+    <div class="workarea-details-container" style="max-width: 1080px; margin: 0 auto;">
+      <%
+        const locationText = workArea.location?.zone || workArea.location || 'Location not specified';
+        const workTypeText = workArea.currentWorkTypes && workArea.currentWorkTypes.length
+          ? workArea.currentWorkTypes.map(wt => wt.workType || wt).join(', ')
+          : 'general';
+        const shiftText = workArea.intake?.shiftOrWorkingTime || (workArea.activeShifts && workArea.activeShifts.length
+          ? workArea.activeShifts.map(shift => shift.name).join(', ')
+          : 'No shift configured');
+        const hazardList = (workArea.identifiedHazards || []).slice(0, 10);
+      %>
+
+      <section class="workarea-hero mb-4">
+        <div class="d-flex justify-content-between align-items-start gap-3 flex-wrap">
+          <div>
+            <p class="text-uppercase text-muted fw-semibold small mb-1">Work Area</p>
+            <h3 class="mb-2">
+              <i class="fas fa-map-marked-alt me-2" style="color: #26a69a;"></i>
+              <%= workArea.name %>
+            </h3>
+            <div class="d-flex flex-wrap gap-2 align-items-center">
+              <span class="status-pill neutral">#<%= workArea.workAreaNumber || 'N/A' %></span>
+              <span class="status-pill <%= 
+                workArea.status === 'active' ? 'success' : 
+                workArea.status === 'planned' ? 'warning' : 
+                workArea.status === 'on_hold' ? 'danger' : 
+                workArea.status === 'completed' ? 'info' : 
+                'neutral' 
+              %>">
+                <%= (workArea.status || 'unknown').toUpperCase() %>
+              </span>
+              <a href="/work-areas/<%= workArea._id %>/edit" class="status-pill edit-link">
+                <i class="fas fa-pen me-1"></i>EDIT WORK AREA
+              </a>
+              <% hazardList.forEach(hazard => { %>
+                <span class="status-pill hazard">
+                  <i class="fas fa-exclamation-triangle me-1"></i><%= hazard.hazard %>
+                </span>
+              <% }) %>
+              <% if ((workArea.identifiedHazards || []).length > hazardList.length) { %>
+                <span class="status-pill neutral">+<%= workArea.identifiedHazards.length - hazardList.length %> more hazards</span>
+              <% } %>
+            </div>
+          </div>
+          <div class="text-lg-end small text-muted">
+            <div><i class="fas fa-calendar-alt me-1"></i>Created: <%= workArea.createdAt ? new Date(workArea.createdAt).toLocaleDateString() : 'N/A' %></div>
+            <div class="mt-1"><i class="fas fa-user-shield me-1"></i><%= user.email %></div>
           </div>
         </div>
-        <div class="text-end">
-          <span class="text-muted small d-block">
-            <i class="fas fa-calendar-alt me-1"></i> Created: <%= workArea.createdAt ? new Date(workArea.createdAt).toLocaleDateString() : 'N/A' %>
+
+        <div class="d-flex flex-wrap gap-2 align-items-center mt-3">
+          <span class="status-pill location">
+            <i class="fas fa-map-marker-alt me-1"></i>Location: <%= locationText %>
           </span>
-          <span class="text-muted small mt-1 d-block">
-            <i class="fas fa-user me-1"></i> Welcome back, <strong><%= user.email %></strong>
-            <span class="badge <%= (user.role === 'enterprise_admin' || user.role === 'system_admin') ? 'bg-warning text-dark' : (user.role === 'safety_officer' ? 'bg-success' : 'bg-info') %> ms-2">
-              <i class="fas fa-<%= (user.role === 'enterprise_admin' || user.role === 'system_admin') ? 'crown' : (user.role === 'safety_officer' ? 'user-shield' : 'user') %> me-1"></i>
-              <%= (user.role === 'enterprise_admin' || user.role === 'system_admin') ? 'Enterprise Admin' : (user.role === 'safety_officer' ? 'Safety Officer' : (user.role === 'supervisor' ? 'Supervisor' : 'Worker')) %>
-            </span>
+          <span class="status-pill work-type">
+            <i class="fas fa-briefcase me-1"></i>Work: <%= workTypeText %>
+          </span>
+          <span class="status-pill dates">
+            <i class="fas fa-calendar-alt me-1"></i><%= workArea.plannedStart ? new Date(workArea.plannedStart).toLocaleDateString() : 'Not set' %> - <%= workArea.plannedEnd ? new Date(workArea.plannedEnd).toLocaleDateString() : 'Not set' %>
+          </span>
+          <span class="status-pill shifts">
+            <i class="fas fa-clock me-1"></i><%= shiftText %>
           </span>
         </div>
-      </div>
+
+        <p class="hero-description mb-0 mt-3"><%= workArea.description || workArea.intake?.mainActivity || 'No description provided yet.' %></p>
+
+        <div class="d-flex flex-wrap gap-2 align-items-center mt-3">
+          <span class="status-pill metric-incident">
+            <i class="fas fa-exclamation-circle me-1"></i><%= workArea.statistics?.incidents || 0 %> Incidents
+          </span>
+          <span class="status-pill metric-nearmiss">
+            <i class="fas fa-exclamation-triangle me-1"></i><%= workArea.statistics?.nearMisses || 0 %> Near Misses
+          </span>
+          <span class="status-pill metric-score">
+            <i class="fas fa-shield-alt me-1"></i><%= workArea.statistics?.safetyScore || 100 %>% Safety Score
+          </span>
+          <span class="status-pill metric-days">
+            <i class="fas fa-calendar-check me-1"></i><%= workArea.statistics?.daysWithoutIncident || 0 %> Days Safe
+          </span>
+        </div>
+      </section>
 
       <!-- Daily Safety Talk Section -->
       <div class="safety-talk-container mb-4">
@@ -122,311 +168,56 @@
         }
       </style>
 
-      <!-- Compact Action Buttons Row - Conditional based on user role -->
-      <div class="d-flex gap-2 justify-content-center flex-wrap mb-4">
-        <% if (user.role === 'enterprise_admin' || user.role === 'system_admin') { %>
-          <a href="/work-areas/<%= workArea._id %>/edit" class="btn btn-outline-primary btn-sm">
-            <i class="fas fa-edit me-1"></i> Edit Work Area
-          </a>
-          <a href="/work-areas/<%= workArea._id %>/manage-officers" class="btn btn-outline-info btn-sm">
-            <i class="fas fa-user-cog me-1"></i> Manage Officers
-          </a>
-          <a href="/work-areas/<%= workArea._id %>/manage-workers" class="btn btn-outline-success btn-sm">
-            <i class="fas fa-users me-1"></i> Manage Workers
-          </a>
-        <% } else if (user.role === 'safety_officer') { %>
-          <a href="/work-areas/<%= workArea._id %>/manage-workers" class="btn btn-outline-success btn-sm">
-            <i class="fas fa-users me-1"></i> Manage Workers
-          </a>
-        <% } %>
-      </div>
-
-      <hr />
-
-      <!-- Work Area Details Section -->
-      <h4 class="text-center mb-4 fw-bold">
-        <i class="fas fa-info-circle me-2" style="color: #26a69a;"></i>
-        Work Area Details
-      </h4>
-
-      <div class="d-flex justify-content-center">
-        <div class="details-panel shadow-sm border rounded p-4" style="max-width: 800px; width: 100%;">
-          <div class="row mb-3">
-            <div class="col-md-6">
-              <h6 class="fw-bold"><i class="fas fa-map-pin me-2 text-secondary"></i>Location</h6>
-              <p class="text-muted"><%= workArea.location?.zone || workArea.location || 'Not specified' %></p>
-            </div>
-            <div class="col-md-6">
-              <h6 class="fw-bold"><i class="fas fa-tasks me-2 text-secondary"></i>Work Types</h6>
-              <div>
-                <% if (workArea.currentWorkTypes && workArea.currentWorkTypes.length > 0) { %>
-                  <% workArea.currentWorkTypes.slice(0, 3).forEach(wt => { %>
-                    <span class="badge bg-secondary me-1"><%= wt.workType || wt %></span>
-                  <% }) %>
-                  <% if (workArea.currentWorkTypes.length > 3) { %>
-                    <span class="badge bg-secondary">+<%= workArea.currentWorkTypes.length - 3 %></span>
-                  <% } %>
-                <% } else { %>
-                  <span class="text-muted small">None specified</span>
-                <% } %>
-              </div>
-            </div>
-          </div>
-
-          <div class="mb-3">
-            <h6 class="fw-bold"><i class="fas fa-align-left me-2 text-secondary"></i>Description</h6>
-            <p class="text-muted"><%= workArea.description || 'No description provided' %></p>
-          </div>
-
-          <div class="row">
-            <div class="col-md-4">
-              <h6 class="fw-bold"><i class="fas fa-calendar-plus me-2 text-secondary"></i>Planned Start</h6>
-              <p class="text-muted"><%= workArea.plannedStart ? new Date(workArea.plannedStart).toLocaleDateString() : 'Not set' %></p>
-            </div>
-            <div class="col-md-4">
-              <h6 class="fw-bold"><i class="fas fa-calendar-check me-2 text-secondary"></i>Planned End</h6>
-              <p class="text-muted"><%= workArea.plannedEnd ? new Date(workArea.plannedEnd).toLocaleDateString() : 'Not set' %></p>
-            </div>
-            <div class="col-md-4">
-              <h6 class="fw-bold"><i class="fas fa-clock me-2 text-secondary"></i>Shifts</h6>
-              <div>
-                <% if (workArea.activeShifts && workArea.activeShifts.length > 0) { %>
-                  <% workArea.activeShifts.forEach(shift => { %>
-                    <span class="badge bg-info me-1"><%= shift.name %></span>
-                  <% }) %>
-                <% } else { %>
-                  <span class="text-muted small">None configured</span>
-                <% } %>
-              </div>
-            </div>
-          </div>
-
-          <div class="row mt-3 pt-3 border-top">
-            <div class="col-3 text-center">
-              <h5 class="fw-bold text-danger"><%= workArea.statistics?.incidents || 0 %></h5>
-              <small class="text-muted">Incidents</small>
-            </div>
-            <div class="col-3 text-center">
-              <h5 class="fw-bold text-warning"><%= workArea.statistics?.nearMisses || 0 %></h5>
-              <small class="text-muted">Near Misses</small>
-            </div>
-            <div class="col-3 text-center">
-              <h5 class="fw-bold text-success"><%= workArea.statistics?.safetyScore || 100 %>%</h5>
-              <small class="text-muted">Safety Score</small>
-            </div>
-            <div class="col-3 text-center">
-              <h5 class="fw-bold text-primary"><%= workArea.statistics?.daysWithoutIncident || 0 %></h5>
-              <small class="text-muted">Days Safe</small>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <!-- Assigned Safety Officers Section -->
-      <h4 class="text-center mt-5 mb-4 fw-bold">
-        <i class="fas fa-users me-2" style="color: #26a69a;"></i>
-        Assigned Safety Officers
-      </h4>
-
-      <div class="d-flex justify-content-center">
-        <div class="officers-panel shadow-sm border rounded p-4" style="max-width: 800px; width: 100%;">
-          <% if (workArea.assignedSafetyOfficers && workArea.assignedSafetyOfficers.filter(a => a.isActive !== false).length > 0) { %>
-            <div class="row g-3">
-              <% workArea.assignedSafetyOfficers.filter(a => a.isActive !== false).forEach(assignment => { %>
-                <div class="col-md-6">
-                  <div class="d-flex align-items-center p-2 rounded bg-light">
-                    <div class="rounded-circle bg-primary d-flex align-items-center justify-content-center me-2" style="width: 35px; height: 35px;">
-                      <i class="fas fa-user-tie text-white" style="font-size: 0.9rem;"></i>
-                    </div>
-                    <div class="flex-grow-1">
-                      <strong><%= assignment.officer?.name || 'Unknown' %></strong>
-                      <div class="d-flex gap-1 small">
-                        <span class="text-muted"><%= assignment.shift || 'No shift' %></span>
-                        <% if (assignment.isPrimary) { %>
-                          <span class="badge bg-warning text-dark" style="font-size: 0.6rem;">Primary</span>
-                        <% } %>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              <% }) %>
-            </div>
-          <% } else { %>
-            <p class="text-muted text-center py-3">No safety officers assigned to this work area.</p>
-            <% if (user.role === 'safety_officer' || user.role === 'enterprise_admin' || user.role === 'system_admin') { %>
-            <div class="text-center">
-              <a href="/work-areas/<%= workArea._id %>/manage-officers" class="btn btn-sm btn-outline-primary">
-                <i class="fas fa-user-plus me-1"></i> Assign Officers
-              </a>
-            </div>
-            <% } %>
-          <% } %>
-        </div>
-      </div>
-
-      <!-- Assigned Workers Section -->
-      <h4 class="text-center mt-5 mb-4 fw-bold">
-        <i class="fas fa-users me-2" style="color: #4caf50;"></i>
-        Assigned Workers
-      </h4>
-
-      <div class="d-flex justify-content-center">
-        <div class="workers-panel shadow-sm border rounded p-4" style="max-width: 800px; width: 100%;">
-          <% const assignedWorkers = workArea.assignedWorkers || []; %>
-          <% if (assignedWorkers.filter(a => a.isActive !== false).length > 0) { %>
-            <div class="row g-3">
-              <% assignedWorkers.filter(a => a.isActive !== false).forEach(assignment => { %>
-                <div class="col-md-6">
-                  <div class="d-flex align-items-center p-2 rounded bg-light">
-                    <div class="rounded-circle bg-success d-flex align-items-center justify-content-center me-2" style="width: 35px; height: 35px;">
-                      <i class="fas fa-hard-hat text-white" style="font-size: 0.9rem;"></i>
-                    </div>
-                    <div class="flex-grow-1">
-                      <strong><%= assignment.worker?.name || 'Unknown' %></strong>
-                      <div class="d-flex gap-1 small flex-wrap">
-                        <span class="text-muted"><%= assignment.shift || 'No shift' %></span>
-                        <% if (assignment.isTeamLead) { %>
-                          <span class="badge bg-warning text-dark" style="font-size: 0.6rem;">Team Lead</span>
-                        <% } %>
-                        <% if (assignment.department) { %>
-                          <span class="badge bg-secondary" style="font-size: 0.6rem;"><%= assignment.department %></span>
-                        <% } %>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              <% }) %>
-            </div>
-          <% } else { %>
-            <p class="text-muted text-center py-3">No workers assigned to this work area.</p>
-          <% } %>
-          <% if (user.role === 'safety_officer' || user.role === 'enterprise_admin' || user.role === 'system_admin') { %>
-          <div class="text-center mt-3">
-            <a href="/work-areas/<%= workArea._id %>/manage-workers" class="btn btn-sm btn-outline-success">
-              <i class="fas fa-user-plus me-1"></i> Manage Workers
-            </a>
-          </div>
-          <% } %>
-        </div>
-      </div>
-
-      <!-- Hazards Section -->
-      <% if (workArea.identifiedHazards && workArea.identifiedHazards.length > 0) { %>
-      <div class="row mt-4">
-        <div class="col-12">
-          <h5 class="fw-bold mb-3">
-            <i class="fas fa-exclamation-triangle me-2" style="color: #26a69a;"></i>
-            Identified Hazards
-          </h5>
-          <div class="d-flex flex-wrap gap-2">
-            <% workArea.identifiedHazards.slice(0, 5).forEach(hazard => { %>
-              <span class="badge <%= 
-                hazard.riskLevel === 'critical' ? 'bg-danger' : 
-                hazard.riskLevel === 'high' ? 'bg-warning text-dark' : 
-                hazard.riskLevel === 'medium' ? 'bg-info' : 
-                'bg-secondary' 
-              %> p-2">
-                <i class="fas fa-exclamation-triangle me-1"></i>
-                <%= hazard.hazard %>
-              </span>
-            <% }) %>
-            <% if (workArea.identifiedHazards.length > 5) { %>
-              <span class="badge bg-secondary p-2">+<%= workArea.identifiedHazards.length - 5 %> more</span>
-            <% } %>
-          </div>
-        </div>
-      </div>
-      <% } %>
-
       <!-- Documents Section with Tabs -->
       <div class="row mt-5">
         <div class="col-12">
-          <h4 class="fw-bold mb-3" style="color: #26a69a;">
-            <i class="fas fa-folder-open me-2"></i>Safety Documents
+          <h4 class="fw-bold mb-3 control-panel-title">
+            <i class="fas fa-sliders-h me-2"></i>SAFETY OFFICER CONTROL PANEL
           </h4>
           
-          <ul class="nav nav-tabs" id="documentTabs" role="tablist">
-            <li class="nav-item" role="presentation">
-              <button class="nav-link active" id="risk-tab" data-bs-toggle="tab" data-bs-target="#risk" type="button" role="tab">
-                <i class="fas fa-chart-pie me-1"></i> Risk Assessments 
-                <span class="badge bg-secondary ms-1"><%= riskAssessments?.length || 0 %></span>
-              </button>
-            </li>
-            <li class="nav-item" role="presentation">
-              <button class="nav-link" id="incidents-tab" data-bs-toggle="tab" data-bs-target="#incidents" type="button" role="tab">
-                <i class="fas fa-exclamation-triangle me-1"></i> Incidents
-                <span class="badge bg-secondary ms-1"><%= recentIncidents?.length || 0 %></span>
-              </button>
-            </li>
-            <li class="nav-item" role="presentation">
-              <button class="nav-link" id="safety-insights-tab" data-bs-toggle="tab" data-bs-target="#insights" type="button" role="tab">
-                <i class="fas fa-brain me-1"></i> Safety Insights
-                <span class="badge bg-secondary ms-1"><%= safetyInsights?.length || 0 %></span>
-              </button>
-            </li>
-            <li class="nav-item" role="presentation">
-              <button class="nav-link" id="safety-talks-tab" data-bs-toggle="tab" data-bs-target="#safety-talks" type="button" role="tab">
-                <i class="fas fa-chalkboard-teacher me-1"></i> Safety Talks
-                <span class="badge bg-secondary ms-1"><%= safetyTalks?.length || 0 %></span>
-              </button>
-            </li>
-            <li class="nav-item" role="presentation">
-              <button class="nav-link" id="emergency-protocols-tab" data-bs-toggle="tab" data-bs-target="#emergency-protocols" type="button" role="tab">
-                <i class="fas fa-truck-medical me-1"></i> Emergency Protocols
-                <span class="badge bg-secondary ms-1"><%= emergencyProtocols?.length || 0 %></span>
-              </button>
-            </li>
-            <li class="nav-item" role="presentation">
-              <button class="nav-link" id="environmental-tab" data-bs-toggle="tab" data-bs-target="#environmental" type="button" role="tab">
-                <i class="fas fa-leaf me-1"></i> Environmental
-                <span class="badge bg-secondary ms-1"><%= environmentalAssessments?.length || 0 %></span>
-              </button>
-            </li>
-            <li class="nav-item" role="presentation">
-              <button class="nav-link" id="permits-tab" data-bs-toggle="tab" data-bs-target="#permits" type="button" role="tab">
-                <i class="fas fa-file-signature me-1"></i> Permits
-                <span class="badge bg-secondary ms-1"><%= permits?.length || 0 %></span>
-              </button>
-            </li>
-            <li class="nav-item" role="presentation">
-              <button class="nav-link" id="jsa-tab" data-bs-toggle="tab" data-bs-target="#jsa" type="button" role="tab">
-                <i class="fas fa-tasks me-1"></i> JSA
-                <span class="badge bg-secondary ms-1"><%= jsa?.length || 0 %></span>
-              </button>
-            </li>
-            <li class="nav-item" role="presentation">
-              <button class="nav-link" id="ohs-compliance-tab" data-bs-toggle="tab" data-bs-target="#ohs-compliance" type="button" role="tab">
-                <i class="fas fa-scale-balanced me-1"></i> OHS Compliance
-                <span class="badge bg-secondary ms-1"><%= ohsComplianceAudits?.length || 0 %></span>
-              </button>
-            </li>
-            <li class="nav-item" role="presentation">
-              <button class="nav-link" id="ppe-tab" data-bs-toggle="tab" data-bs-target="#ppe" type="button" role="tab">
-                <i class="fas fa-helmet-safety me-1"></i> PPE Checklists
-                <span class="badge bg-secondary ms-1"><%= ppeChecklists?.length || 0 %></span>
-              </button>
-            </li>
-            <li class="nav-item" role="presentation">
-              <button class="nav-link" id="training-tab" data-bs-toggle="tab" data-bs-target="#training" type="button" role="tab">
-                <i class="fas fa-graduation-cap me-1"></i> Training
-                <span class="badge bg-secondary ms-1"><%= trainingRequirements?.length || 0 %></span>
-              </button>
-            </li>
-            <li class="nav-item" role="presentation">
-              <button class="nav-link" id="safety-audits-tab" data-bs-toggle="tab" data-bs-target="#safety-audits" type="button" role="tab">
-                <i class="fas fa-gauge-high me-1"></i> Safety Audits
-                <span class="badge bg-secondary ms-1"><%= safetyAudits?.length || 0 %></span>
-              </button>
-            </li>
-            <li class="nav-item" role="presentation">
-              <button class="nav-link" id="observations-tab" data-bs-toggle="tab" data-bs-target="#observations" type="button" role="tab">
-                <i class="fas fa-eye me-1"></i> Safety Observations
-                <span class="badge bg-secondary ms-1"><%= safetyObservations?.length || 0 %></span>
-              </button>
-            </li>
-          </ul>
+          <div class="control-panel-grid" id="documentTabs" role="tablist">
+            <button class="control-tile active risk" id="risk-tab" data-bs-toggle="tab" data-bs-target="#risk" type="button" role="tab">
+              <i class="fas fa-chart-pie"></i><span>Risk Assessments</span><strong><%= riskAssessments?.length || 0 %></strong>
+            </button>
+            <button class="control-tile incident" id="incidents-tab" data-bs-toggle="tab" data-bs-target="#incidents" type="button" role="tab">
+              <i class="fas fa-exclamation-triangle"></i><span>Incidents</span><strong><%= recentIncidents?.length || 0 %></strong>
+            </button>
+            <button class="control-tile insights" id="safety-insights-tab" data-bs-toggle="tab" data-bs-target="#insights" type="button" role="tab">
+              <i class="fas fa-brain"></i><span>Safety Insights</span><strong><%= safetyInsights?.length || 0 %></strong>
+            </button>
+            <button class="control-tile talks" id="safety-talks-tab" data-bs-toggle="tab" data-bs-target="#safety-talks" type="button" role="tab">
+              <i class="fas fa-chalkboard-teacher"></i><span>Safety Talks</span><strong><%= safetyTalks?.length || 0 %></strong>
+            </button>
+            <button class="control-tile emergency" id="emergency-protocols-tab" data-bs-toggle="tab" data-bs-target="#emergency-protocols" type="button" role="tab">
+              <i class="fas fa-truck-medical"></i><span>Emergency Plans</span><strong><%= emergencyProtocols?.length || 0 %></strong>
+            </button>
+            <button class="control-tile environmental" id="environmental-tab" data-bs-toggle="tab" data-bs-target="#environmental" type="button" role="tab">
+              <i class="fas fa-leaf"></i><span>Environmental</span><strong><%= environmentalAssessments?.length || 0 %></strong>
+            </button>
+            <button class="control-tile permits" id="permits-tab" data-bs-toggle="tab" data-bs-target="#permits" type="button" role="tab">
+              <i class="fas fa-file-signature"></i><span>Permits</span><strong><%= permits?.length || 0 %></strong>
+            </button>
+            <button class="control-tile jsa" id="jsa-tab" data-bs-toggle="tab" data-bs-target="#jsa" type="button" role="tab">
+              <i class="fas fa-tasks"></i><span>JSA</span><strong><%= jsa?.length || 0 %></strong>
+            </button>
+            <button class="control-tile compliance" id="ohs-compliance-tab" data-bs-toggle="tab" data-bs-target="#ohs-compliance" type="button" role="tab">
+              <i class="fas fa-scale-balanced"></i><span>OHS Compliance</span><strong><%= ohsComplianceAudits?.length || 0 %></strong>
+            </button>
+            <button class="control-tile ppe" id="ppe-tab" data-bs-toggle="tab" data-bs-target="#ppe" type="button" role="tab">
+              <i class="fas fa-helmet-safety"></i><span>PPE Checklists</span><strong><%= ppeChecklists?.length || 0 %></strong>
+            </button>
+            <button class="control-tile training" id="training-tab" data-bs-toggle="tab" data-bs-target="#training" type="button" role="tab">
+              <i class="fas fa-graduation-cap"></i><span>Training</span><strong><%= trainingRequirements?.length || 0 %></strong>
+            </button>
+            <button class="control-tile audits" id="safety-audits-tab" data-bs-toggle="tab" data-bs-target="#safety-audits" type="button" role="tab">
+              <i class="fas fa-gauge-high"></i><span>Safety Audits</span><strong><%= safetyAudits?.length || 0 %></strong>
+            </button>
+            <button class="control-tile observations" id="observations-tab" data-bs-toggle="tab" data-bs-target="#observations" type="button" role="tab">
+              <i class="fas fa-eye"></i><span>Observations</span><strong><%= safetyObservations?.length || 0 %></strong>
+            </button>
+          </div>
 
-          <div class="tab-content p-4 border border-top-0 rounded-bottom shadow-sm" style="background-color: white;">
+          <div class="tab-content p-4 border rounded shadow-sm mt-3" style="background-color: white;">
             
             <!-- Risk Assessments Tab -->
             <div class="tab-pane fade show active" id="risk" role="tabpanel">
@@ -1117,23 +908,137 @@
             </div>
           </div>
         </div>
-      </div>
-
-      <!-- Back Button -->
-      <div class="text-center mt-4">
-        <a href="/worksites/<%= workArea.worksite?._id %>" class="btn btn-outline-secondary btn-sm">
-          <i class="fas fa-arrow-left me-1"></i> Back to Worksite
-        </a>
-      </div>
-    </div>
+      </div></div>
   </div>
 </div>
 
 <style>
   .workarea-details-container {
-    max-width: 900px;
+    max-width: 1080px;
     margin: 0 auto;
   }
+
+  .workarea-hero {
+    background: #ffffff;
+    border: 1px solid #e1e8ef;
+    border-radius: 12px;
+    padding: 1.25rem;
+    box-shadow: 0 10px 28px rgba(20, 39, 60, .06);
+  }
+
+  .status-pill {
+    min-height: 30px;
+    display: inline-flex;
+    align-items: center;
+    gap: .25rem;
+    border-radius: 999px;
+    padding: .36rem .72rem;
+    font-size: .78rem;
+    font-weight: 800;
+    line-height: 1;
+    letter-spacing: .02em;
+    text-decoration: none;
+    border: 1px solid transparent;
+  }
+
+  .status-pill.success { background: #dff7ea; color: #137a3d; border-color: #bdeccc; }
+  .status-pill.warning { background: #fff4d8; color: #8a5b00; border-color: #ffe1a3; }
+  .status-pill.danger { background: #ffe2e2; color: #a82626; border-color: #ffc8c8; }
+  .status-pill.info { background: #dff1ff; color: #075985; border-color: #b9e2ff; }
+  .status-pill.neutral { background: #edf2f7; color: #405468; border-color: #d8e1ea; }
+  .status-pill.hazard { background: #fff0e6; color: #9a4316; border-color: #ffd2b7; }
+  .status-pill.location { background: #e7f5ff; color: #1864ab; border-color: #bfdbfe; }
+  .status-pill.work-type { background: #e6fcf5; color: #087f5b; border-color: #b2f2dd; }
+  .status-pill.dates { background: #fff9db; color: #8a5b00; border-color: #ffec99; }
+  .status-pill.shifts { background: #f3f0ff; color: #5f3dc4; border-color: #d0bfff; }
+  .status-pill.metric-incident { background: #ffe3e3; color: #c92a2a; border-color: #ffc9c9; }
+  .status-pill.metric-nearmiss { background: #fff4e6; color: #d9480f; border-color: #ffd8a8; }
+  .status-pill.metric-score { background: #e6fcf5; color: #087f5b; border-color: #b2f2dd; }
+  .status-pill.metric-days { background: #e7f5ff; color: #1864ab; border-color: #bfdbfe; }
+  .status-pill.edit-link { background: #ede7ff; color: #5b3bb2; border-color: #d6c9ff; }
+  .status-pill.edit-link:hover { background: #5b3bb2; color: #fff; }
+
+  .hero-description {
+    color: #465668;
+    font-size: .95rem;
+  }
+
+  .control-panel-title {
+    color: #1e3c5c;
+  }
+
+  .control-panel-grid {
+    display: flex;
+    flex-wrap: wrap;
+    gap: .55rem;
+    align-items: center;
+  }
+
+  .control-tile {
+    min-height: 38px;
+    display: inline-grid;
+    grid-template-columns: 24px minmax(92px, 1fr) auto;
+    align-items: center;
+    gap: .45rem;
+    border: 1px solid transparent;
+    border-radius: 999px;
+    padding: .36rem .62rem;
+    text-align: left;
+    box-shadow: 0 4px 12px rgba(20, 39, 60, .06);
+    transition: transform .16s ease, box-shadow .16s ease, background-color .16s ease, border-color .16s ease;
+  }
+
+  .control-tile:hover,
+  .control-tile.active {
+    transform: translateY(-1px);
+    box-shadow: 0 7px 16px rgba(20, 39, 60, .1);
+    border-color: currentColor;
+  }
+
+  .control-tile i {
+    width: 24px;
+    height: 24px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 999px;
+    background: rgba(255,255,255,.65);
+    font-size: .82rem;
+  }
+
+  .control-tile span {
+    font-weight: 800;
+    line-height: 1;
+    font-size: .78rem;
+    white-space: nowrap;
+  }
+
+  .control-tile strong {
+    min-width: 24px;
+    height: 24px;
+    padding: 0 .35rem;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 999px;
+    background: rgba(255,255,255,.75);
+    font-size: .76rem;
+    line-height: 1;
+  }
+
+  .control-tile.risk { background: #e6fcf5; color: #087f5b; border-color: #b2f2dd; }
+  .control-tile.incident { background: #fff0e6; color: #d9480f; border-color: #ffd8a8; }
+  .control-tile.insights { background: #f3f0ff; color: #5f3dc4; border-color: #d0bfff; }
+  .control-tile.talks { background: #f8f0ff; color: #7048e8; border-color: #e5dbff; }
+  .control-tile.emergency { background: #fff0f6; color: #c2255c; border-color: #fcc2d7; }
+  .control-tile.environmental { background: #ebfbee; color: #2b8a3e; border-color: #c3f0ca; }
+  .control-tile.permits { background: #e7f5ff; color: #1864ab; border-color: #bfdbfe; }
+  .control-tile.jsa { background: #e3fafc; color: #0b7285; border-color: #99e9f2; }
+  .control-tile.compliance { background: #edf2f7; color: #2f3e46; border-color: #d8e1ea; }
+  .control-tile.ppe { background: #fff4e6; color: #e67700; border-color: #ffd8a8; }
+  .control-tile.training { background: #edf2ff; color: #4263eb; border-color: #bac8ff; }
+  .control-tile.audits { background: #edf2ff; color: #364fc7; border-color: #bac8ff; }
+  .control-tile.observations { background: #f8f0fc; color: #862e9c; border-color: #eebefa; }
 
   .safety-talk-container {
     background-color: #f8f9fa;
@@ -1185,6 +1090,10 @@
   }
 
   @media (max-width: 768px) {
+    .control-panel-grid {
+      grid-template-columns: 1fr;
+    }
+
     .btn-sm {
       font-size: 0.75rem;
     }

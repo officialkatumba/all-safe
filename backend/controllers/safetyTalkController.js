@@ -1,5 +1,6 @@
 const SafetyTalk = require("../models/SafetyTalk");
 const WorkArea = require("../models/WorkArea");
+const SafetyHub = require("../models/SafetyHub");
 const Incident = require("../models/Incident");
 const RiskAssessment = require("../models/RiskAssessment");
 const { OpenAI } = require("openai");
@@ -22,9 +23,7 @@ exports.generateSafetyTalk = async (req, res) => {
   try {
     const { workAreaId } = req.params;
 
-    const workArea = await WorkArea.findById(workAreaId)
-      .populate("worksite")
-      .populate("assignedSafetyOfficers.officer");
+    const workArea = await WorkArea.findById(workAreaId);
 
     if (!workArea) {
       req.flash("error", "Work area not found");
@@ -58,7 +57,7 @@ ${miningContextGuidance}
 
 ## WORK AREA CONTEXT:
 - Name: ${workArea.name}
-- Worksite: ${workArea.worksite?.name || "N/A"}
+- Location: ${workArea.location?.zone || "N/A"}
 - Status: ${workArea.status}
 - Current Work Types: ${workArea.currentWorkTypes?.map((wt) => wt.workType).join(", ") || "Various"}
 
@@ -192,8 +191,8 @@ Generate the talk in 220-320 words total. Be direct, professional, and specific 
       duration: 5,
       topics: [activeHazards[0]?.hazard || "General Safety", "Daily Briefing"],
       sections,
-      generatedBy: req.user.safetyOfficer,
-      conductedBy: req.user.safetyOfficer,
+      generatedBy: req.user._id,
+      conductedBy: req.user._id,
       status: "draft",
       date: new Date(),
       aiGenerated: true,
@@ -209,11 +208,17 @@ Generate the talk in 220-320 words total. Be direct, professional, and specific 
     });
 
     await safetyTalk.save();
+    await SafetyHub.findOneAndUpdate(
+      { officerId: req.user._id, workArea: workArea._id },
+      {
+        $setOnInsert: { officerId: req.user._id, workArea: workArea._id },
+        $addToSet: { "generatedDrafts.safetyTalks": safetyTalk._id },
+      },
+      { upsert: true },
+    );
 
     await trackUsage({
       user: req.user?._id,
-      company: req.user?.companyId,
-      worksite: workArea.worksite?._id || workArea.worksite,
       workArea: workArea._id,
       eventType: "ai_generation",
       module: "safety_talk",
@@ -249,7 +254,7 @@ Generate the talk in 220-320 words total. Be direct, professional, and specific 
 exports.getSafetyTalk = async (req, res) => {
   try {
     const talk = await SafetyTalk.findById(req.params.id)
-      .populate("targetWorkAreas", "name worksite")
+      .populate("targetWorkAreas", "name")
       .populate("generatedBy", "name")
       .populate("conductedBy", "name")
       .populate(
@@ -302,7 +307,7 @@ exports.markAsConducted = async (req, res) => {
     talk.attendance.totalAttendees = attendeeCount || 0;
     talk.effectiveness = {
       comments: notes || "",
-      reviewedBy: req.user.safetyOfficer,
+      reviewedBy: req.user._id,
       reviewedAt: new Date(),
     };
 
@@ -330,7 +335,7 @@ exports.reviewAndConfirm = async (req, res) => {
     talk.status = "published";
     talk.review = {
       status: "confirmed",
-      reviewedBy: req.user.safetyOfficer,
+      reviewedBy: req.user._id,
       reviewedAt: new Date(),
       comments: reviewComments || "",
     };
@@ -354,7 +359,7 @@ exports.downloadWord = async (req, res) => {
     const { id } = req.params;
 
     const talk = await SafetyTalk.findById(id)
-      .populate("targetWorkAreas", "name worksite")
+      .populate("targetWorkAreas", "name")
       .populate("generatedBy", "name")
       .populate("conductedBy", "name")
       .populate(
@@ -384,3 +389,4 @@ exports.downloadWord = async (req, res) => {
     return res.status(500).send("Error generating Safety Talk Word document");
   }
 };
+

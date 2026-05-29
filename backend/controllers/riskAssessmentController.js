@@ -1,5 +1,6 @@
 const RiskAssessment = require("../models/RiskAssessment");
 const WorkArea = require("../models/WorkArea");
+const SafetyHub = require("../models/SafetyHub");
 const Incident = require("../models/Incident");
 const SafetyTalk = require("../models/SafetyTalk");
 const { OpenAI } = require("openai");
@@ -76,7 +77,7 @@ const sections = [
 exports.showCreateForm = async (req, res) => {
   try {
     const { workAreaId } = req.params;
-    const workArea = await WorkArea.findById(workAreaId).populate("worksite");
+    const workArea = await WorkArea.findById(workAreaId);
     if (!workArea) {
       req.flash("error", "Work area not found");
       return res.redirect("/dashboard");
@@ -160,7 +161,7 @@ exports.createRiskAssessment = async (req, res) => {
         title ||
         `Risk Assessment - ${workArea.name} - ${new Date().toLocaleDateString()}`,
       description: description || ExecutiveSummary?.substring(0, 500) || "",
-      conductedBy: req.user.safetyOfficer,
+      conductedBy: req.user._id,
       assessmentDate: new Date(),
       status: "draft",
       hazards: hazardsArray,
@@ -195,6 +196,14 @@ exports.createRiskAssessment = async (req, res) => {
     if (!workArea.documents) workArea.documents = { riskAssessments: [] };
     workArea.documents.riskAssessments.push(newAssessment._id);
     await workArea.save();
+    await SafetyHub.findOneAndUpdate(
+      { officerId: req.user._id, workArea: workArea._id },
+      {
+        $setOnInsert: { officerId: req.user._id, workArea: workArea._id },
+        $addToSet: { "generatedDrafts.riskAssessments": newAssessment._id },
+      },
+      { upsert: true },
+    );
 
     req.flash("success", "Risk assessment created successfully!");
     res.redirect(`/risk-assessments/${newAssessment._id}`);
@@ -208,7 +217,7 @@ exports.createRiskAssessment = async (req, res) => {
 exports.getRiskAssessment = async (req, res) => {
   try {
     const assessment = await RiskAssessment.findById(req.params.id)
-      .populate("workArea", "name worksite")
+      .populate("workArea", "name")
       .populate("conductedBy", "name");
 
     if (!assessment) {
@@ -677,3 +686,4 @@ exports.approveAssessment = async (req, res) => {
     res.status(500).json({ success: false, error: error.message });
   }
 };
+

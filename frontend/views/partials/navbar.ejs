@@ -10,7 +10,7 @@
         </a>
         <span class="text-white-50">|</span>
         <a
-          href="https://wa.me/260966658181?text=URGENT%20SAFETY%20REPORT%3A%20Please%20assist%20with%20an%20emergency%20at%20our%20worksite"
+          href="https://wa.me/260966658181?text=URGENT%20SAFETY%20REPORT%3A%20Please%20assist%20with%20an%20emergency%20at%20our%20work area"
           class="mx-2 text-white"
           target="_blank"
         >
@@ -30,7 +30,7 @@
   <div class="container">
     <a class="navbar-brand fw-bold" href="/">
       <i class="bi bi-shield-check me-2" style="color: var(--secondary);"></i>
-      TrueSafe
+      All-Safe
     </a>
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
       <span class="navbar-toggler-icon"></span>
@@ -41,27 +41,9 @@
           <a class="nav-link" href="/">Home</a>
         </li>
         <% if (user) { %>
-          <% if (user.role === 'system_owner' || user.isSystemOwner) { %>
-            <!-- System Owner -->
-            <li class="nav-item">
-              <a class="nav-link" href="/system-owner/dashboard">System Owner</a>
-            </li>
-          <% } else if (user.role === 'enterprise_admin' || user.role === 'system_admin') { %>
-            <!-- Enterprise Admin -->
-            <li class="nav-item">
-              <a class="nav-link" href="/dashboard/admin">Dashboard</a>
-            </li>
-          <% } else if (user.role === 'safety_officer') { %>
-            <!-- Safety Officer -->
-            <li class="nav-item">
-              <a class="nav-link" href="/dashboard/officer">Dashboard</a>
-            </li>
-          <% } else if (user.role === 'worker') { %>
-            <!-- Worker -->
-            <li class="nav-item">
-              <a class="nav-link" href="/dashboard/worker">Dashboard</a>
-            </li>
-          <% } %>
+          <li class="nav-item">
+            <a class="nav-link" href="/dashboard/officer">Dashboard</a>
+          </li>
           <li class="nav-item">
             <a class="nav-link <%= hasUrgentAlerts ? 'alert-nav-link' : '' %>" href="/alerts">
               <i class="bi bi-exclamation-triangle-fill me-1"></i>Alerts
@@ -79,32 +61,10 @@
           <li class="nav-item">
             <a class="nav-link" href="/api/users/login">Login</a>
           </li>
-          <li class="nav-item dropdown">
-            <a class="nav-link dropdown-toggle" href="#" id="registerDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+          <li class="nav-item">
+            <a class="nav-link" href="/register/safety-officer">
               <i class="bi bi-person-plus-fill me-1"></i>Register
             </a>
-            <ul class="dropdown-menu" aria-labelledby="registerDropdown">
-              <li>
-                <a class="dropdown-item" href="/register/enterprise-admin">
-                  <i class="bi bi-building me-2"></i>Enterprise Admin
-                  <small class="d-block text-muted">Register your company</small>
-                </a>
-              </li>
-              <li><hr class="dropdown-divider"></li>
-              <li>
-                <a class="dropdown-item" href="/register/safety-officer/join">
-                  <i class="bi bi-shield-check me-2"></i>Safety Officer
-                  <small class="d-block text-muted">Join with company PIN</small>
-                </a>
-              </li>
-              <li><hr class="dropdown-divider"></li>
-              <li>
-                <a class="dropdown-item" href="/register/worker/join">
-                  <i class="bi bi-person-badge me-2"></i>Worker
-                  <small class="d-block text-muted">Join with company PIN</small>
-                </a>
-              </li>
-            </ul>
           </li>
         <% } %>
       </ul>
@@ -234,3 +194,4 @@
     }
   }
 </style>
+

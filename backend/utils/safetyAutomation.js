@@ -13,9 +13,7 @@ async function createDraftTalkRecommendation(incident) {
 
   if (existing) return existing;
 
-  const workArea = await WorkArea.findById(incident.workArea).populate(
-    "worksite",
-  );
+  const workArea = await WorkArea.findById(incident.workArea);
 
   if (!workArea) return null;
 
@@ -124,7 +122,6 @@ async function createCorrectiveActionReminders() {
         "One or more corrective actions are overdue and require safety officer follow-up.",
       type: "corrective_action",
       severity: "high",
-      worksite: workArea?.worksite?._id || workArea?.worksite,
       workArea: incident.workArea,
       relatedModel: "Incident",
       relatedId: incident._id,
@@ -163,7 +160,6 @@ async function createNoRecentSafetyTalkReminders() {
         "This active work area has no safety talk recorded in the last 7 days.",
       type: "safety_talk",
       severity: "medium",
-      worksite: workArea.worksite,
       workArea: workArea._id,
       actionUrl: `/work-areas/${workArea._id}`,
       recipients: recipientsData.recipients,
@@ -201,3 +197,4 @@ module.exports = {
   createCorrectiveActionReminders,
   createNoRecentSafetyTalkReminders,
 };
+

@@ -73,7 +73,7 @@ const permitSchema = new mongoose.Schema(
       {
         extendedBy: {
           type: mongoose.Schema.Types.ObjectId,
-          ref: "SafetyOfficer",
+          ref: "User",
         },
         extendedTo: Date,
         reason: String,
@@ -132,7 +132,7 @@ const permitSchema = new mongoose.Schema(
         otherGases: Object,
         testedBy: {
           type: mongoose.Schema.Types.ObjectId,
-          ref: "SafetyOfficer",
+          ref: "User",
         },
         equipmentUsed: String,
         results: { type: String, enum: ["pass", "fail", "caution"] },
@@ -149,7 +149,7 @@ const permitSchema = new mongoose.Schema(
         completedAt: Date,
         verifiedBy: {
           type: mongoose.Schema.Types.ObjectId,
-          ref: "SafetyOfficer",
+          ref: "User",
         },
         notes: String,
       },
@@ -167,7 +167,7 @@ const permitSchema = new mongoose.Schema(
         {
           authorizer: {
             type: mongoose.Schema.Types.ObjectId,
-            ref: "SafetyOfficer",
+            ref: "User",
           },
           role: String,
           date: Date,
@@ -194,7 +194,7 @@ const permitSchema = new mongoose.Schema(
         reading: String,
         monitoredBy: {
           type: mongoose.Schema.Types.ObjectId,
-          ref: "SafetyOfficer",
+          ref: "User",
         },
         status: { type: String, enum: ["normal", "caution", "stop"] },
       },
@@ -205,14 +205,14 @@ const permitSchema = new mongoose.Schema(
       completedAt: Date,
       completedBy: {
         type: mongoose.Schema.Types.ObjectId,
-        ref: "SafetyOfficer",
+        ref: "User",
       },
       workCompleted: Boolean,
       areaLeftSafe: Boolean,
       equipmentRemoved: Boolean,
       wasteDisposed: Boolean,
       remarks: String,
-      signOff: { type: mongoose.Schema.Types.ObjectId, ref: "SafetyOfficer" },
+      signOff: { type: mongoose.Schema.Types.ObjectId, ref: "User" },
     },
 
     // Suspension/Cancellation
@@ -220,18 +220,18 @@ const permitSchema = new mongoose.Schema(
       suspendedAt: Date,
       suspendedBy: {
         type: mongoose.Schema.Types.ObjectId,
-        ref: "SafetyOfficer",
+        ref: "User",
       },
       reason: String,
       resumedAt: Date,
-      resumedBy: { type: mongoose.Schema.Types.ObjectId, ref: "SafetyOfficer" },
+      resumedBy: { type: mongoose.Schema.Types.ObjectId, ref: "User" },
     },
 
     cancellation: {
       cancelledAt: Date,
       cancelledBy: {
         type: mongoose.Schema.Types.ObjectId,
-        ref: "SafetyOfficer",
+        ref: "User",
       },
       reason: String,
     },
@@ -274,8 +274,8 @@ const permitSchema = new mongoose.Schema(
     ],
 
     // Metadata
-    createdBy: { type: mongoose.Schema.Types.ObjectId, ref: "SafetyOfficer" },
-    updatedBy: { type: mongoose.Schema.Types.ObjectId, ref: "SafetyOfficer" },
+    createdBy: { type: mongoose.Schema.Types.ObjectId, ref: "User" },
+    updatedBy: { type: mongoose.Schema.Types.ObjectId, ref: "User" },
   },
   { timestamps: true },
 );

@@ -64,10 +64,7 @@ function legalRiskLevel(score) {
 }
 
 async function collectWorkAreaEvidence(workAreaId) {
-  const workArea = await WorkArea.findById(workAreaId)
-    .populate("worksite")
-    .populate("assignedWorkers.worker", "name email")
-    .populate("assignedSafetyOfficers.officer", "name email");
+  const workArea = await WorkArea.findById(workAreaId);
 
   if (!workArea) return null;
 
@@ -88,9 +85,7 @@ async function collectWorkAreaEvidence(workAreaId) {
     .sort({ createdAt: -1 })
     .limit(10);
 
-  const ppeChecklists = await PPEChecklist.find({
-    $or: [{ workArea: workAreaId }, { worksite: workArea.worksite?._id }],
-  })
+  const ppeChecklists = await PPEChecklist.find({ workArea: workAreaId })
     .sort({ createdAt: -1 })
     .limit(10);
 
@@ -142,14 +137,14 @@ function buildEvidenceSummary(data) {
   return `
 WORK AREA:
 Name: ${data.workArea.name}
-Worksite: ${data.workArea.worksite?.name || "N/A"}
+Location: ${data.workArea.location?.zone || "N/A"}
 Status: ${data.workArea.status || "N/A"}
 Description: ${safeText(data.workArea.description, 500)}
 Work Types: ${
     data.workArea.currentWorkTypes?.map((w) => w.workType || w).join(", ") ||
     "Not specified"
   }
-Assigned Workers: ${data.workArea.assignedWorkers?.length || 0}
+Estimated exposed persons: ${data.workArea.activeShifts?.reduce((sum, shift) => sum + (shift.workerCount || 0), 0) || "Not specified"}
 
 ACTIVE HAZARDS:
 ${
@@ -329,7 +324,7 @@ exports.generateAudit = async (req, res) => {
         safetyInsights: data.safetyInsights.length,
         permits: data.permits.length,
       },
-      initiatedBy: req.user.safetyOfficer,
+      initiatedBy: req.user._id,
       aiGenerated: true,
       aiModel: "gpt-3.5-turbo-16k",
     });
@@ -629,3 +624,4 @@ exports.downloadWord = async (req, res) => {
       .send("Error generating OHS Compliance Word document");
   }
 };
+

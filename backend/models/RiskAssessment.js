@@ -36,7 +36,7 @@ const riskAssessmentSchema = new mongoose.Schema(
     // Assessment team
     conductedBy: {
       type: mongoose.Schema.Types.ObjectId,
-      ref: "SafetyOfficer",
+      ref: "User",
       required: true,
     },
     team: [
@@ -115,7 +115,7 @@ const riskAssessmentSchema = new mongoose.Schema(
             },
             verifiedBy: {
               type: mongoose.Schema.Types.ObjectId,
-              ref: "SafetyOfficer",
+              ref: "User",
             },
             verifiedAt: Date,
           },
@@ -196,7 +196,7 @@ const riskAssessmentSchema = new mongoose.Schema(
         verificationRequired: { type: Boolean, default: false },
         verifiedBy: {
           type: mongoose.Schema.Types.ObjectId,
-          ref: "SafetyOfficer",
+          ref: "User",
         },
         verifiedAt: Date,
       },
@@ -214,7 +214,7 @@ const riskAssessmentSchema = new mongoose.Schema(
         {
           approver: {
             type: mongoose.Schema.Types.ObjectId,
-            ref: "SafetyOfficer",
+            ref: "User",
           },
           approvedAt: Date,
           comments: String,
@@ -242,7 +242,7 @@ const riskAssessmentSchema = new mongoose.Schema(
         type: String,
         uploadedBy: {
           type: mongoose.Schema.Types.ObjectId,
-          ref: "SafetyOfficer",
+          ref: "User",
         },
         uploadedAt: { type: Date, default: Date.now },
       },
@@ -404,7 +404,7 @@ const riskAssessmentSchema = new mongoose.Schema(
         date: Date,
         updatedBy: {
           type: mongoose.Schema.Types.ObjectId,
-          ref: "SafetyOfficer",
+          ref: "User",
         },
         changes: String,
       },
@@ -425,8 +425,8 @@ const riskAssessmentSchema = new mongoose.Schema(
     },
 
     // Metadata
-    createdBy: { type: mongoose.Schema.Types.ObjectId, ref: "SafetyOfficer" },
-    updatedBy: { type: mongoose.Schema.Types.ObjectId, ref: "SafetyOfficer" },
+    createdBy: { type: mongoose.Schema.Types.ObjectId, ref: "User" },
+    updatedBy: { type: mongoose.Schema.Types.ObjectId, ref: "User" },
   },
   { timestamps: true },
 );

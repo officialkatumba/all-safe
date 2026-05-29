@@ -53,7 +53,7 @@ function parseAIJson(aiResponse) {
 exports.showGenerateForm = async (req, res) => {
   try {
     const { workAreaId } = req.params;
-    const workArea = await WorkArea.findById(workAreaId).populate("worksite");
+    const workArea = await WorkArea.findById(workAreaId);
 
     if (!workArea) {
       req.flash("error", "Work area not found");
@@ -95,7 +95,6 @@ exports.generateTrainingRequirement = async (req, res) => {
     const primaryCategory = selectedCategories[0] || "hazard_specific";
 
     const workArea = await WorkArea.findById(workAreaId)
-      .populate("worksite")
       .populate("identifiedHazards");
 
     if (!workArea) {
@@ -138,7 +137,7 @@ exports.generateTrainingRequirement = async (req, res) => {
 
 WORK AREA CONTEXT:
 - Name: ${workArea.name}
-- Worksite: ${workArea.worksite?.name || "N/A"}
+- Location: ${workArea.location?.zone || "N/A"}
 - Work Types: ${workTypes}
 - Worker Count: ${workerCount}
 - Selected Categories: ${selectedCategoryLabels}
@@ -266,8 +265,8 @@ Return ONLY valid JSON in this exact structure:
 
       aiGenerated: true,
       aiModel: "gpt-3.5-turbo-16k",
-      generatedBy: req.user.safetyOfficer,
-      createdBy: req.user.safetyOfficer,
+      generatedBy: req.user._id,
+      createdBy: req.user._id,
       status: "published",
       targetDate: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000),
     });
@@ -290,7 +289,7 @@ Return ONLY valid JSON in this exact structure:
 exports.getTrainingRequirement = async (req, res) => {
   try {
     const training = await TrainingRequirement.findById(req.params.id)
-      .populate("workArea", "name worksite")
+      .populate("workArea", "name")
       .populate("targetWorkers.workerId", "name email workerNumber")
       .populate("generatedBy", "name")
       .populate("createdBy", "name");
@@ -385,3 +384,4 @@ exports.downloadWord = async (req, res) => {
     return res.status(500).send("Error generating Training Word document");
   }
 };
+

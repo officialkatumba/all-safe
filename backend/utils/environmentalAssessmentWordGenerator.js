@@ -123,7 +123,6 @@ function infoTable(assessment) {
       assessment.assessmentNumber ? `#${assessment.assessmentNumber}` : "N/A",
     ],
     ["Title", assessment.title || "Environmental Screening"],
-    ["Worksite", assessment.worksite?.name || "N/A"],
     ["Work Area", assessment.workArea?.name || "N/A"],
     ["Assessment Type", String(assessment.assessmentType || "screening").replace(/_/g, " ")],
     ["Review Status", String(assessment.approval?.status || "draft").replace(/_/g, " ")],
@@ -315,3 +314,4 @@ async function generateEnvironmentalAssessmentWordBuffer({ assessment }) {
 }
 
 module.exports = { generateEnvironmentalAssessmentWordBuffer };
+

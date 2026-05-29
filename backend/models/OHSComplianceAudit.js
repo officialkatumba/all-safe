@@ -176,7 +176,7 @@ const ohsComplianceAuditSchema = new mongoose.Schema(
 
     initiatedBy: {
       type: mongoose.Schema.Types.ObjectId,
-      ref: "SafetyOfficer",
+      ref: "User",
     },
   },
   { timestamps: true },

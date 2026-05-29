@@ -1,12 +1,11 @@
 // const Permit = require("../models/Permit");
 // const WorkArea = require("../models/WorkArea");
-// const SafetyOfficer = require("../models/SafetyOfficer");
 
 // // Show create permit form
 // exports.showCreateForm = async (req, res) => {
 //   try {
 //     const { workAreaId } = req.params;
-//     const workArea = await WorkArea.findById(workAreaId).populate("worksite");
+//     const workArea = await WorkArea.findById(workAreaId);
 
 //     if (!workArea) {
 //       req.flash("error", "Work area not found");
@@ -73,7 +72,7 @@
 //       ppeRequirements: parseJSON(ppeRequirements),
 //       preWorkChecklist: parseJSON(preWorkChecklist),
 //       status: "draft",
-//       createdBy: req.user.safetyOfficer,
+//       createdBy: req.user._id,
 //     });
 
 //     await newPermit.save();
@@ -95,7 +94,7 @@
 // exports.getPermit = async (req, res) => {
 //   try {
 //     const permit = await Permit.findById(req.params.id)
-//       .populate("workArea", "name worksite")
+//       .populate("workArea", "name")
 //       .populate("createdBy", "name")
 //       .populate("authorizations.received.authorizer", "name");
 
@@ -128,7 +127,7 @@
 //     const { comments } = req.body;
 
 //     permit.authorizations.received.push({
-//       authorizer: req.user.safetyOfficer || req.user._id,
+//       authorizer: req.user._id || req.user._id,
 //       role: req.user.role,
 //       date: new Date(),
 //       comments,
@@ -163,7 +162,7 @@
 
 //     permit.completion = {
 //       completedAt: new Date(),
-//       completedBy: req.user.safetyOfficer,
+//       completedBy: req.user._id,
 //       workCompleted: workCompleted === "true",
 //       areaLeftSafe: areaLeftSafe === "true",
 //       remarks,
@@ -196,7 +195,7 @@
 
 //     permit.cancellation = {
 //       cancelledAt: new Date(),
-//       cancelledBy: req.user.safetyOfficer || req.user._id,
+//       cancelledBy: req.user._id || req.user._id,
 //       reason,
 //     };
 
@@ -228,7 +227,7 @@
 // exports.showGenerateForm = async (req, res) => {
 //   try {
 //     const { workAreaId } = req.params;
-//     const workArea = await WorkArea.findById(workAreaId).populate("worksite");
+//     const workArea = await WorkArea.findById(workAreaId);
 
 //     if (!workArea) {
 //       req.flash("error", "Work area not found");
@@ -271,7 +270,7 @@
 //     } = req.body;
 
 //     const workArea = await WorkArea.findById(workAreaId)
-//       .populate("worksite")
+//
 //       .populate("identifiedHazards");
 
 //     if (!workArea) {
@@ -300,7 +299,6 @@
 
 // ## WORK AREA CONTEXT:
 // - Work Area: ${workArea.name}
-// - Worksite: ${workArea.worksite?.name || "N/A"}
 // - Location: ${specificLocation || workArea.location?.zone || "Not specified"}
 // - Current Status: ${workArea.status}
 
@@ -375,7 +373,7 @@
 //       },
 //       validFrom: new Date(validFrom),
 //       validTo: new Date(validTo),
-//       createdBy: req.user.safetyOfficer,
+//       createdBy: req.user._id,
 //       status: "pending_approval",
 //       preWorkChecklist: (permitData.preWorkChecklist || []).map((item) => ({
 //         item: typeof item === "string" ? item : item.item,
@@ -416,7 +414,7 @@
 // exports.getPermit = async (req, res) => {
 //   try {
 //     const permit = await Permit.findById(req.params.id)
-//       .populate("workArea", "name worksite")
+//       .populate("workArea", "name")
 //       .populate("createdBy", "name")
 //       .populate("authorizations.received.authorizer", "name")
 //       .populate("completion.completedBy", "name");
@@ -448,7 +446,7 @@
 
 //     permit.status = "issued";
 //     permit.authorizations.received.push({
-//       authorizer: req.user.safetyOfficer,
+//       authorizer: req.user._id,
 //       role: "Safety Officer",
 //       date: new Date(),
 //       comments: req.body.comments || "",
@@ -498,7 +496,7 @@
 //     permit.status = "completed";
 //     permit.completion = {
 //       completedAt: new Date(),
-//       completedBy: req.user.safetyOfficer,
+//       completedBy: req.user._id,
 //       workCompleted: req.body.workCompleted === "yes",
 //       areaLeftSafe: req.body.areaLeftSafe === "yes",
 //       equipmentRemoved: req.body.equipmentRemoved === "yes",
@@ -546,7 +544,7 @@ const openai = new OpenAI({
 exports.showGenerateForm = async (req, res) => {
   try {
     const { workAreaId } = req.params;
-    const workArea = await WorkArea.findById(workAreaId).populate("worksite");
+    const workArea = await WorkArea.findById(workAreaId);
 
     if (!workArea) {
       req.flash("error", "Work area not found");
@@ -590,7 +588,7 @@ exports.showGenerateForm = async (req, res) => {
 //     } = req.body;
 
 //     const workArea = await WorkArea.findById(workAreaId)
-//       .populate("worksite")
+//
 //       .populate("identifiedHazards");
 
 //     if (!workArea) {
@@ -619,7 +617,6 @@ exports.showGenerateForm = async (req, res) => {
 
 // ## WORK AREA CONTEXT:
 // - Work Area: ${workArea.name}
-// - Worksite: ${workArea.worksite?.name || "N/A"}
 // - Location: ${specificLocation || workArea.location?.zone || "Not specified"}
 // - Current Status: ${workArea.status}
 
@@ -689,7 +686,7 @@ exports.showGenerateForm = async (req, res) => {
 //       },
 //       validFrom: new Date(validFrom),
 //       validTo: new Date(validTo),
-//       createdBy: req.user.safetyOfficer,
+//       createdBy: req.user._id,
 //       status: "pending_approval",
 //       preWorkChecklist: (permitData.preWorkChecklist || []).map((item) => ({
 //         item: typeof item === "string" ? item : item.item,
@@ -714,7 +711,7 @@ exports.showGenerateForm = async (req, res) => {
 //           ? [
 //               {
 //                 content: `Gas Test Requirements: ${permitData.gasTestRequirements.join(", ")}`,
-//                 createdBy: req.user.safetyOfficer,
+//                 createdBy: req.user._id,
 //                 type: "reminder",
 //               },
 //             ]
@@ -752,7 +749,6 @@ exports.generatePermit = async (req, res) => {
     } = req.body;
 
     const workArea = await WorkArea.findById(workAreaId)
-      .populate("worksite")
       .populate("identifiedHazards");
 
     if (!workArea) {
@@ -781,7 +777,7 @@ exports.generatePermit = async (req, res) => {
 
 ## WORK AREA CONTEXT:
 - Work Area: ${workArea.name}
-- Worksite: ${workArea.worksite?.name || "N/A"}
+- Location: ${workArea.location?.zone || "N/A"}
 - Location: ${specificLocation || workArea.location?.zone || "Not specified"}
 - Current Status: ${workArea.status}
 
@@ -963,7 +959,7 @@ Return ONLY valid JSON with this structure:
       },
       validFrom: new Date(validFrom),
       validTo: new Date(validTo),
-      createdBy: req.user.safetyOfficer,
+      createdBy: req.user._id,
       status: "pending_approval",
       preWorkChecklist: (permitData.preWorkChecklist || []).map((item) => ({
         item: typeof item === "string" ? item : item.item,
@@ -988,7 +984,7 @@ Return ONLY valid JSON with this structure:
           ? [
               {
                 content: `REQUIRED CERTIFICATIONS:\n${permitData.requiredQualifications.map((q) => `- ${q.certification}: ${q.personnelRole} (must be on site: ${q.mustBeOnSite ? "YES" : "NO"})`).join("\n")}`,
-                createdBy: req.user.safetyOfficer,
+                createdBy: req.user._id,
                 type: "warning",
               },
             ]
@@ -997,7 +993,7 @@ Return ONLY valid JSON with this structure:
           ? [
               {
                 content: `ON-SITE PERSONNEL REQUIREMENTS:\n${permitData.onSitePersonnel.map((p) => `- ${p.role}: Minimum ${p.minimumNumber} person(s) with ${p.requiredCertification}`).join("\n")}`,
-                createdBy: req.user.safetyOfficer,
+                createdBy: req.user._id,
                 type: "warning",
               },
             ]
@@ -1006,7 +1002,7 @@ Return ONLY valid JSON with this structure:
           ? [
               {
                 content: `Gas Test Requirements: ${permitData.gasTestRequirements.join(", ")}`,
-                createdBy: req.user.safetyOfficer,
+                createdBy: req.user._id,
                 type: "reminder",
               },
             ]
@@ -1038,7 +1034,7 @@ Return ONLY valid JSON with this structure:
 exports.getPermit = async (req, res) => {
   try {
     const permit = await Permit.findById(req.params.id)
-      .populate("workArea", "name worksite")
+      .populate("workArea", "name")
       .populate("createdBy", "name")
       .populate("authorizations.received.authorizer", "name")
       .populate("completion.completedBy", "name");
@@ -1070,7 +1066,7 @@ exports.approvePermit = async (req, res) => {
 
     permit.status = "issued";
     permit.authorizations.received.push({
-      authorizer: req.user.safetyOfficer,
+      authorizer: req.user._id,
       role: "Safety Officer",
       date: new Date(),
       comments: req.body.comments || "",
@@ -1120,7 +1116,7 @@ exports.completePermit = async (req, res) => {
     permit.status = "completed";
     permit.completion = {
       completedAt: new Date(),
-      completedBy: req.user.safetyOfficer,
+      completedBy: req.user._id,
       workCompleted: req.body.workCompleted === "yes",
       areaLeftSafe: req.body.areaLeftSafe === "yes",
       equipmentRemoved: req.body.equipmentRemoved === "yes",
@@ -1152,3 +1148,4 @@ exports.getWorkAreaPermits = async (req, res) => {
     res.status(500).json({ success: false, error: error.message });
   }
 };
+

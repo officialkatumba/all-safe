@@ -17,3 +17,4 @@ const uploadPDFToGCS = async (filePath, fileName) => {
 };
 
 module.exports = uploadPDFToGCS;
+

@@ -35,9 +35,7 @@ function parseAIJson(text) {
 
 exports.showGenerateForm = async (req, res) => {
   try {
-    const workArea = await WorkArea.findById(req.params.workAreaId).populate(
-      "worksite",
-    );
+    const workArea = await WorkArea.findById(req.params.workAreaId);
 
     if (!workArea) {
       req.flash("error", "Work area not found");
@@ -60,7 +58,7 @@ exports.generateAssessment = async (req, res) => {
     const { workAreaId } = req.params;
     const { title, activityDescription } = req.body;
 
-    const workArea = await WorkArea.findById(workAreaId).populate("worksite");
+    const workArea = await WorkArea.findById(workAreaId);
 
     if (!workArea) {
       req.flash("error", "Work area not found");
@@ -93,17 +91,13 @@ This is a first-launch screening tool, not a final statutory EIA submission. Do 
 
 WORK AREA:
 Name: ${workArea.name}
-Worksite: ${workArea.worksite?.name || "N/A"}
+Location: ${workArea.location?.zone || "N/A"}
 Description: ${safeText(workArea.description, 500)}
 Activity description: ${safeText(activityDescription, 1200)}
 
-WORKSITE ENVIRONMENTAL CONTEXT:
-Water proximity: ${workArea.worksite?.siteCharacteristics?.proximityToWater || "N/A"}
-Water body type: ${workArea.worksite?.siteCharacteristics?.waterBodyType || "N/A"}
-Terrain: ${workArea.worksite?.siteCharacteristics?.terrain || "N/A"}
-Waste plan: ${workArea.worksite?.environmentalConsiderations?.wasteManagement?.hasPlan ? "Yes" : "No/unknown"}
-Dust/emissions: ${workArea.worksite?.environmentalConsiderations?.airQuality?.hasDust ? "Dust present" : "Unknown/not listed"}
-Noise monitoring required: ${workArea.worksite?.environmentalConsiderations?.noiseControl?.noiseMonitoringRequired ? "Yes" : "No/unknown"}
+WORK AREA ENVIRONMENTAL CONTEXT:
+Known environmental concerns: ${(workArea.concernsRegister || []).filter((concern) => concern.category === "environmental").map((concern) => concern.concern).join("; ") || "None recorded"}
+PPE/environmental notes: ${workArea.aiContext?.ppeStatusSummary || "Not specified"}
 
 RECENT ENVIRONMENTAL INCIDENTS:
 ${
@@ -176,7 +170,6 @@ Return ONLY valid JSON in this exact structure:
     const parsed = parseAIJson(completion.choices[0].message.content);
 
     const assessment = new EnvironmentalAssessment({
-      worksite: workArea.worksite?._id || workArea.worksite,
       workArea: workArea._id,
       title: parsed.title || title || `Environmental Screening - ${workArea.name}`,
       activityDescription,
@@ -185,7 +178,7 @@ Return ONLY valid JSON in this exact structure:
       aiSummary: parsed.aiSummary || {},
       aiGenerated: true,
       aiModel: "gpt-3.5-turbo-16k",
-      generatedBy: req.user.safetyOfficer,
+      generatedBy: req.user._id,
       createdBy: req.user._id,
     });
 
@@ -200,8 +193,6 @@ Return ONLY valid JSON in this exact structure:
 
     await trackUsage({
       user: req.user._id,
-      company: req.user.companyId,
-      worksite: assessment.worksite,
       workArea: assessment.workArea,
       eventType: "environmental_assessment",
       module: "environmental",
@@ -226,7 +217,6 @@ exports.viewAssessment = async (req, res) => {
   try {
     const assessment = await EnvironmentalAssessment.findById(req.params.id)
       .populate("workArea", "name")
-      .populate("worksite", "name")
       .populate("generatedBy", "name")
       .populate("approval.reviewedBy", "name");
 
@@ -256,7 +246,7 @@ exports.approveAssessment = async (req, res) => {
     }
 
     assessment.approval.status = "approved";
-    assessment.approval.reviewedBy = req.user.safetyOfficer;
+    assessment.approval.reviewedBy = req.user._id;
     assessment.approval.reviewedAt = new Date();
     assessment.approval.comments = req.body.comments || "";
     await assessment.save();
@@ -273,8 +263,7 @@ exports.approveAssessment = async (req, res) => {
 exports.downloadWord = async (req, res) => {
   try {
     const assessment = await EnvironmentalAssessment.findById(req.params.id)
-      .populate("workArea", "name")
-      .populate("worksite", "name");
+      .populate("workArea", "name");
 
     if (!assessment) {
       return res.status(404).send("Environmental assessment not found");
@@ -300,3 +289,4 @@ exports.downloadWord = async (req, res) => {
       .send("Error generating environmental assessment document");
   }
 };
+

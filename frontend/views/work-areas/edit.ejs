@@ -1,201 +1,410 @@
 <%- include('../partials/header') %>
 <%- include('../partials/navbar') %>
 
-<div class="container py-5">
+<%
+  const intake = workArea.intake || {};
+  const risk = intake.personallyIdentifiedRisks || {};
+  const existingControls = intake.existingControls || {};
+  const emergency = intake.emergencyPreparedness || {};
+  const exposure = intake.peopleExposure || {};
+  const ppe = intake.ppeAssessment || {};
+  const equipment = intake.equipmentAndTools || {};
+  const materials = intake.materialsAndSubstances || {};
+  const history = intake.incidentNearMissHistory || {};
+  const workerTypes = intake.workerTypes || {};
+  const hazardDetails = intake.hazardCategories || [];
+  const selectedHazards = hazardDetails.map(h => h.category);
+  const contains = (items, value) => Array.isArray(items) && items.includes(value);
+  const checked = (condition) => condition ? 'checked' : '';
+  const selected = (value, expected) => value === expected ? 'selected' : '';
+  const detailFor = (category) => hazardDetails.find(h => h.category === category) || {};
+  const formatDate = (value) => value ? new Date(value).toISOString().split('T')[0] : '';
+  const locationValue = workArea.location?.zone || '';
+
+  const controls = [
+    ['barricades_installed', 'Barricades installed'],
+    ['warning_signs_placed', 'Warning signs placed'],
+    ['ppe_issued', 'PPE issued'],
+    ['toolbox_talk_done', 'Toolbox talk done'],
+    ['equipment_inspected', 'Equipment inspected'],
+    ['supervisor_assigned', 'Supervisor assigned'],
+    ['permit_issued', 'Permit issued'],
+    ['fire_extinguisher_placed', 'Fire extinguisher placed'],
+    ['first_aider_nearby', 'First aider nearby'],
+    ['area_isolated', 'Area isolated'],
+    ['lockout_tagout_done', 'Lockout/tagout done'],
+    ['ventilation_provided', 'Ventilation provided'],
+    ['dust_suppression_used', 'Dust suppression used'],
+  ];
+
+  const hazards = [
+    ['fire_risk', 'Fire risk'],
+    ['smoke_inhalation', 'Smoke inhalation'],
+    ['dust_exposure', 'Dust exposure'],
+    ['chemical_exposure', 'Chemical exposure'],
+    ['biological_infection', 'Biological infection'],
+    ['electricity_high_voltage', 'Electricity or high voltage'],
+    ['radiation', 'Radiation'],
+    ['noise', 'Noise'],
+    ['vibration', 'Vibration'],
+    ['heat_stress', 'Heat stress'],
+    ['working_at_height', 'Working at height'],
+    ['excavation', 'Excavation'],
+    ['confined_space', 'Confined space'],
+    ['lifting_operations', 'Lifting operations'],
+    ['moving_machinery', 'Moving machinery'],
+    ['vehicles_mobile_equipment', 'Vehicles/mobile equipment'],
+    ['falling_objects', 'Falling objects'],
+    ['slips_trips_falls', 'Slips, trips, and falls'],
+    ['manual_handling', 'Manual handling'],
+    ['poor_lighting', 'Poor lighting'],
+    ['weather_exposure', 'Weather exposure'],
+    ['water_flooding', 'Water/flooding'],
+    ['explosive_flammable_substances', 'Explosive or flammable substances'],
+  ];
+
+  const ppeOptions = [
+    ['hard_hat', 'Hard hats'],
+    ['steel_toe_boots', 'Safety boots'],
+    ['gloves', 'Gloves'],
+    ['safety_glasses', 'Safety glasses/goggles'],
+    ['face_shield', 'Face shield'],
+    ['respirator', 'Respirator/mask'],
+    ['ear_plugs', 'Ear plugs'],
+    ['ear_muffs', 'Ear muffs'],
+    ['high_vis_vest', 'High visibility clothing'],
+    ['fall_arrest', 'Fall arrest harness'],
+    ['welding_helmet', 'Welding helmet'],
+    ['chemical_suit', 'Chemical apron/suit'],
+    ['life_jacket', 'Life jacket'],
+    ['dust_mask', 'Dust mask'],
+    ['heat_resistant_ppe', 'Heat-resistant PPE'],
+  ];
+
+  const documents = [
+    ['safety_talk', 'Safety Talk'],
+    ['risk_assessment', 'Risk Assessment'],
+    ['job_safety_analysis', 'Job Safety Analysis'],
+    ['incident_report', 'Incident Report'],
+    ['near_miss_report', 'Near-Miss Report'],
+    ['ppe_checklist', 'PPE Checklist'],
+    ['emergency_response_plan', 'Emergency Response Plan'],
+    ['training_requirement', 'Training Requirement'],
+    ['permit_to_work_guidance', 'Permit-to-Work Guidance'],
+    ['chemical_material_safety_handling_guide', 'Chemical / Material Safety Handling Guide'],
+    ['environmental_risk_assessment', 'Environmental Risk Assessment'],
+    ['ohs_compliance_audit', 'OHS Compliance Audit'],
+  ];
+%>
+
+<div class="container-fluid py-4 work-area-create">
   <div class="row justify-content-center">
-    <div class="col-md-8">
-      <div class="card shadow-lg border-0">
-        <div class="card-header bg-transparent border-0 pt-4 px-4">
-          <h3 class="fw-bold mb-0" style="color: #26a69a">
-            <i class="fas fa-edit me-2"></i>Edit Work Area
-          </h3>
-          <p class="text-muted">Update work area information</p>
-        </div>
-        <div class="card-body p-4">
-          <form action="/work-areas/<%= workArea._id %>/edit" method="POST">
-            <!-- Worksite (Read-only) -->
-            <div class="mb-4">
-              <h5 class="fw-bold mb-3" style="color: #1e3c5c">Worksite</h5>
-              <div class="row g-3">
-                <div class="col-12">
-                  <label class="form-label fw-semibold">Worksite</label>
-                  <input type="text" class="form-control form-control-lg" value="<%= workArea.worksite.name %>" readonly disabled>
-                  <small class="text-muted">Worksite cannot be changed</small>
-                </div>
-              </div>
-            </div>
-
-            <!-- Basic Information -->
-            <div class="mb-4">
-              <h5 class="fw-bold mb-3" style="color: #1e3c5c">Basic Information</h5>
-              <div class="row g-3">
-                <div class="col-md-6">
-                  <label for="name" class="form-label fw-semibold">Work Area Name *</label>
-                  <input type="text" class="form-control form-control-lg" id="name" name="name" 
-                         value="<%= workArea.name %>" required>
-                </div>
-                <div class="col-md-6">
-                  <label for="code" class="form-label fw-semibold">Area Code</label>
-                  <input type="text" class="form-control form-control-lg" id="code" name="code" 
-                         value="<%= workArea.code || '' %>">
-                </div>
-                <div class="col-12">
-                  <label for="location" class="form-label fw-semibold">Location/Zone</label>
-                  <input type="text" class="form-control form-control-lg" id="location" name="location" 
-                         value="<%= workArea.location || '' %>">
-                </div>
-                <div class="col-12">
-                  <label for="description" class="form-label fw-semibold">Description</label>
-                  <textarea class="form-control" id="description" name="description" rows="3"><%= workArea.description || '' %></textarea>
-                </div>
-              </div>
-            </div>
-
-            <!-- Status & Schedule -->
-            <div class="mb-4">
-              <h5 class="fw-bold mb-3" style="color: #1e3c5c">Status & Schedule</h5>
-              <div class="row g-3">
-                <div class="col-md-4">
-                  <label for="status" class="form-label fw-semibold">Status</label>
-                  <select class="form-select form-select-lg" id="status" name="status">
-                    <option value="planned" <%= workArea.status === 'planned' ? 'selected' : '' %>>Planned</option>
-                    <option value="active" <%= workArea.status === 'active' ? 'selected' : '' %>>Active</option>
-                    <option value="on_hold" <%= workArea.status === 'on_hold' ? 'selected' : '' %>>On Hold</option>
-                    <option value="completed" <%= workArea.status === 'completed' ? 'selected' : '' %>>Completed</option>
-                    <option value="inspecting" <%= workArea.status === 'inspecting' ? 'selected' : '' %>>Inspecting</option>
-                  </select>
-                </div>
-                <div class="col-md-4">
-                  <label for="plannedStart" class="form-label fw-semibold">Planned Start</label>
-                  <input type="date" class="form-control form-control-lg" id="plannedStart" name="plannedStart"
-                         value="<%= workArea.plannedStart ? new Date(workArea.plannedStart).toISOString().split('T')[0] : '' %>">
-                </div>
-                <div class="col-md-4">
-                  <label for="plannedEnd" class="form-label fw-semibold">Planned End</label>
-                  <input type="date" class="form-control form-control-lg" id="plannedEnd" name="plannedEnd"
-                         value="<%= workArea.plannedEnd ? new Date(workArea.plannedEnd).toISOString().split('T')[0] : '' %>">
-                </div>
-              </div>
-            </div>
-
-            <!-- Work Types -->
-            <div class="mb-4">
-              <h5 class="fw-bold mb-3" style="color: #1e3c5c">Work Types</h5>
-              <p class="text-muted small">Select the types of work performed in this area</p>
-              <div class="row g-3">
-                <div class="col-md-6">
-                  <div class="form-check">
-                    <input class="form-check-input" type="checkbox" name="currentWorkTypes" value="excavation" id="workExcavation"
-                           <%= workArea.currentWorkTypes && workArea.currentWorkTypes.includes('excavation') ? 'checked' : '' %>>
-                    <label class="form-check-label" for="workExcavation">Excavation</label>
-                  </div>
-                  <div class="form-check">
-                    <input class="form-check-input" type="checkbox" name="currentWorkTypes" value="foundation" id="workFoundation"
-                           <%= workArea.currentWorkTypes && workArea.currentWorkTypes.includes('foundation') ? 'checked' : '' %>>
-                    <label class="form-check-label" for="workFoundation">Foundation</label>
-                  </div>
-                  <div class="form-check">
-                    <input class="form-check-input" type="checkbox" name="currentWorkTypes" value="structural" id="workStructural"
-                           <%= workArea.currentWorkTypes && workArea.currentWorkTypes.includes('structural') ? 'checked' : '' %>>
-                    <label class="form-check-label" for="workStructural">Structural</label>
-                  </div>
-                  <div class="form-check">
-                    <input class="form-check-input" type="checkbox" name="currentWorkTypes" value="masonry" id="workMasonry"
-                           <%= workArea.currentWorkTypes && workArea.currentWorkTypes.includes('masonry') ? 'checked' : '' %>>
-                    <label class="form-check-label" for="workMasonry">Masonry</label>
-                  </div>
-                  <div class="form-check">
-                    <input class="form-check-input" type="checkbox" name="currentWorkTypes" value="roofing" id="workRoofing"
-                           <%= workArea.currentWorkTypes && workArea.currentWorkTypes.includes('roofing') ? 'checked' : '' %>>
-                    <label class="form-check-label" for="workRoofing">Roofing</label>
-                  </div>
-                </div>
-                <div class="col-md-6">
-                  <div class="form-check">
-                    <input class="form-check-input" type="checkbox" name="currentWorkTypes" value="electrical" id="workElectrical"
-                           <%= workArea.currentWorkTypes && workArea.currentWorkTypes.includes('electrical') ? 'checked' : '' %>>
-                    <label class="form-check-label" for="workElectrical">Electrical</label>
-                  </div>
-                  <div class="form-check">
-                    <input class="form-check-input" type="checkbox" name="currentWorkTypes" value="plumbing" id="workPlumbing"
-                           <%= workArea.currentWorkTypes && workArea.currentWorkTypes.includes('plumbing') ? 'checked' : '' %>>
-                    <label class="form-check-label" for="workPlumbing">Plumbing</label>
-                  </div>
-                  <div class="form-check">
-                    <input class="form-check-input" type="checkbox" name="currentWorkTypes" value="hvac" id="workHvac"
-                           <%= workArea.currentWorkTypes && workArea.currentWorkTypes.includes('hvac') ? 'checked' : '' %>>
-                    <label class="form-check-label" for="workHvac">HVAC</label>
-                  </div>
-                  <div class="form-check">
-                    <input class="form-check-input" type="checkbox" name="currentWorkTypes" value="finishing" id="workFinishing"
-                           <%= workArea.currentWorkTypes && workArea.currentWorkTypes.includes('finishing') ? 'checked' : '' %>>
-                    <label class="form-check-label" for="workFinishing">Finishing</label>
-                  </div>
-                  <div class="form-check">
-                    <input class="form-check-input" type="checkbox" name="currentWorkTypes" value="general" id="workGeneral"
-                           <%= workArea.currentWorkTypes && workArea.currentWorkTypes.includes('general') ? 'checked' : '' %>>
-                    <label class="form-check-label" for="workGeneral">General</label>
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            <!-- Shifts -->
-            <div class="mb-4">
-              <h5 class="fw-bold mb-3" style="color: #1e3c5c">Shifts</h5>
-              <div class="row g-3">
-                <div class="col-md-4">
-                  <div class="form-check">
-                    <input class="form-check-input" type="checkbox" name="shifts" value="morning" id="shiftMorning"
-                           <%= workArea.activeShifts && workArea.activeShifts.includes('morning') ? 'checked' : '' %>>
-                    <label class="form-check-label" for="shiftMorning">
-                      <i class="fas fa-sun text-warning me-1"></i> Morning Shift
-                    </label>
-                  </div>
-                </div>
-                <div class="col-md-4">
-                  <div class="form-check">
-                    <input class="form-check-input" type="checkbox" name="shifts" value="afternoon" id="shiftAfternoon"
-                           <%= workArea.activeShifts && workArea.activeShifts.includes('afternoon') ? 'checked' : '' %>>
-                    <label class="form-check-label" for="shiftAfternoon">
-                      <i class="fas fa-cloud-sun text-info me-1"></i> Afternoon Shift
-                    </label>
-                  </div>
-                </div>
-                <div class="col-md-4">
-                  <div class="form-check">
-                    <input class="form-check-input" type="checkbox" name="shifts" value="night" id="shiftNight"
-                           <%= workArea.activeShifts && workArea.activeShifts.includes('night') ? 'checked' : '' %>>
-                    <label class="form-check-label" for="shiftNight">
-                      <i class="fas fa-moon text-secondary me-1"></i> Night Shift
-                    </label>
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            <!-- Hazards Section (Optional JSON input) -->
-            <div class="mb-4">
-              <h5 class="fw-bold mb-3" style="color: #1e3c5c">Hazards (Advanced)</h5>
-              <div class="form-group">
-                <label for="identifiedHazards" class="form-label fw-semibold">Identified Hazards (JSON format)</label>
-                <textarea class="form-control" id="identifiedHazards" name="identifiedHazards" rows="5" 
-                          placeholder='[{"hazard":"Working at height","riskLevel":"high","controls":"Use harness"}]'><%= workArea.identifiedHazards ? JSON.stringify(workArea.identifiedHazards, null, 2) : '' %></textarea>
-                <small class="text-muted">For advanced users - enter hazards in JSON format</small>
-              </div>
-            </div>
-
-            <div class="d-flex gap-2 justify-content-end mt-4">
-              <a href="/work-areas/<%= workArea._id %>" class="btn btn-secondary btn-lg px-4">Cancel</a>
-              <button type="submit" class="btn btn-primary btn-lg px-4" style="background: linear-gradient(135deg, #26a69a 0%, #00897b 100%); border: none;">
-                <i class="fas fa-save me-2"></i> Update Work Area
-              </button>
-            </div>
-          </form>
-        </div>
+    <div class="col-12 col-lg-8">
+      <div class="mb-4">
+        <p class="text-uppercase text-muted fw-semibold small mb-1">Safety officer intake</p>
+        <h1 class="h3 fw-bold mb-1" style="color: #1e3c5c;">Edit Work Area</h1>
+        <p class="text-muted mb-0">Update the saved safety context used by All-Safe documents.</p>
       </div>
+
+      <form action="/work-areas/<%= workArea._id %>/edit" method="POST" id="workAreaForm">
+        <div class="wizard-panel mb-3" aria-label="Work area edit steps">
+          <div class="d-flex justify-content-between align-items-center gap-3 mb-3">
+            <span class="fw-semibold text-muted" id="wizardStepLabel">Step 1 of 11</span>
+            <span class="fw-semibold" id="wizardSectionLabel" style="color: #1e3c5c;">Work Area Basics</span>
+          </div>
+          <div class="step-strip" id="wizardStepStrip" aria-label="Numbered form steps">
+            <% for (let i = 0; i < 11; i++) { %>
+              <button type="button" class="step-dot <%= i === 0 ? 'is-active' : '' %>" data-step-index="<%= i %>" aria-label="Step <%= i + 1 %>"><%= i + 1 %></button>
+            <% } %>
+          </div>
+        </div>
+
+        <section class="intake-section wizard-step" data-step-title="Work Area Basics">
+          <div class="section-heading"><span>1</span><div><h2>Work Area Basics</h2><p>Work area name and location are optional. A general town or memorable reference is enough.</p></div></div>
+          <div class="row g-3">
+            <div class="col-md-6"><label class="form-label fw-semibold" for="name">Work area name</label><input class="form-control" id="name" name="name" type="text" value="<%= workArea.name || '' %>" placeholder="Optional"><small class="text-muted">Any memorable name is fine.</small></div>
+            <div class="col-md-6"><label class="form-label fw-semibold" for="location">Location</label><input class="form-control" id="location" name="location" type="text" value="<%= locationValue %>" placeholder="Optional, e.g., Kitwe"><small class="text-muted">A town or general area is enough.</small></div>
+            <div class="col-md-6"><label class="form-label fw-semibold" for="mainActivity">Main activity or job being done</label><input class="form-control" id="mainActivity" name="mainActivity" type="text" required value="<%= intake.mainActivity || '' %>"></div>
+            <div class="col-md-3"><label class="form-label fw-semibold" for="plannedStart">Expected start date</label><input class="form-control" id="plannedStart" name="plannedStart" type="date" value="<%= formatDate(workArea.plannedStart) %>"></div>
+            <div class="col-md-3"><label class="form-label fw-semibold" for="plannedEnd">Expected end date</label><input class="form-control" id="plannedEnd" name="plannedEnd" type="date" value="<%= formatDate(workArea.plannedEnd) %>"></div>
+            <div class="col-md-6"><label class="form-label fw-semibold" for="shiftOrWorkingTime">Shift or working time</label><input class="form-control" id="shiftOrWorkingTime" name="shiftOrWorkingTime" type="text" value="<%= intake.shiftOrWorkingTime || '' %>"></div>
+            <div class="col-md-3"><label class="form-label fw-semibold" for="numberOfPeopleInvolved">Number of people involved</label><input class="form-control" id="numberOfPeopleInvolved" name="numberOfPeopleInvolved" type="number" min="0" value="<%= intake.numberOfPeopleInvolved || '' %>"></div>
+            <div class="col-md-3"><label class="form-label fw-semibold" for="status">Status</label><select class="form-select" id="status" name="status"><option value="planned" <%= selected(workArea.status, 'planned') %>>Planned</option><option value="active" <%= selected(workArea.status, 'active') %>>Active</option><option value="on_hold" <%= selected(workArea.status, 'on_hold') %>>On Hold</option><option value="completed" <%= selected(workArea.status, 'completed') %>>Completed</option><option value="inspecting" <%= selected(workArea.status, 'inspecting') %>>Inspecting</option></select></div>
+            <div class="col-12"><label class="form-label fw-semibold" for="description">Short description of the work</label><textarea class="form-control" id="description" name="description" rows="3"><%= workArea.description || intake.workDescription || '' %></textarea></div>
+            <div class="col-12"><label class="form-label fw-semibold">Type of workers involved</label><div class="option-grid">
+              <label class="check-tile"><input type="checkbox" name="workerEmployees" <%= checked(workerTypes.employees) %>> Employees</label>
+              <label class="check-tile"><input type="checkbox" name="workerContractors" <%= checked(workerTypes.contractors) %>> Contractors</label>
+              <label class="check-tile"><input type="checkbox" name="workerVisitors" <%= checked(workerTypes.visitors) %>> Visitors</label>
+              <label class="check-tile"><input type="checkbox" name="workerPublicNearby" <%= checked(workerTypes.publicNearby) %>> Public nearby</label>
+            </div></div>
+          </div>
+        </section>
+
+        <section class="intake-section wizard-step" data-step-title="Personal Risks">
+          <div class="section-heading"><span>2</span><div><h2>What Risks Have You Personally Identified?</h2><p>Edit what you have seen, heard from workers, or collected from field reports.</p></div></div>
+          <div class="row g-3">
+            <div class="col-md-6"><label class="form-label fw-semibold" for="riskPeople">Risk to people</label><textarea class="form-control" id="riskPeople" name="riskPeople" rows="3"><%= risk.people || '' %></textarea></div>
+            <div class="col-md-6"><label class="form-label fw-semibold" for="riskEquipment">Risk to equipment</label><textarea class="form-control" id="riskEquipment" name="riskEquipment" rows="3"><%= risk.equipment || '' %></textarea></div>
+            <div class="col-md-6"><label class="form-label fw-semibold" for="riskEnvironment">Risk to environment</label><textarea class="form-control" id="riskEnvironment" name="riskEnvironment" rows="3"><%= risk.environment || '' %></textarea></div>
+            <div class="col-md-6"><label class="form-label fw-semibold" for="riskNearbyWorkersPublic">Risk to nearby workers/public</label><textarea class="form-control" id="riskNearbyWorkersPublic" name="riskNearbyWorkersPublic" rows="3"><%= risk.nearbyWorkersPublic || '' %></textarea></div>
+            <div class="col-md-6"><label class="form-label fw-semibold" for="riskPropertyMaterials">Risk to property/materials</label><textarea class="form-control" id="riskPropertyMaterials" name="riskPropertyMaterials" rows="3"><%= risk.propertyMaterials || '' %></textarea></div>
+            <div class="col-md-6"><label class="form-label fw-semibold" for="riskOperationsProduction">Risk to operations or production</label><textarea class="form-control" id="riskOperationsProduction" name="riskOperationsProduction" rows="3"><%= risk.operationsProduction || '' %></textarea></div>
+          </div>
+        </section>
+
+        <section class="intake-section wizard-step" data-step-title="Controls Taken">
+          <div class="section-heading"><span>3</span><div><h2>What Measures Have You Already Taken?</h2><p>Select the controls already in place and edit the notes.</p></div></div>
+          <div class="option-grid"><% controls.forEach(([value, label]) => { %><label class="check-tile"><input type="checkbox" name="existingControls" value="<%= value %>" <%= checked(contains(existingControls.selected, value)) %>> <%= label %></label><% }) %></div>
+          <label class="form-label fw-semibold mt-3" for="existingControlsNotes">Control notes</label><textarea class="form-control" id="existingControlsNotes" name="existingControlsNotes" rows="3"><%= existingControls.notes || '' %></textarea>
+        </section>
+
+        <section class="intake-section wizard-step" data-step-title="Emergency Preparedness">
+          <div class="section-heading"><span>4</span><div><h2>Emergency Preparedness</h2><p>Update what is ready to protect people, equipment, and lives.</p></div></div>
+          <div class="row g-3">
+            <div class="col-md-6"><label class="form-label fw-semibold" for="emergencyContactPerson">Emergency contact person</label><input class="form-control" id="emergencyContactPerson" name="emergencyContactPerson" type="text" value="<%= emergency.emergencyContactPerson || '' %>"></div>
+            <div class="col-md-6"><label class="form-label fw-semibold" for="nearestClinicHospital">Nearest clinic/hospital</label><input class="form-control" id="nearestClinicHospital" name="nearestClinicHospital" type="text" value="<%= emergency.nearestClinicHospital || '' %>"></div>
+            <div class="col-md-6"><label class="form-label fw-semibold" for="healthFacilityDistanceTime">Distance or travel time</label><input class="form-control" id="healthFacilityDistanceTime" name="healthFacilityDistanceTime" type="text" value="<%= emergency.healthFacilityDistanceTime || '' %>"></div>
+            <div class="col-md-6"><label class="form-label fw-semibold" for="trainedFirstAiders">Number of trained first aiders</label><input class="form-control" id="trainedFirstAiders" name="trainedFirstAiders" type="number" min="0" value="<%= emergency.trainedFirstAiders || '' %>"></div>
+            <div class="col-md-6"><label class="form-label fw-semibold" for="emergencyExitRoutes">Emergency exit routes</label><input class="form-control" id="emergencyExitRoutes" name="emergencyExitRoutes" type="text" value="<%= emergency.emergencyExitRoutes || '' %>"></div>
+            <div class="col-md-6"><label class="form-label fw-semibold" for="assemblyPoint">Assembly point</label><input class="form-control" id="assemblyPoint" name="assemblyPoint" type="text" value="<%= emergency.assemblyPoint || '' %>"></div>
+            <div class="col-md-6"><label class="form-label fw-semibold" for="rescueEquipment">Rescue equipment</label><input class="form-control" id="rescueEquipment" name="rescueEquipment" type="text" value="<%= emergency.rescueEquipment || '' %>"></div>
+            <div class="col-md-6"><label class="form-label fw-semibold">Communication method</label><div class="option-grid compact"><label class="check-tile"><input type="checkbox" name="communicationMethods" value="phone" <%= checked(contains(emergency.communicationMethods, 'phone')) %>> Phone</label><label class="check-tile"><input type="checkbox" name="communicationMethods" value="radio" <%= checked(contains(emergency.communicationMethods, 'radio')) %>> Radio</label><label class="check-tile"><input type="checkbox" name="communicationMethods" value="whatsapp" <%= checked(contains(emergency.communicationMethods, 'whatsapp')) %>> WhatsApp</label></div></div>
+            <div class="col-12"><div class="option-grid">
+              <label class="check-tile"><input type="checkbox" name="ambulanceAvailable" <%= checked(emergency.ambulanceAvailable) %>> Ambulance availability confirmed</label>
+              <label class="check-tile"><input type="checkbox" name="firstAidBoxAvailable" <%= checked(emergency.firstAidBoxAvailable) %>> First aid box available</label>
+              <label class="check-tile"><input type="checkbox" name="fireExtinguishersAvailable" <%= checked(emergency.fireExtinguishersAvailable) %>> Fire extinguishers available</label>
+              <label class="check-tile"><input type="checkbox" name="evacuationPlan" <%= checked(emergency.evacuationPlan) %>> Evacuation plan available</label>
+              <label class="check-tile"><input type="checkbox" name="spillKitAvailable" <%= checked(emergency.spillKitAvailable) %>> Spill kit available</label>
+              <label class="check-tile"><input type="checkbox" name="emergencyShowerEyewashAvailable" <%= checked(emergency.emergencyShowerEyewashAvailable) %>> Emergency shower/eye wash available</label>
+            </div></div>
+            <div class="col-12"><label class="form-label fw-semibold" for="emergencyPreparednessNotes">Emergency notes</label><textarea class="form-control" id="emergencyPreparednessNotes" name="emergencyPreparednessNotes" rows="3"><%= emergency.notes || '' %></textarea></div>
+          </div>
+        </section>
+
+        <section class="intake-section wizard-step" data-step-title="People Exposure">
+          <div class="section-heading"><span>5</span><div><h2>People Exposure</h2><p>Update who may be exposed and whether extra protection is needed.</p></div></div>
+          <div class="row g-3">
+            <div class="col-md-6"><label class="form-label fw-semibold" for="workersInArea">How many people will work in this area?</label><input class="form-control" id="workersInArea" name="workersInArea" type="number" min="0" value="<%= exposure.workersInArea || '' %>"></div>
+            <div class="col-md-6"><label class="form-label fw-semibold" for="peoplePassingNearby">How many may pass nearby?</label><input class="form-control" id="peoplePassingNearby" name="peoplePassingNearby" type="number" min="0" value="<%= exposure.peoplePassingNearby || '' %>"></div>
+            <div class="col-12"><div class="option-grid">
+              <label class="check-tile"><input type="checkbox" name="inexperiencedWorkers" <%= checked(exposure.inexperiencedWorkers) %>> Inexperienced workers involved</label>
+              <label class="check-tile"><input type="checkbox" name="contractorsInvolved" <%= checked(exposure.contractorsInvolved) %>> Contractors involved</label>
+              <label class="check-tile"><input type="checkbox" name="workingAlone" <%= checked(exposure.workingAlone) %>> Workers working alone</label>
+              <label class="check-tile"><input type="checkbox" name="supervisionAvailable" <%= checked(exposure.supervisionAvailable) %>> Supervision available</label>
+              <label class="check-tile"><input type="checkbox" name="vulnerablePersonsExposed" <%= checked(exposure.vulnerablePersonsExposed) %>> Vulnerable persons exposed</label>
+            </div></div>
+            <div class="col-12"><label class="form-label fw-semibold" for="peopleExposureNotes">People exposure notes</label><textarea class="form-control" id="peopleExposureNotes" name="peopleExposureNotes" rows="3"><%= exposure.notes || '' %></textarea></div>
+          </div>
+        </section>
+
+        <section class="intake-section wizard-step" data-step-title="Hazard Categories">
+          <div class="section-heading"><span>6</span><div><h2>Hazard Categories</h2><p>Select each hazard that applies and edit its risk details.</p></div></div>
+          <div class="hazard-list">
+            <% hazards.forEach(([value, label], index) => { const hd = detailFor(value); const isOn = contains(selectedHazards, value); %>
+              <div class="hazard-row">
+                <label class="check-tile hazard-check"><input type="checkbox" name="hazardCategories" value="<%= value %>" data-hazard-toggle="<%= value %>" <%= checked(isOn) %>> <%= label %></label>
+                <div class="hazard-detail <%= isOn ? 'is-open' : '' %>" data-hazard-detail="<%= value %>">
+                  <div class="row g-3">
+                    <div class="col-md-6"><label class="form-label" for="hazardWhatCouldHappen<%= index %>">What could happen?</label><textarea class="form-control hazard-input" id="hazardWhatCouldHappen<%= index %>" name="hazardWhatCouldHappen" rows="2" <%= isOn ? '' : 'disabled' %>><%= hd.whatCouldHappen || '' %></textarea></div>
+                    <div class="col-md-3"><label class="form-label" for="hazardLikelihood<%= index %>">How likely is it?</label><select class="form-select hazard-input" id="hazardLikelihood<%= index %>" name="hazardLikelihood" <%= isOn ? '' : 'disabled' %>><option value="rare" <%= selected(hd.likelihood, 'rare') %>>Rare</option><option value="unlikely" <%= selected(hd.likelihood, 'unlikely') %>>Unlikely</option><option value="possible" <%= selected(hd.likelihood || 'possible', 'possible') %>>Possible</option><option value="likely" <%= selected(hd.likelihood, 'likely') %>>Likely</option><option value="almost_certain" <%= selected(hd.likelihood, 'almost_certain') %>>Almost certain</option></select></div>
+                    <div class="col-md-3"><label class="form-label" for="hazardSeverity<%= index %>">How severe could it be?</label><select class="form-select hazard-input" id="hazardSeverity<%= index %>" name="hazardSeverity" <%= isOn ? '' : 'disabled' %>><option value="minor" <%= selected(hd.severity, 'minor') %>>Minor</option><option value="moderate" <%= selected(hd.severity || 'moderate', 'moderate') %>>Moderate</option><option value="major" <%= selected(hd.severity, 'major') %>>Major</option><option value="catastrophic" <%= selected(hd.severity, 'catastrophic') %>>Catastrophic</option></select></div>
+                    <div class="col-md-6"><label class="form-label" for="hazardExistingControls<%= index %>">Controls already in place</label><textarea class="form-control hazard-input" id="hazardExistingControls<%= index %>" name="hazardExistingControls" rows="2" <%= isOn ? '' : 'disabled' %>><%= hd.existingControls || '' %></textarea></div>
+                    <div class="col-md-6"><label class="form-label" for="hazardControlsStillNeeded<%= index %>">Controls still needed</label><textarea class="form-control hazard-input" id="hazardControlsStillNeeded<%= index %>" name="hazardControlsStillNeeded" rows="2" <%= isOn ? '' : 'disabled' %>><%= hd.controlsStillNeeded || '' %></textarea></div>
+                  </div>
+                </div>
+              </div>
+            <% }) %>
+          </div>
+        </section>
+
+        <section class="intake-section wizard-step" data-step-title="PPE Assessment">
+          <div class="section-heading"><span>7</span><div><h2>PPE Assessment</h2><p>Edit what has been obtained and whether it is adequate.</p></div></div>
+          <div class="option-grid"><% ppeOptions.forEach(([value, label]) => { %><label class="check-tile"><input type="checkbox" name="ppeItems" value="<%= value %>" <%= checked(contains(ppe.obtained, value)) %>> <%= label %></label><% }) %></div>
+          <div class="row g-3 mt-1">
+            <div class="col-md-6"><label class="form-label fw-semibold" for="ppeAdequacy">Is the PPE adequate?</label><select class="form-select" id="ppeAdequacy" name="ppeAdequacy"><option value="">Select</option><option value="adequate" <%= selected(ppe.adequacy, 'adequate') %>>Adequate</option><option value="partly_adequate" <%= selected(ppe.adequacy, 'partly_adequate') %>>Partly adequate</option><option value="not_adequate" <%= selected(ppe.adequacy, 'not_adequate') %>>Not adequate</option><option value="unknown" <%= selected(ppe.adequacy, 'unknown') %>>Unknown</option></select></div>
+            <div class="col-md-6"><label class="form-label fw-semibold" for="ppeCondition">PPE condition</label><input class="form-control" id="ppeCondition" name="ppeCondition" type="text" value="<%= ppe.condition || '' %>"></div>
+            <div class="col-12"><div class="option-grid"><label class="check-tile"><input type="checkbox" name="ppeEnoughForAllWorkers" <%= checked(ppe.enoughForAllWorkers) %>> Enough for all workers</label><label class="check-tile"><input type="checkbox" name="ppeInspected" <%= checked(ppe.inspected) %>> PPE inspected</label><label class="check-tile"><input type="checkbox" name="ppeWorkersKnowHowToUse" <%= checked(ppe.workersKnowHowToUse) %>> Workers know how to use it</label><label class="check-tile"><input type="checkbox" name="ppeReplacementAvailable" <%= checked(ppe.replacementAvailable) %>> Replacement PPE available</label></div></div>
+            <div class="col-12"><label class="form-label fw-semibold" for="ppeNotes">PPE notes</label><textarea class="form-control" id="ppeNotes" name="ppeNotes" rows="3"><%= ppe.notes || '' %></textarea></div>
+            <div class="col-12"><label class="form-label fw-semibold" for="customPPE">Additional PPE</label><textarea class="form-control" id="customPPE" name="customPPE" rows="2"></textarea></div>
+          </div>
+        </section>
+
+        <section class="intake-section wizard-step" data-step-title="Equipment and Tools">
+          <div class="section-heading"><span>8</span><div><h2>Equipment and Tools</h2><p>Edit equipment condition, authority to operate, and failure risks.</p></div></div>
+          <div class="row g-3">
+            <div class="col-12"><label class="form-label fw-semibold" for="equipmentUsed">What equipment will be used?</label><textarea class="form-control" id="equipmentUsed" name="equipmentUsed" rows="3"><%= equipment.equipmentUsed || '' %></textarea></div>
+            <div class="col-md-6"><label class="form-label fw-semibold" for="authorizedOperators">Who is allowed to operate it?</label><input class="form-control" id="authorizedOperators" name="authorizedOperators" type="text" value="<%= equipment.authorizedOperators || '' %>"></div>
+            <div class="col-12"><div class="option-grid"><label class="check-tile"><input type="checkbox" name="equipmentInspected" <%= checked(equipment.inspected) %>> Equipment inspected</label><label class="check-tile"><input type="checkbox" name="equipmentCertified" <%= checked(equipment.certifiedWhereRequired) %>> Certified where required</label><label class="check-tile"><input type="checkbox" name="guardsInPlace" <%= checked(equipment.guardsInPlace) %>> Guards in place</label><label class="check-tile"><input type="checkbox" name="emergencyStopsWorking" <%= checked(equipment.emergencyStopsWorking) %>> Emergency stops working</label><label class="check-tile"><input type="checkbox" name="maintenanceUpToDate" <%= checked(equipment.maintenanceUpToDate) %>> Maintenance up to date</label></div></div>
+            <div class="col-12"><label class="form-label fw-semibold">Equipment failure risks</label><div class="option-grid compact"><% ['breakdown','fire','leakage','collapse','electrocution'].forEach(item => { %><label class="check-tile"><input type="checkbox" name="equipmentFailureRisks" value="<%= item %>" <%= checked(contains(equipment.failureRisks, item)) %>> <%= item.charAt(0).toUpperCase() + item.slice(1) %></label><% }) %></div></div>
+            <div class="col-12"><label class="form-label fw-semibold" for="equipmentNotes">Equipment notes</label><textarea class="form-control" id="equipmentNotes" name="equipmentNotes" rows="3"><%= equipment.notes || '' %></textarea></div>
+          </div>
+        </section>
+
+        <section class="intake-section wizard-step" data-step-title="Materials and Substances">
+          <div class="section-heading"><span>9</span><div><h2>Materials and Substances</h2><p>Edit chemicals, dusty materials, storage, spill response, PPE, and first aid.</p></div></div>
+          <div class="row g-3">
+            <div class="col-12"><label class="form-label fw-semibold" for="materialsOrChemicalsUsed">What materials or chemicals are being used?</label><textarea class="form-control" id="materialsOrChemicalsUsed" name="materialsOrChemicalsUsed" rows="3"><%= materials.materialsOrChemicalsUsed || '' %></textarea></div>
+            <div class="col-12"><div class="option-grid"><label class="check-tile"><input type="checkbox" name="safetyDataSheetsAvailable" <%= checked(materials.safetyDataSheetsAvailable) %>> Safety Data Sheets available</label><% ['flammable','toxic','corrosive','explosive','dusty'].forEach(item => { %><label class="check-tile"><input type="checkbox" name="substanceHazards" value="<%= item %>" <%= checked(contains(materials.substanceHazards, item)) %>> <%= item.charAt(0).toUpperCase() + item.slice(1) %></label><% }) %></div></div>
+            <div class="col-md-6"><label class="form-label fw-semibold" for="storageMethod">How are they stored?</label><textarea class="form-control" id="storageMethod" name="storageMethod" rows="3"><%= materials.storageMethod || '' %></textarea></div>
+            <div class="col-md-6"><label class="form-label fw-semibold" for="spillHandling">How are spills handled?</label><textarea class="form-control" id="spillHandling" name="spillHandling" rows="3"><%= materials.spillHandling || '' %></textarea></div>
+            <div class="col-md-6"><label class="form-label fw-semibold" for="materialRequiredPPE">What PPE is required?</label><textarea class="form-control" id="materialRequiredPPE" name="materialRequiredPPE" rows="3"><%= materials.requiredPPE || '' %></textarea></div>
+            <div class="col-md-6"><label class="form-label fw-semibold" for="firstAidAfterExposure">What first aid is required after exposure?</label><textarea class="form-control" id="firstAidAfterExposure" name="firstAidAfterExposure" rows="3"><%= materials.firstAidAfterExposure || '' %></textarea></div>
+          </div>
+        </section>
+
+        <section class="intake-section wizard-step" data-step-title="Incident History">
+          <div class="section-heading"><span>10</span><div><h2>Incident and Near-Miss History</h2><p>Edit whether this area or activity has already shown warning signs.</p></div></div>
+          <div class="option-grid">
+            <label class="check-tile"><input type="checkbox" name="similarHappenedBefore" <%= checked(history.similarHappenedBefore) %>> Similar incident happened before</label>
+            <label class="check-tile"><input type="checkbox" name="workersComplained" <%= checked(history.workersComplained) %>> Workers complained about this area</label>
+            <label class="check-tile"><input type="checkbox" name="nearMisses" <%= checked(history.nearMisses) %>> Near-misses reported</label>
+            <label class="check-tile"><input type="checkbox" name="equipmentFailedBefore" <%= checked(history.equipmentFailedBefore) %>> Equipment failed before</label>
+            <label class="check-tile"><input type="checkbox" name="injuriesFiresSpillsFallsShocksExposure" <%= checked(history.injuriesFiresSpillsFallsShocksExposure) %>> Injuries, fires, spills, falls, shocks, or exposure incidents</label>
+          </div>
+          <label class="form-label fw-semibold mt-3" for="incidentHistoryNotes">History notes</label><textarea class="form-control" id="incidentHistoryNotes" name="incidentHistoryNotes" rows="3"><%= history.notes || '' %></textarea>
+        </section>
+
+        <section class="intake-section wizard-step" data-step-title="AI Document Intent">
+          <div class="section-heading"><span>11</span><div><h2>AI Document Intent</h2><p>Edit the documents All-Safe should treat as intended outputs for this work area.</p></div></div>
+          <div class="option-grid"><% documents.forEach(([value, label]) => { %><label class="check-tile"><input type="checkbox" name="documentIntent" value="<%= value %>" <%= checked(contains(intake.documentIntent, value)) %>> <%= label %></label><% }) %></div>
+        </section>
+
+        <div class="submit-bar">
+          <a href="/work-areas/<%= workArea._id %>" class="btn btn-outline-secondary btn-lg px-4">Cancel</a>
+          <button class="btn btn-outline-primary btn-lg px-4" id="wizardPrev" type="button"><i class="fas fa-arrow-left me-2"></i>Previous</button>
+          <button class="btn btn-primary btn-lg px-4" id="wizardNext" type="button">Next<i class="fas fa-arrow-right ms-2"></i></button>
+          <button class="btn btn-primary btn-lg px-4 d-none" id="wizardSubmit" type="submit"><i class="fas fa-save me-2"></i>Update Work Area</button>
+        </div>
+      </form>
     </div>
   </div>
 </div>
+
+<script>
+  const wizardSteps = Array.from(document.querySelectorAll('.wizard-step'));
+  const wizardPrev = document.getElementById('wizardPrev');
+  const wizardNext = document.getElementById('wizardNext');
+  const wizardSubmit = document.getElementById('wizardSubmit');
+  const wizardStepLabel = document.getElementById('wizardStepLabel');
+  const wizardSectionLabel = document.getElementById('wizardSectionLabel');
+  const wizardStepDots = Array.from(document.querySelectorAll('.step-dot'));
+  let currentWizardStep = 0;
+
+  function updateWizard() {
+    const totalSteps = wizardSteps.length;
+    wizardSteps.forEach(function (step, index) {
+      step.classList.toggle('is-active', index === currentWizardStep);
+    });
+    const visibleStep = wizardSteps[currentWizardStep];
+    wizardStepLabel.textContent = 'Step ' + (currentWizardStep + 1) + ' of ' + totalSteps;
+    wizardSectionLabel.textContent = visibleStep.dataset.stepTitle || '';
+    wizardStepDots.forEach(function (dot, index) {
+      dot.classList.toggle('is-active', index === currentWizardStep);
+      dot.classList.toggle('is-complete', index < currentWizardStep);
+      dot.setAttribute('aria-current', index === currentWizardStep ? 'step' : 'false');
+    });
+    wizardPrev.disabled = currentWizardStep === 0;
+    wizardNext.classList.toggle('d-none', currentWizardStep === totalSteps - 1);
+    wizardSubmit.classList.toggle('d-none', currentWizardStep !== totalSteps - 1);
+  }
+
+  function validateCurrentStep() {
+    const controls = Array.from(wizardSteps[currentWizardStep].querySelectorAll('input, select, textarea'));
+    const invalidControl = controls.find(function (control) {
+      return !control.disabled && !control.checkValidity();
+    });
+    if (invalidControl) {
+      invalidControl.reportValidity();
+      return false;
+    }
+    return true;
+  }
+
+  wizardPrev.addEventListener('click', function () {
+    if (currentWizardStep === 0) return;
+    currentWizardStep -= 1;
+    updateWizard();
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  });
+
+  wizardNext.addEventListener('click', function () {
+    if (!validateCurrentStep()) return;
+    if (currentWizardStep >= wizardSteps.length - 1) return;
+    currentWizardStep += 1;
+    updateWizard();
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  });
+
+  wizardStepDots.forEach(function (dot) {
+    dot.addEventListener('click', function () {
+      const requestedStep = Number(dot.dataset.stepIndex);
+      if (Number.isNaN(requestedStep) || requestedStep === currentWizardStep) return;
+      if (requestedStep > currentWizardStep && !validateCurrentStep()) return;
+      currentWizardStep = requestedStep;
+      updateWizard();
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    });
+  });
+
+  document.querySelectorAll('[data-hazard-toggle]').forEach(function (toggle) {
+    const detail = document.querySelector('[data-hazard-detail="' + toggle.dataset.hazardToggle + '"]');
+    const inputs = detail ? detail.querySelectorAll('.hazard-input') : [];
+    const sync = function () {
+      if (!detail) return;
+      detail.classList.toggle('is-open', toggle.checked);
+      inputs.forEach(function (input) {
+        input.disabled = !toggle.checked;
+      });
+    };
+    toggle.addEventListener('change', sync);
+    sync();
+  });
+
+  document.getElementById('workAreaForm').addEventListener('submit', function () {
+    const customPPE = document.getElementById('customPPE').value;
+    customPPE.split('\n').map(function (line) {
+      return line.trim();
+    }).filter(Boolean).forEach(function (item) {
+      const input = document.createElement('input');
+      input.type = 'hidden';
+      input.name = 'ppeItems';
+      input.value = item;
+      this.appendChild(input);
+    }, this);
+  });
+
+  updateWizard();
+</script>
+
+<style>
+  .work-area-create { background: #f6f8fb; }
+  .wizard-panel, .intake-section { background: #fff; border: 1px solid #dfe7ef; border-radius: 8px; }
+  .wizard-panel { padding: 1rem 1.25rem; }
+  .intake-section { display: none; padding: 1.5rem; margin-bottom: 1rem; }
+  .intake-section.is-active { display: block; }
+  .section-heading { display: flex; gap: 1rem; align-items: flex-start; margin-bottom: 1.25rem; }
+  .section-heading span { width: 2rem; height: 2rem; display: inline-flex; align-items: center; justify-content: center; border-radius: 999px; background: #26a69a; color: #fff; font-weight: 700; flex: 0 0 auto; }
+  .section-heading h2 { font-size: 1.15rem; color: #1e3c5c; margin: 0; font-weight: 700; }
+  .section-heading p { color: #607080; margin: .25rem 0 0; }
+  .step-strip { display: grid; grid-template-columns: repeat(11, minmax(34px, 1fr)); gap: .45rem; }
+  .step-dot { min-width: 34px; height: 34px; border: 1px solid #cfd9e3; border-radius: 999px; background: #fff; color: #607080; font-weight: 700; line-height: 1; }
+  .step-dot.is-active { background: #26a69a; border-color: #26a69a; color: #fff; }
+  .step-dot.is-complete { background: #e7f5f3; border-color: #26a69a; color: #00796b; }
+  .option-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(210px, 1fr)); gap: .65rem; }
+  .option-grid.compact { grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); }
+  .check-tile { min-height: 44px; display: flex; align-items: center; gap: .55rem; border: 1px solid #dfe7ef; background: #fbfcfe; border-radius: 8px; padding: .65rem .8rem; color: #263746; font-weight: 500; }
+  .hazard-list { display: grid; gap: .75rem; }
+  .hazard-row { border: 1px solid #dfe7ef; border-radius: 8px; overflow: hidden; background: #fff; }
+  .hazard-check { border: 0; border-radius: 0; background: #fbfcfe; }
+  .hazard-detail { display: none; padding: 1rem; border-top: 1px solid #dfe7ef; background: #f8fbfb; }
+  .hazard-detail.is-open { display: block; }
+  .form-control:focus, .form-select:focus, .form-check-input:focus { border-color: #26a69a; box-shadow: 0 0 0 .2rem rgba(38, 166, 154, .18); }
+  .form-check-input:checked { background-color: #26a69a; border-color: #26a69a; }
+  .submit-bar { position: sticky; bottom: 0; z-index: 4; display: flex; justify-content: flex-end; gap: .75rem; padding: 1rem 0; background: linear-gradient(180deg, rgba(246, 248, 251, 0), #f6f8fb 30%); }
+  .submit-bar .btn-primary { background: #00897b; border-color: #00897b; }
+  .submit-bar .btn-outline-primary { color: #00897b; border-color: #00897b; }
+  .submit-bar .btn-outline-primary:hover, .submit-bar .btn-outline-primary:focus { background: #00897b; border-color: #00897b; color: #fff; }
+  @media (max-width: 576px) { .intake-section { padding: 1rem; } .step-strip { grid-template-columns: repeat(6, minmax(34px, 1fr)); } .section-heading { gap: .75rem; } .submit-bar { flex-direction: column-reverse; } .submit-bar .btn { width: 100%; } }
+</style>
 
 <%- include('../partials/footer') %>

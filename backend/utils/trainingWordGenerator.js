@@ -458,3 +458,4 @@ async function generateTrainingWordBuffer({ training }) {
 module.exports = {
   generateTrainingWordBuffer,
 };
+

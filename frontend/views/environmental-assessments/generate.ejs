@@ -7,7 +7,7 @@
       <div class="d-flex justify-content-between align-items-center mb-3">
         <div>
           <h3 class="fw-bold mb-1">Environmental Screening</h3>
-          <p class="text-muted mb-0"><%= workArea.name %> · <%= workArea.worksite?.name || 'Worksite' %></p>
+          <p class="text-muted mb-0"><%= workArea.name %></p>
         </div>
         <a href="/work-areas/<%= workArea._id %>" class="btn btn-outline-secondary btn-sm">Back</a>
       </div>
@@ -22,7 +22,7 @@
             <div class="mb-3">
               <label class="form-label fw-semibold">Activity Description</label>
               <textarea name="activityDescription" class="form-control" rows="8" required placeholder="Describe the activity, equipment, materials, location, nearby receptors, and any known environmental concerns."></textarea>
-              <div class="form-text">The AI will use this plus existing worksite/work-area data to draft an impact register for review.</div>
+              <div class="form-text">The AI will use this plus existing work-area data to draft an impact register for review.</div>
             </div>
             <button type="submit" class="btn btn-success">
               <i class="fas fa-leaf me-1"></i> Generate Screening Draft

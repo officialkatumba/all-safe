@@ -145,11 +145,11 @@ const trainingRequirementSchema = new mongoose.Schema(
     // AI metadata
     aiGenerated: { type: Boolean, default: true },
     aiModel: String,
-    generatedBy: { type: mongoose.Schema.Types.ObjectId, ref: "SafetyOfficer" },
+    generatedBy: { type: mongoose.Schema.Types.ObjectId, ref: "User" },
 
     // Metadata
-    createdBy: { type: mongoose.Schema.Types.ObjectId, ref: "SafetyOfficer" },
-    updatedBy: { type: mongoose.Schema.Types.ObjectId, ref: "SafetyOfficer" },
+    createdBy: { type: mongoose.Schema.Types.ObjectId, ref: "User" },
+    updatedBy: { type: mongoose.Schema.Types.ObjectId, ref: "User" },
   },
   { timestamps: true },
 );

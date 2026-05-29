@@ -14,6 +14,7 @@ const User = require("./models/User");
 const Alert = require("./models/Alert");
 
 dotenv.config();
+mongoose.set("strictPopulate", false);
 
 mongoose
   .connect(process.env.MONGO_URI)
@@ -63,18 +64,13 @@ app.use(async (req, res, next) => {
       const query = {
         severity: { $in: ["high", "critical"] },
         status: { $ne: "resolved" },
-      };
-
-      if (
-        req.user.role !== "system_owner" &&
-        req.user.role !== "enterprise_admin" &&
-        req.user.role !== "system_admin"
-      ) {
-        query.$or = [
+        $or: [
+          { officerId: req.user._id },
+          { createdBy: req.user._id },
           { "recipients.user": req.user._id },
           { "recipients.email": req.user.email },
-        ];
-      }
+        ],
+      };
 
       res.locals.hasUrgentAlerts = Boolean(await Alert.exists(query));
     }
@@ -92,11 +88,7 @@ app.get("/", (req, res) => {
 
 app.use("/dashboard", require("./routes/dashboardRoutes"));
 app.use("/register", require("./routes/registrationRoutes"));
-app.use("/safety-officers", require("./routes/safetyOfficerRoutes"));
 app.use("/api/users", require("./routes/usersRoutes"));
-app.use("/admin", require("./routes/adminRoutes"));
-app.use("/system-owner", require("./routes/systemOwnerRoutes"));
-app.use("/worksites", require("./routes/worksiteRoutes"));
 app.use("/work-areas", require("./routes/workAreaRoutes"));
 app.use("/incidents", require("./routes/incidentRoutes"));
 app.use("/risk-assessments", require("./routes/riskAssessmentRoutes"));
@@ -112,8 +104,6 @@ app.use("/training", require("./routes/trainingRoutes"));
 app.use("/emergency-protocols", require("./routes/emergencyProtocolRoutes"));
 app.use("/environmental-assessments", require("./routes/environmentalAssessmentRoutes"));
 app.use("/alerts", require("./routes/alertRoutes"));
-app.use("/functions", require("./routes/functionRoutes"));
-app.use("/ai", require("./routes/aiDocumentRoutes"));
 
 require("./utils/safetyAutomation");
 

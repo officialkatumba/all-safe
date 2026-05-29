@@ -596,3 +596,4 @@ async function generateSafetyInsightWordBuffer({ insight }) {
 module.exports = {
   generateSafetyInsightWordBuffer,
 };
+

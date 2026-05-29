@@ -106,7 +106,7 @@ const emergencyProtocolSchema = new mongoose.Schema(
 
     generatedBy: {
       type: mongoose.Schema.Types.ObjectId,
-      ref: "SafetyOfficer",
+      ref: "User",
     },
 
     status: {

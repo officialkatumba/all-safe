@@ -1,437 +1,744 @@
 <%- include('../partials/header') %>
 <%- include('../partials/navbar') %>
 
-<div class="container py-5">
+<%
+  const controls = [
+    ['barricades_installed', 'Barricades installed'],
+    ['warning_signs_placed', 'Warning signs placed'],
+    ['ppe_issued', 'PPE issued'],
+    ['toolbox_talk_done', 'Toolbox talk done'],
+    ['equipment_inspected', 'Equipment inspected'],
+    ['supervisor_assigned', 'Supervisor assigned'],
+    ['permit_issued', 'Permit issued'],
+    ['fire_extinguisher_placed', 'Fire extinguisher placed'],
+    ['first_aider_nearby', 'First aider nearby'],
+    ['area_isolated', 'Area isolated'],
+    ['lockout_tagout_done', 'Lockout/tagout done'],
+    ['ventilation_provided', 'Ventilation provided'],
+    ['dust_suppression_used', 'Dust suppression used'],
+  ];
+
+  const hazards = [
+    ['fire_risk', 'Fire risk'],
+    ['smoke_inhalation', 'Smoke inhalation'],
+    ['dust_exposure', 'Dust exposure'],
+    ['chemical_exposure', 'Chemical exposure'],
+    ['biological_infection', 'Biological infection'],
+    ['electricity_high_voltage', 'Electricity or high voltage'],
+    ['radiation', 'Radiation'],
+    ['noise', 'Noise'],
+    ['vibration', 'Vibration'],
+    ['heat_stress', 'Heat stress'],
+    ['working_at_height', 'Working at height'],
+    ['excavation', 'Excavation'],
+    ['confined_space', 'Confined space'],
+    ['lifting_operations', 'Lifting operations'],
+    ['moving_machinery', 'Moving machinery'],
+    ['vehicles_mobile_equipment', 'Vehicles/mobile equipment'],
+    ['falling_objects', 'Falling objects'],
+    ['slips_trips_falls', 'Slips, trips, and falls'],
+    ['manual_handling', 'Manual handling'],
+    ['poor_lighting', 'Poor lighting'],
+    ['weather_exposure', 'Weather exposure'],
+    ['water_flooding', 'Water/flooding'],
+    ['explosive_flammable_substances', 'Explosive or flammable substances'],
+  ];
+
+  const ppeOptions = [
+    ['hard_hat', 'Hard hats'],
+    ['steel_toe_boots', 'Safety boots'],
+    ['gloves', 'Gloves'],
+    ['safety_glasses', 'Safety glasses/goggles'],
+    ['face_shield', 'Face shield'],
+    ['respirator', 'Respirator/mask'],
+    ['ear_plugs', 'Ear plugs'],
+    ['ear_muffs', 'Ear muffs'],
+    ['high_vis_vest', 'High visibility clothing'],
+    ['fall_arrest', 'Fall arrest harness'],
+    ['welding_helmet', 'Welding helmet'],
+    ['chemical_suit', 'Chemical apron/suit'],
+    ['life_jacket', 'Life jacket'],
+    ['dust_mask', 'Dust mask'],
+    ['heat_resistant_ppe', 'Heat-resistant PPE'],
+  ];
+
+  const documents = [
+    ['safety_talk', 'Safety Talk'],
+    ['risk_assessment', 'Risk Assessment'],
+    ['job_safety_analysis', 'Job Safety Analysis'],
+    ['incident_report', 'Incident Report'],
+    ['near_miss_report', 'Near-Miss Report'],
+    ['ppe_checklist', 'PPE Checklist'],
+    ['emergency_response_plan', 'Emergency Response Plan'],
+    ['training_requirement', 'Training Requirement'],
+    ['permit_to_work_guidance', 'Permit-to-Work Guidance'],
+    ['chemical_material_safety_handling_guide', 'Chemical / Material Safety Handling Guide'],
+    ['environmental_risk_assessment', 'Environmental Risk Assessment'],
+    ['ohs_compliance_audit', 'OHS Compliance Audit'],
+  ];
+%>
+
+<div class="container-fluid py-4 work-area-create">
   <div class="row justify-content-center">
-    <div class="col-md-10">
-      <div class="card shadow-lg border-0">
-        <div class="card-header bg-transparent border-0 pt-4 px-4">
-          <div class="d-flex justify-content-between align-items-center">
-            <div>
-              <h3 class="fw-bold mb-0" style="color: #26a69a">
-                <i class="fas fa-plus-circle me-2"></i>Create New Work Area
-              </h3>
-              <p class="text-muted">Add a new work area with comprehensive safety information</p>
-            </div>
-            <span class="badge bg-info">Step 1 of 3</span>
-          </div>
-        </div>
-        
-        <div class="card-body p-4">
-          <form action="/work-areas/create" method="POST" id="workAreaForm">
-            <!-- ==================== SECTION 1: BASIC INFORMATION ==================== -->
-            <div class="form-section mb-5">
-              <h5 class="fw-bold mb-3" style="color: #1e3c5c">
-                <i class="fas fa-info-circle me-2"></i>1. Basic Information
-              </h5>
-              
-              <div class="row g-3">
-                <div class="col-12">
-                  <label for="worksiteId" class="form-label fw-semibold">Parent Worksite *</label>
-                  <select class="form-select form-select-lg" id="worksiteId" name="worksiteId" required>
-                    <option value="" disabled selected>Select a worksite</option>
-                    <% worksites.forEach(worksite => { %>
-                    <option value="<%= worksite._id %>" <%= preselectedWorksite === worksite._id.toString() ? 'selected' : '' %>>
-                      <%= worksite.name %> - <%= worksite.location %>
-                    </option>
-                    <% }) %>
-                  </select>
-                </div>
-                
-                <div class="col-md-6">
-                  <label for="name" class="form-label fw-semibold">Work Area Name *</label>
-                  <input type="text" class="form-control form-control-lg" id="name" name="name" 
-                         placeholder="e.g., North Wing Foundation" required>
-                </div>
-                
-                <div class="col-md-6">
-                  <label for="code" class="form-label fw-semibold">Area Code</label>
-                  <input type="text" class="form-control form-control-lg" id="code" name="code" 
-                         placeholder="e.g., NW-FND-01">
-                  <small class="text-muted">Auto-generated if left blank</small>
-                </div>
-                
-                <div class="col-md-6">
-                  <label for="location" class="form-label fw-semibold">Location/Zone</label>
-                  <input type="text" class="form-control" id="location" name="location" 
-                         placeholder="e.g., Zone A, Level 2, Grid 5">
-                </div>
-                
-                <div class="col-md-6">
-                  <label for="status" class="form-label fw-semibold">Status</label>
-                  <select class="form-select" id="status" name="status">
-                    <option value="planned">Planned</option>
-                    <option value="active" selected>Active</option>
-                    <option value="on_hold">On Hold</option>
-                    <option value="completed">Completed</option>
-                  </select>
-                </div>
-                
-                <div class="col-12">
-                  <label for="description" class="form-label fw-semibold">Description</label>
-                  <textarea class="form-control" id="description" name="description" rows="2" 
-                            placeholder="Describe the purpose, scope, and nature of work in this area..."></textarea>
-                </div>
-              </div>
-            </div>
-            
-            <!-- ==================== SECTION 2: WORK CHARACTERISTICS ==================== -->
-            <div class="form-section mb-5">
-              <h5 class="fw-bold mb-3" style="color: #1e3c5c">
-                <i class="fas fa-tools me-2"></i>2. Work Characteristics
-              </h5>
-              
-              <!-- Schedule -->
-              <div class="row g-3 mb-4">
-                <div class="col-md-6">
-                  <label for="plannedStart" class="form-label fw-semibold">Planned Start Date</label>
-                  <input type="date" class="form-control" id="plannedStart" name="plannedStart">
-                </div>
-                <div class="col-md-6">
-                  <label for="plannedEnd" class="form-label fw-semibold">Planned End Date</label>
-                  <input type="date" class="form-control" id="plannedEnd" name="plannedEnd">
-                </div>
-              </div>
-              
-              <!-- Work Types -->
-              <div class="mb-4">
-                <label class="form-label fw-semibold">Work Types</label>
-                <p class="text-muted small">Select all that apply</p>
-                <div class="row g-2">
-                  <div class="col-md-4">
-                    <div class="form-check">
-                      <input class="form-check-input" type="checkbox" name="currentWorkTypes" value="excavation" id="workExcavation">
-                      <label class="form-check-label" for="workExcavation">⛏️ Excavation</label>
-                    </div>
-                  </div>
-                  <div class="col-md-4">
-                    <div class="form-check">
-                      <input class="form-check-input" type="checkbox" name="currentWorkTypes" value="foundation" id="workFoundation">
-                      <label class="form-check-label" for="workFoundation">🏗️ Foundation</label>
-                    </div>
-                  </div>
-                  <div class="col-md-4">
-                    <div class="form-check">
-                      <input class="form-check-input" type="checkbox" name="currentWorkTypes" value="structural" id="workStructural">
-                      <label class="form-check-label" for="workStructural">🏢 Structural</label>
-                    </div>
-                  </div>
-                  <div class="col-md-4">
-                    <div class="form-check">
-                      <input class="form-check-input" type="checkbox" name="currentWorkTypes" value="masonry" id="workMasonry">
-                      <label class="form-check-label" for="workMasonry">🧱 Masonry</label>
-                    </div>
-                  </div>
-                  <div class="col-md-4">
-                    <div class="form-check">
-                      <input class="form-check-input" type="checkbox" name="currentWorkTypes" value="roofing" id="workRoofing">
-                      <label class="form-check-label" for="workRoofing">🏠 Roofing</label>
-                    </div>
-                  </div>
-                  <div class="col-md-4">
-                    <div class="form-check">
-                      <input class="form-check-input" type="checkbox" name="currentWorkTypes" value="electrical" id="workElectrical">
-                      <label class="form-check-label" for="workElectrical">⚡ Electrical</label>
-                    </div>
-                  </div>
-                  <div class="col-md-4">
-                    <div class="form-check">
-                      <input class="form-check-input" type="checkbox" name="currentWorkTypes" value="plumbing" id="workPlumbing">
-                      <label class="form-check-label" for="workPlumbing">🚰 Plumbing</label>
-                    </div>
-                  </div>
-                  <div class="col-md-4">
-                    <div class="form-check">
-                      <input class="form-check-input" type="checkbox" name="currentWorkTypes" value="hvac" id="workHvac">
-                      <label class="form-check-label" for="workHvac">🌡️ HVAC</label>
-                    </div>
-                  </div>
-                  <div class="col-md-4">
-                    <div class="form-check">
-                      <input class="form-check-input" type="checkbox" name="currentWorkTypes" value="finishing" id="workFinishing">
-                      <label class="form-check-label" for="workFinishing">🎨 Finishing</label>
-                    </div>
-                  </div>
-                  <div class="col-md-4">
-                    <div class="form-check">
-                      <input class="form-check-input" type="checkbox" name="currentWorkTypes" value="welding" id="workWelding">
-                      <label class="form-check-label" for="workWelding">🔥 Welding</label>
-                    </div>
-                  </div>
-                  <div class="col-md-4">
-                    <div class="form-check">
-                      <input class="form-check-input" type="checkbox" name="currentWorkTypes" value="scaffolding" id="workScaffolding">
-                      <label class="form-check-label" for="workScaffolding">🪜 Scaffolding</label>
-                    </div>
-                  </div>
-                  <div class="col-md-4">
-                    <div class="form-check">
-                      <input class="form-check-input" type="checkbox" name="currentWorkTypes" value="general" id="workGeneral">
-                      <label class="form-check-label" for="workGeneral">📋 General</label>
-                    </div>
-                  </div>
-                </div>
-              </div>
-              
-              <!-- Shifts -->
-              <div class="mb-4">
-                <label class="form-label fw-semibold">Active Shifts</label>
-                <div class="row g-3">
-                  <div class="col-md-4">
-                    <div class="form-check">
-                      <input class="form-check-input" type="checkbox" name="shifts" value="morning" id="shiftMorning">
-                      <label class="form-check-label" for="shiftMorning">
-                        <i class="fas fa-sun text-warning me-1"></i> Morning (06:00 - 14:00)
-                      </label>
-                    </div>
-                  </div>
-                  <div class="col-md-4">
-                    <div class="form-check">
-                      <input class="form-check-input" type="checkbox" name="shifts" value="afternoon" id="shiftAfternoon">
-                      <label class="form-check-label" for="shiftAfternoon">
-                        <i class="fas fa-cloud-sun text-info me-1"></i> Afternoon (14:00 - 22:00)
-                      </label>
-                    </div>
-                  </div>
-                  <div class="col-md-4">
-                    <div class="form-check">
-                      <input class="form-check-input" type="checkbox" name="shifts" value="night" id="shiftNight">
-                      <label class="form-check-label" for="shiftNight">
-                        <i class="fas fa-moon text-secondary me-1"></i> Night (22:00 - 06:00)
-                      </label>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
-            
-            <!-- ==================== SECTION 3: HAZARD & RISK ASSESSMENT ==================== -->
-            <div class="form-section mb-5">
-              <h5 class="fw-bold mb-3" style="color: #1e3c5c">
-                <i class="fas fa-exclamation-triangle me-2"></i>3. Hazard & Risk Assessment
-              </h5>
-              <p class="text-muted small">Identify potential hazards and assess risks in this work area</p>
-              
-              <!-- Overall Risk Level -->
-              <div class="mb-4">
-                <label for="initialRiskLevel" class="form-label fw-semibold">Overall Risk Level</label>
-                <select class="form-select" id="initialRiskLevel" name="initialRiskLevel">
-                  <option value="low">🟢 Low - Standard precautions required</option>
-                  <option value="medium" selected>🟡 Medium - Enhanced controls needed</option>
-                  <option value="high">🟠 High - Significant controls required</option>
-                  <option value="critical">🔴 Critical - Immediate action required</option>
-                </select>
-              </div>
-              
-              <!-- Hazards Identification -->
-              <div class="mb-4">
-                <label class="form-label fw-semibold">Identified Hazards</label>
-                <div id="hazardsContainer">
-                  <div class="hazard-entry mb-3 p-3 border rounded bg-light">
-                    <div class="row g-2">
-                      <div class="col-md-5">
-                        <input type="text" class="form-control" name="hazardDescriptions[]" placeholder="Hazard description" value="">
-                      </div>
-                      <div class="col-md-3">
-                        <select class="form-select" name="hazardRiskLevels[]">
-                          <option value="low">Low Risk</option>
-                          <option value="medium" selected>Medium Risk</option>
-                          <option value="high">High Risk</option>
-                          <option value="critical">Critical Risk</option>
-                        </select>
-                      </div>
-                      <div class="col-md-3">
-                        <input type="text" class="form-control" name="hazardControls[]" placeholder="Controls">
-                      </div>
-                      <div class="col-md-1">
-                        <button type="button" class="btn btn-outline-danger w-100" onclick="this.closest('.hazard-entry').remove()">
-                          <i class="fas fa-trash"></i>
-                        </button>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-                <button type="button" class="btn btn-sm btn-outline-primary" onclick="addHazard()">
-                  <i class="fas fa-plus me-1"></i> Add Hazard
-                </button>
-              </div>
-              
-              <!-- Initial Concerns -->
-              <div class="mb-4">
-                <label for="initialConcerns" class="form-label fw-semibold">Initial Safety Concerns</label>
-                <textarea class="form-control" id="initialConcerns" name="initialConcerns" rows="3" 
-                          placeholder="List any safety concerns, observations, or issues that need attention. Enter one per line."></textarea>
-                <small class="text-muted">Examples: Unstable ground conditions, Overhead power lines, Nearby traffic, Confined space entry</small>
-              </div>
-            </div>
-            
-            <!-- ==================== SECTION 4: PPE REQUIREMENTS ==================== -->
-            <div class="form-section mb-5">
-              <h5 class="fw-bold mb-3" style="color: #1e3c5c">
-                <i class="fas fa-helmet-safety me-2"></i>4. PPE Requirements
-              </h5>
-              <p class="text-muted small">Specify required Personal Protective Equipment for this work area</p>
-              
-              <div class="row g-3">
-                <div class="col-md-6">
-                  <!-- Standard PPE Checkboxes with correct enum values -->
-<div class="form-check">
-  <input class="form-check-input" type="checkbox" value="hard_hat" name="ppeItems" id="ppeHardHat">
-  <label class="form-check-label" for="ppeHardHat">🪖 Hard Hat</label>
-</div>
-<div class="form-check">
-  <input class="form-check-input" type="checkbox" value="safety_glasses" name="ppeItems" id="ppeGlasses">
-  <label class="form-check-label" for="ppeGlasses">👓 Safety Glasses</label>
-</div>
-<div class="form-check">
-  <input class="form-check-input" type="checkbox" value="high_vis_vest" name="ppeItems" id="ppeVest">
-  <label class="form-check-label" for="ppeVest">🦺 High-Visibility Vest</label>
-</div>
-<div class="form-check">
-  <input class="form-check-input" type="checkbox" value="steel_toe_boots" name="ppeItems" id="ppeBoots">
-  <label class="form-check-label" for="ppeBoots">👢 Steel-Toed Boots</label>
-</div>
-<div class="form-check">
-  <input class="form-check-input" type="checkbox" value="gloves" name="ppeItems" id="ppeGloves">
-  <label class="form-check-label" for="ppeGloves">🧤 Gloves</label>
-</div>
-<div class="form-check">
-  <input class="form-check-input" type="checkbox" value="ear_muffs" name="ppeItems" id="ppeEar">
-  <label class="form-check-label" for="ppeEar">🎧 Ear Protection (Muffs/Plugs)</label>
-</div>
-<div class="form-check">
-  <input class="form-check-input" type="checkbox" value="respirator" name="ppeItems" id="ppeRespirator">
-  <label class="form-check-label" for="ppeRespirator">😷 Respirator</label>
-</div>
-<div class="form-check">
-  <input class="form-check-input" type="checkbox" value="harness" name="ppeItems" id="ppeHarness">
-  <label class="form-check-label" for="ppeHarness">⛓️ Fall Protection Harness</label>
-</div>
-                </div>
-              </div>
-              
-              <div class="mt-3">
-                <label for="customPPE" class="form-label fw-semibold">Additional PPE (one per line)</label>
-                <textarea class="form-control" id="customPPE" name="customPPE" rows="2" 
-                          placeholder="e.g., Welding helmet
-Chemical-resistant suit
-Knee pads"></textarea>
-              </div>
-            </div>
-            
-            <!-- ==================== SECTION 5: ADDITIONAL CONTEXT ==================== -->
-            <div class="form-section mb-5">
-              <h5 class="fw-bold mb-3" style="color: #1e3c5c">
-                <i class="fas fa-file-alt me-2"></i>5. Additional Context
-              </h5>
-              
-              <div class="row g-3">
-                <div class="col-12">
-                  <label for="initialContextDesc" class="form-label fw-semibold">Site-Specific Conditions</label>
-                  <textarea class="form-control" id="initialContextDesc" name="initialContextDesc" rows="3" 
-                            placeholder="Describe any site-specific conditions that may affect safety: weather exposure, terrain, access restrictions, nearby hazards, etc."></textarea>
-                </div>
-                
-                <div class="col-12">
-                  <label for="specialConsiderations" class="form-label fw-semibold">Special Considerations</label>
-                  <textarea class="form-control" id="specialConsiderations" name="specialConsiderations" rows="2" 
-                            placeholder="Any special safety considerations: working at height, confined space, hot work, etc."></textarea>
-                </div>
-              </div>
-            </div>
-            
-            <!-- Submit Buttons -->
-            <div class="d-flex gap-2 justify-content-end mt-4 pt-3 border-top">
-              <a href="/worksites/my-worksites" class="btn btn-secondary btn-lg px-4">Cancel</a>
-              <button type="submit" class="btn btn-primary btn-lg px-4" style="background: linear-gradient(135deg, #26a69a 0%, #00897b 100%); border: none;">
-                <i class="fas fa-save me-2"></i> Create Work Area
-              </button>
-            </div>
-          </form>
+    <div class="col-12 col-lg-8">
+      <div class="d-flex flex-column flex-lg-row justify-content-between align-items-lg-end gap-3 mb-4">
+        <div>
+          <p class="text-uppercase text-muted fw-semibold small mb-1">Safety officer intake</p>
+          <h1 class="h3 fw-bold mb-1" style="color: #1e3c5c;">Create Work Area</h1>
+          <p class="text-muted mb-0">Capture the facts All-Safe needs to prepare useful safety documents.</p>
         </div>
       </div>
+
+      <form action="/work-areas/create" method="POST" id="workAreaForm">
+        <div class="wizard-panel mb-3" aria-label="Work area creation steps">
+          <div class="d-flex justify-content-between align-items-center gap-3 mb-3">
+            <span class="fw-semibold text-muted" id="wizardStepLabel">Step 1 of 11</span>
+            <span class="fw-semibold" id="wizardSectionLabel" style="color: #1e3c5c;">Work Area Basics</span>
+          </div>
+          <div class="step-strip" id="wizardStepStrip" aria-label="Numbered form steps">
+            <button type="button" class="step-dot is-active" data-step-index="0" aria-label="Step 1">1</button>
+            <button type="button" class="step-dot" data-step-index="1" aria-label="Step 2">2</button>
+            <button type="button" class="step-dot" data-step-index="2" aria-label="Step 3">3</button>
+            <button type="button" class="step-dot" data-step-index="3" aria-label="Step 4">4</button>
+            <button type="button" class="step-dot" data-step-index="4" aria-label="Step 5">5</button>
+            <button type="button" class="step-dot" data-step-index="5" aria-label="Step 6">6</button>
+            <button type="button" class="step-dot" data-step-index="6" aria-label="Step 7">7</button>
+            <button type="button" class="step-dot" data-step-index="7" aria-label="Step 8">8</button>
+            <button type="button" class="step-dot" data-step-index="8" aria-label="Step 9">9</button>
+            <button type="button" class="step-dot" data-step-index="9" aria-label="Step 10">10</button>
+            <button type="button" class="step-dot" data-step-index="10" aria-label="Step 11">11</button>
+          </div>
+        </div>
+
+        <section class="intake-section wizard-step" data-step-title="Work Area Basics">
+          <div class="section-heading">
+            <span>1</span>
+            <div>
+              <h2>Work Area Basics</h2>
+              <p>Work area name and location are optional. You may use a simple reference such as "Kitwe" or "Workshop area" instead of the exact site name or precise location. If you leave them blank, All-Safe will create a default reference for you.</p>
+            </div>
+          </div>
+
+          <div class="row g-3">
+            <div class="col-md-6">
+              <label class="form-label fw-semibold" for="name">Work area name</label>
+              <input class="form-control" id="name" name="name" type="text" placeholder="Optional">
+              <small class="text-muted">Any memorable name is fine. It does not need to be the official or exact site name.</small>
+            </div>
+            <div class="col-md-6">
+              <label class="form-label fw-semibold" for="location">Location</label>
+              <input class="form-control" id="location" name="location" type="text" placeholder="Optional, e.g., Kitwe">
+              <small class="text-muted">A town or general area is enough. The precise location can be added manually in the final document.</small>
+            </div>
+            <div class="col-md-6">
+              <label class="form-label fw-semibold" for="mainActivity">Main activity or job being done</label>
+              <input class="form-control" id="mainActivity" name="mainActivity" type="text" required placeholder="e.g., Excavation, welding, lifting, cleaning">
+            </div>
+            <div class="col-md-3">
+              <label class="form-label fw-semibold" for="plannedStart">Expected start date</label>
+              <input class="form-control" id="plannedStart" name="plannedStart" type="date">
+            </div>
+            <div class="col-md-3">
+              <label class="form-label fw-semibold" for="plannedEnd">Expected end date</label>
+              <input class="form-control" id="plannedEnd" name="plannedEnd" type="date">
+            </div>
+            <div class="col-md-6">
+              <label class="form-label fw-semibold" for="shiftOrWorkingTime">Shift or working time</label>
+              <input class="form-control" id="shiftOrWorkingTime" name="shiftOrWorkingTime" type="text" placeholder="e.g., 07:00 - 17:00, night shift">
+            </div>
+            <div class="col-md-6">
+              <label class="form-label fw-semibold" for="numberOfPeopleInvolved">Number of people involved</label>
+              <input class="form-control" id="numberOfPeopleInvolved" name="numberOfPeopleInvolved" type="number" min="0">
+            </div>
+            <div class="col-12">
+              <label class="form-label fw-semibold" for="description">Short description of the work</label>
+              <textarea class="form-control" id="description" name="description" rows="3" placeholder="Describe what will be done, where the work starts and ends, and anything unusual about the job."></textarea>
+            </div>
+            <div class="col-12">
+              <label class="form-label fw-semibold">Type of workers involved</label>
+              <div class="option-grid">
+                <label class="check-tile"><input type="checkbox" name="workerEmployees"> Employees</label>
+                <label class="check-tile"><input type="checkbox" name="workerContractors"> Contractors</label>
+                <label class="check-tile"><input type="checkbox" name="workerVisitors"> Visitors</label>
+                <label class="check-tile"><input type="checkbox" name="workerPublicNearby"> Public nearby</label>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <section class="intake-section wizard-step" data-step-title="Personal Risks">
+          <div class="section-heading">
+            <span>2</span>
+            <div>
+              <h2>What Risks Have You Personally Identified?</h2>
+              <p>Write what you have seen, heard from workers, or collected from WhatsApp/verbal reports.</p>
+            </div>
+          </div>
+          <div class="row g-3">
+            <div class="col-md-6"><label class="form-label fw-semibold" for="riskPeople">Risk to people</label><textarea class="form-control" id="riskPeople" name="riskPeople" rows="3"></textarea></div>
+            <div class="col-md-6"><label class="form-label fw-semibold" for="riskEquipment">Risk to equipment</label><textarea class="form-control" id="riskEquipment" name="riskEquipment" rows="3"></textarea></div>
+            <div class="col-md-6"><label class="form-label fw-semibold" for="riskEnvironment">Risk to environment</label><textarea class="form-control" id="riskEnvironment" name="riskEnvironment" rows="3"></textarea></div>
+            <div class="col-md-6"><label class="form-label fw-semibold" for="riskNearbyWorkersPublic">Risk to nearby workers/public</label><textarea class="form-control" id="riskNearbyWorkersPublic" name="riskNearbyWorkersPublic" rows="3"></textarea></div>
+            <div class="col-md-6"><label class="form-label fw-semibold" for="riskPropertyMaterials">Risk to property/materials</label><textarea class="form-control" id="riskPropertyMaterials" name="riskPropertyMaterials" rows="3"></textarea></div>
+            <div class="col-md-6"><label class="form-label fw-semibold" for="riskOperationsProduction">Risk to operations or production</label><textarea class="form-control" id="riskOperationsProduction" name="riskOperationsProduction" rows="3"></textarea></div>
+          </div>
+        </section>
+
+        <section class="intake-section wizard-step" data-step-title="Controls Taken">
+          <div class="section-heading">
+            <span>3</span>
+            <div>
+              <h2>What Measures Have You Already Taken?</h2>
+              <p>Select the controls already in place and add anything specific the AI should know.</p>
+            </div>
+          </div>
+          <div class="option-grid">
+            <% controls.forEach(([value, label]) => { %>
+              <label class="check-tile"><input type="checkbox" name="existingControls" value="<%= value %>"> <%= label %></label>
+            <% }) %>
+          </div>
+          <label class="form-label fw-semibold mt-3" for="existingControlsNotes">Control notes</label>
+          <textarea class="form-control" id="existingControlsNotes" name="existingControlsNotes" rows="3" placeholder="Explain what has been done, where it is placed, who checked it, and any gaps still open."></textarea>
+        </section>
+
+        <section class="intake-section wizard-step" data-step-title="Emergency Preparedness">
+          <div class="section-heading">
+            <span>4</span>
+            <div>
+              <h2>Emergency Preparedness</h2>
+              <p>Record what is ready to protect people, equipment, and lives if something goes wrong.</p>
+            </div>
+          </div>
+          <div class="row g-3">
+            <div class="col-md-6"><label class="form-label fw-semibold" for="emergencyContactPerson">Emergency contact person</label><input class="form-control" id="emergencyContactPerson" name="emergencyContactPerson" type="text"></div>
+            <div class="col-md-6"><label class="form-label fw-semibold" for="nearestClinicHospital">Nearest clinic/hospital</label><input class="form-control" id="nearestClinicHospital" name="nearestClinicHospital" type="text"></div>
+            <div class="col-md-6"><label class="form-label fw-semibold" for="healthFacilityDistanceTime">Distance or travel time to health facility</label><input class="form-control" id="healthFacilityDistanceTime" name="healthFacilityDistanceTime" type="text"></div>
+            <div class="col-md-6"><label class="form-label fw-semibold" for="trainedFirstAiders">Number of trained first aiders</label><input class="form-control" id="trainedFirstAiders" name="trainedFirstAiders" type="number" min="0"></div>
+            <div class="col-md-6"><label class="form-label fw-semibold" for="emergencyExitRoutes">Emergency exit routes</label><input class="form-control" id="emergencyExitRoutes" name="emergencyExitRoutes" type="text"></div>
+            <div class="col-md-6"><label class="form-label fw-semibold" for="assemblyPoint">Assembly point</label><input class="form-control" id="assemblyPoint" name="assemblyPoint" type="text"></div>
+            <div class="col-md-6"><label class="form-label fw-semibold" for="rescueEquipment">Rescue equipment</label><input class="form-control" id="rescueEquipment" name="rescueEquipment" type="text"></div>
+            <div class="col-md-6">
+              <label class="form-label fw-semibold">Communication method</label>
+              <div class="option-grid compact">
+                <label class="check-tile"><input type="checkbox" name="communicationMethods" value="phone"> Phone</label>
+                <label class="check-tile"><input type="checkbox" name="communicationMethods" value="radio"> Radio</label>
+                <label class="check-tile"><input type="checkbox" name="communicationMethods" value="whatsapp"> WhatsApp</label>
+              </div>
+            </div>
+            <div class="col-12">
+              <div class="option-grid">
+                <label class="check-tile"><input type="checkbox" name="ambulanceAvailable"> Ambulance availability confirmed</label>
+                <label class="check-tile"><input type="checkbox" name="firstAidBoxAvailable"> First aid box available</label>
+                <label class="check-tile"><input type="checkbox" name="fireExtinguishersAvailable"> Fire extinguishers available</label>
+                <label class="check-tile"><input type="checkbox" name="evacuationPlan"> Evacuation plan available</label>
+                <label class="check-tile"><input type="checkbox" name="spillKitAvailable"> Spill kit available</label>
+                <label class="check-tile"><input type="checkbox" name="emergencyShowerEyewashAvailable"> Emergency shower/eye wash available</label>
+              </div>
+            </div>
+            <div class="col-12"><label class="form-label fw-semibold" for="emergencyPreparednessNotes">Emergency notes</label><textarea class="form-control" id="emergencyPreparednessNotes" name="emergencyPreparednessNotes" rows="3"></textarea></div>
+          </div>
+        </section>
+
+        <section class="intake-section wizard-step" data-step-title="People Exposure">
+          <div class="section-heading">
+            <span>5</span>
+            <div>
+              <h2>People Exposure</h2>
+              <p>Show who may be exposed and whether supervision or extra protection is needed.</p>
+            </div>
+          </div>
+          <div class="row g-3">
+            <div class="col-md-6"><label class="form-label fw-semibold" for="workersInArea">How many people will work in this area?</label><input class="form-control" id="workersInArea" name="workersInArea" type="number" min="0"></div>
+            <div class="col-md-6"><label class="form-label fw-semibold" for="peoplePassingNearby">How many may pass nearby?</label><input class="form-control" id="peoplePassingNearby" name="peoplePassingNearby" type="number" min="0"></div>
+            <div class="col-12">
+              <div class="option-grid">
+                <label class="check-tile"><input type="checkbox" name="inexperiencedWorkers"> Inexperienced workers involved</label>
+                <label class="check-tile"><input type="checkbox" name="contractorsInvolved"> Contractors involved</label>
+                <label class="check-tile"><input type="checkbox" name="workingAlone"> Workers working alone</label>
+                <label class="check-tile"><input type="checkbox" name="supervisionAvailable"> Supervision available</label>
+                <label class="check-tile"><input type="checkbox" name="vulnerablePersonsExposed"> Vulnerable persons exposed</label>
+              </div>
+            </div>
+            <div class="col-12"><label class="form-label fw-semibold" for="peopleExposureNotes">People exposure notes</label><textarea class="form-control" id="peopleExposureNotes" name="peopleExposureNotes" rows="3"></textarea></div>
+          </div>
+        </section>
+
+        <section class="intake-section wizard-step" data-step-title="Hazard Categories">
+          <div class="section-heading">
+            <span>6</span>
+            <div>
+              <h2>Hazard Categories</h2>
+              <p>Select each hazard that applies. For every selected hazard, add what could happen, likelihood, severity, current controls, and controls still needed.</p>
+            </div>
+          </div>
+
+          <div class="hazard-list">
+            <% hazards.forEach(([value, label], index) => { %>
+              <div class="hazard-row">
+                <label class="check-tile hazard-check">
+                  <input type="checkbox" name="hazardCategories" value="<%= value %>" data-hazard-toggle="<%= value %>">
+                  <%= label %>
+                </label>
+                <div class="hazard-detail" data-hazard-detail="<%= value %>">
+                  <div class="row g-3">
+                    <div class="col-md-6"><label class="form-label" for="hazardWhatCouldHappen<%= index %>">What could happen?</label><textarea class="form-control hazard-input" id="hazardWhatCouldHappen<%= index %>" name="hazardWhatCouldHappen" rows="2" disabled></textarea></div>
+                    <div class="col-md-3"><label class="form-label" for="hazardLikelihood<%= index %>">How likely is it?</label><select class="form-select hazard-input" id="hazardLikelihood<%= index %>" name="hazardLikelihood" disabled><option value="rare">Rare</option><option value="unlikely">Unlikely</option><option value="possible" selected>Possible</option><option value="likely">Likely</option><option value="almost_certain">Almost certain</option></select></div>
+                    <div class="col-md-3"><label class="form-label" for="hazardSeverity<%= index %>">How severe could it be?</label><select class="form-select hazard-input" id="hazardSeverity<%= index %>" name="hazardSeverity" disabled><option value="minor">Minor</option><option value="moderate" selected>Moderate</option><option value="major">Major</option><option value="catastrophic">Catastrophic</option></select></div>
+                    <div class="col-md-6"><label class="form-label" for="hazardExistingControls<%= index %>">Controls already in place</label><textarea class="form-control hazard-input" id="hazardExistingControls<%= index %>" name="hazardExistingControls" rows="2" disabled></textarea></div>
+                    <div class="col-md-6"><label class="form-label" for="hazardControlsStillNeeded<%= index %>">Controls still needed</label><textarea class="form-control hazard-input" id="hazardControlsStillNeeded<%= index %>" name="hazardControlsStillNeeded" rows="2" disabled></textarea></div>
+                  </div>
+                </div>
+              </div>
+            <% }) %>
+          </div>
+        </section>
+
+        <section class="intake-section wizard-step" data-step-title="PPE Assessment">
+          <div class="section-heading">
+            <span>7</span>
+            <div>
+              <h2>PPE Assessment</h2>
+              <p>Record what has been obtained and whether it is adequate for the work.</p>
+            </div>
+          </div>
+          <div class="option-grid">
+            <% ppeOptions.forEach(([value, label]) => { %>
+              <label class="check-tile"><input type="checkbox" name="ppeItems" value="<%= value %>"> <%= label %></label>
+            <% }) %>
+          </div>
+          <div class="row g-3 mt-1">
+            <div class="col-md-6"><label class="form-label fw-semibold" for="ppeAdequacy">Is the PPE adequate?</label><select class="form-select" id="ppeAdequacy" name="ppeAdequacy"><option value="">Select</option><option value="adequate">Adequate</option><option value="partly_adequate">Partly adequate</option><option value="not_adequate">Not adequate</option><option value="unknown">Unknown</option></select></div>
+            <div class="col-md-6"><label class="form-label fw-semibold" for="ppeCondition">PPE condition</label><input class="form-control" id="ppeCondition" name="ppeCondition" type="text" placeholder="e.g., good, damaged items removed, needs inspection"></div>
+            <div class="col-12">
+              <div class="option-grid">
+                <label class="check-tile"><input type="checkbox" name="ppeEnoughForAllWorkers"> Enough for all workers</label>
+                <label class="check-tile"><input type="checkbox" name="ppeInspected"> PPE inspected</label>
+                <label class="check-tile"><input type="checkbox" name="ppeWorkersKnowHowToUse"> Workers know how to use it</label>
+                <label class="check-tile"><input type="checkbox" name="ppeReplacementAvailable"> Replacement PPE available</label>
+              </div>
+            </div>
+            <div class="col-12"><label class="form-label fw-semibold" for="ppeNotes">PPE notes</label><textarea class="form-control" id="ppeNotes" name="ppeNotes" rows="3"></textarea></div>
+            <div class="col-12"><label class="form-label fw-semibold" for="customPPE">Additional PPE</label><textarea class="form-control" id="customPPE" name="customPPE" rows="2" placeholder="One item per line"></textarea></div>
+          </div>
+        </section>
+
+        <section class="intake-section wizard-step" data-step-title="Equipment and Tools">
+          <div class="section-heading">
+            <span>8</span>
+            <div>
+              <h2>Equipment and Tools</h2>
+              <p>Capture equipment condition, authority to operate, guarding, emergency stops, and failure risks.</p>
+            </div>
+          </div>
+          <div class="row g-3">
+            <div class="col-12"><label class="form-label fw-semibold" for="equipmentUsed">What equipment will be used?</label><textarea class="form-control" id="equipmentUsed" name="equipmentUsed" rows="3"></textarea></div>
+            <div class="col-md-6"><label class="form-label fw-semibold" for="authorizedOperators">Who is allowed to operate it?</label><input class="form-control" id="authorizedOperators" name="authorizedOperators" type="text"></div>
+            <div class="col-12">
+              <div class="option-grid">
+                <label class="check-tile"><input type="checkbox" name="equipmentInspected"> Equipment inspected</label>
+                <label class="check-tile"><input type="checkbox" name="equipmentCertified"> Certified where required</label>
+                <label class="check-tile"><input type="checkbox" name="guardsInPlace"> Guards in place</label>
+                <label class="check-tile"><input type="checkbox" name="emergencyStopsWorking"> Emergency stops working</label>
+                <label class="check-tile"><input type="checkbox" name="maintenanceUpToDate"> Maintenance up to date</label>
+              </div>
+            </div>
+            <div class="col-12">
+              <label class="form-label fw-semibold">Equipment failure risks</label>
+              <div class="option-grid compact">
+                <label class="check-tile"><input type="checkbox" name="equipmentFailureRisks" value="breakdown"> Breakdown</label>
+                <label class="check-tile"><input type="checkbox" name="equipmentFailureRisks" value="fire"> Fire</label>
+                <label class="check-tile"><input type="checkbox" name="equipmentFailureRisks" value="leakage"> Leakage</label>
+                <label class="check-tile"><input type="checkbox" name="equipmentFailureRisks" value="collapse"> Collapse</label>
+                <label class="check-tile"><input type="checkbox" name="equipmentFailureRisks" value="electrocution"> Electrocution</label>
+              </div>
+            </div>
+            <div class="col-12"><label class="form-label fw-semibold" for="equipmentNotes">Equipment notes</label><textarea class="form-control" id="equipmentNotes" name="equipmentNotes" rows="3"></textarea></div>
+          </div>
+        </section>
+
+        <section class="intake-section wizard-step" data-step-title="Materials and Substances">
+          <div class="section-heading">
+            <span>9</span>
+            <div>
+              <h2>Materials and Substances</h2>
+              <p>Include chemicals, dust-producing materials, storage, spill response, PPE, and first aid after exposure.</p>
+            </div>
+          </div>
+          <div class="row g-3">
+            <div class="col-12"><label class="form-label fw-semibold" for="materialsOrChemicalsUsed">What materials or chemicals are being used?</label><textarea class="form-control" id="materialsOrChemicalsUsed" name="materialsOrChemicalsUsed" rows="3"></textarea></div>
+            <div class="col-12">
+              <div class="option-grid">
+                <label class="check-tile"><input type="checkbox" name="safetyDataSheetsAvailable"> Safety Data Sheets available</label>
+                <label class="check-tile"><input type="checkbox" name="substanceHazards" value="flammable"> Flammable</label>
+                <label class="check-tile"><input type="checkbox" name="substanceHazards" value="toxic"> Toxic</label>
+                <label class="check-tile"><input type="checkbox" name="substanceHazards" value="corrosive"> Corrosive</label>
+                <label class="check-tile"><input type="checkbox" name="substanceHazards" value="explosive"> Explosive</label>
+                <label class="check-tile"><input type="checkbox" name="substanceHazards" value="dusty"> Dusty</label>
+              </div>
+            </div>
+            <div class="col-md-6"><label class="form-label fw-semibold" for="storageMethod">How are they stored?</label><textarea class="form-control" id="storageMethod" name="storageMethod" rows="3"></textarea></div>
+            <div class="col-md-6"><label class="form-label fw-semibold" for="spillHandling">How are spills handled?</label><textarea class="form-control" id="spillHandling" name="spillHandling" rows="3"></textarea></div>
+            <div class="col-md-6"><label class="form-label fw-semibold" for="materialRequiredPPE">What PPE is required?</label><textarea class="form-control" id="materialRequiredPPE" name="materialRequiredPPE" rows="3"></textarea></div>
+            <div class="col-md-6"><label class="form-label fw-semibold" for="firstAidAfterExposure">What first aid is required after exposure?</label><textarea class="form-control" id="firstAidAfterExposure" name="firstAidAfterExposure" rows="3"></textarea></div>
+          </div>
+        </section>
+
+        <section class="intake-section wizard-step" data-step-title="Incident History">
+          <div class="section-heading">
+            <span>10</span>
+            <div>
+              <h2>Incident and Near-Miss History</h2>
+              <p>Tell All-Safe whether this area or activity has already shown warning signs.</p>
+            </div>
+          </div>
+          <div class="option-grid">
+            <label class="check-tile"><input type="checkbox" name="similarHappenedBefore"> Similar incident happened before</label>
+            <label class="check-tile"><input type="checkbox" name="workersComplained"> Workers complained about this area</label>
+            <label class="check-tile"><input type="checkbox" name="nearMisses"> Near-misses reported</label>
+            <label class="check-tile"><input type="checkbox" name="equipmentFailedBefore"> Equipment failed before</label>
+            <label class="check-tile"><input type="checkbox" name="injuriesFiresSpillsFallsShocksExposure"> Injuries, fires, spills, falls, shocks, or exposure incidents</label>
+          </div>
+          <label class="form-label fw-semibold mt-3" for="incidentHistoryNotes">History notes</label>
+          <textarea class="form-control" id="incidentHistoryNotes" name="incidentHistoryNotes" rows="3"></textarea>
+        </section>
+
+        <section class="intake-section wizard-step" data-step-title="AI Document Intent">
+          <div class="section-heading">
+            <span>11</span>
+            <div>
+              <h2>AI Document Intent</h2>
+              <p>Select the documents you want All-Safe to generate from this work area information.</p>
+            </div>
+          </div>
+          <div class="option-grid">
+            <% documents.forEach(([value, label]) => { %>
+              <label class="check-tile"><input type="checkbox" name="documentIntent" value="<%= value %>"> <%= label %></label>
+            <% }) %>
+          </div>
+        </section>
+
+        <div class="submit-bar">
+          <a href="/dashboard/officer" class="btn btn-outline-secondary btn-lg px-4">Cancel</a>
+          <button class="btn btn-outline-primary btn-lg px-4" id="wizardPrev" type="button">
+            <i class="fas fa-arrow-left me-2"></i>Previous
+          </button>
+          <button class="btn btn-primary btn-lg px-4" id="wizardNext" type="button">
+            Next<i class="fas fa-arrow-right ms-2"></i>
+          </button>
+          <button class="btn btn-primary btn-lg px-4 d-none" id="wizardSubmit" type="submit">
+            <i class="fas fa-save me-2"></i>Create Work Area
+          </button>
+        </div>
+      </form>
     </div>
   </div>
 </div>
 
 <script>
-  // Add hazard function
-  function addHazard() {
-    const container = document.getElementById('hazardsContainer');
-    const newEntry = document.createElement('div');
-    newEntry.className = 'hazard-entry mb-3 p-3 border rounded bg-light';
-    newEntry.innerHTML = `
-      <div class="row g-2">
-        <div class="col-md-5">
-          <input type="text" class="form-control" name="hazardDescriptions[]" placeholder="Hazard description">
-        </div>
-        <div class="col-md-3">
-          <select class="form-select" name="hazardRiskLevels[]">
-            <option value="low">Low Risk</option>
-            <option value="medium" selected>Medium Risk</option>
-            <option value="high">High Risk</option>
-            <option value="critical">Critical Risk</option>
-          </select>
-        </div>
-        <div class="col-md-3">
-          <input type="text" class="form-control" name="hazardControls[]" placeholder="Controls">
-        </div>
-        <div class="col-md-1">
-          <button type="button" class="btn btn-outline-danger w-100" onclick="this.closest('.hazard-entry').remove()">
-            <i class="fas fa-trash"></i>
-          </button>
-        </div>
-      </div>
-    `;
-    container.appendChild(newEntry);
+  const wizardSteps = Array.from(document.querySelectorAll('.wizard-step'));
+  const wizardPrev = document.getElementById('wizardPrev');
+  const wizardNext = document.getElementById('wizardNext');
+  const wizardSubmit = document.getElementById('wizardSubmit');
+  const wizardStepLabel = document.getElementById('wizardStepLabel');
+  const wizardSectionLabel = document.getElementById('wizardSectionLabel');
+  const wizardStepDots = Array.from(document.querySelectorAll('.step-dot'));
+  let currentWizardStep = 0;
+
+  function updateWizard() {
+    const totalSteps = wizardSteps.length;
+    wizardSteps.forEach(function (step, index) {
+      step.classList.toggle('is-active', index === currentWizardStep);
+    });
+
+    const visibleStep = wizardSteps[currentWizardStep];
+    wizardStepLabel.textContent = 'Step ' + (currentWizardStep + 1) + ' of ' + totalSteps;
+    wizardSectionLabel.textContent = visibleStep.dataset.stepTitle || '';
+    wizardStepDots.forEach(function (dot, index) {
+      dot.classList.toggle('is-active', index === currentWizardStep);
+      dot.classList.toggle('is-complete', index < currentWizardStep);
+      dot.setAttribute('aria-current', index === currentWizardStep ? 'step' : 'false');
+    });
+
+    wizardPrev.disabled = currentWizardStep === 0;
+    wizardNext.classList.toggle('d-none', currentWizardStep === totalSteps - 1);
+    wizardSubmit.classList.toggle('d-none', currentWizardStep !== totalSteps - 1);
   }
-  
-  // Process custom PPE items before submission
-  document.getElementById('workAreaForm').addEventListener('submit', function(e) {
-    const customPPE = document.getElementById('customPPE').value;
-    if (customPPE) {
-      // Create hidden inputs for custom PPE items
-      const lines = customPPE.split('\n');
-      lines.forEach(line => {
-        if (line.trim()) {
-          const input = document.createElement('input');
-          input.type = 'hidden';
-          input.name = 'ppeItems';
-          input.value = line.trim();
-          this.appendChild(input);
-        }
-      });
+
+  function validateCurrentStep() {
+    const controls = Array.from(wizardSteps[currentWizardStep].querySelectorAll('input, select, textarea'));
+    const invalidControl = controls.find(function (control) {
+      return !control.disabled && !control.checkValidity();
+    });
+
+    if (invalidControl) {
+      invalidControl.reportValidity();
+      return false;
     }
+
+    return true;
+  }
+
+  wizardPrev.addEventListener('click', function () {
+    if (currentWizardStep === 0) return;
+    currentWizardStep -= 1;
+    updateWizard();
+    window.scrollTo({ top: 0, behavior: 'smooth' });
   });
+
+  wizardNext.addEventListener('click', function () {
+    if (!validateCurrentStep()) return;
+    if (currentWizardStep >= wizardSteps.length - 1) return;
+    currentWizardStep += 1;
+    updateWizard();
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  });
+
+  wizardStepDots.forEach(function (dot) {
+    dot.addEventListener('click', function () {
+      const requestedStep = Number(dot.dataset.stepIndex);
+      if (Number.isNaN(requestedStep) || requestedStep === currentWizardStep) return;
+      if (requestedStep > currentWizardStep && !validateCurrentStep()) return;
+      currentWizardStep = requestedStep;
+      updateWizard();
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    });
+  });
+
+  document.querySelectorAll('[data-hazard-toggle]').forEach(function (toggle) {
+    const detail = document.querySelector('[data-hazard-detail="' + toggle.dataset.hazardToggle + '"]');
+    const inputs = detail ? detail.querySelectorAll('.hazard-input') : [];
+    const sync = function () {
+      if (!detail) return;
+      detail.classList.toggle('is-open', toggle.checked);
+      inputs.forEach(function (input) {
+        input.disabled = !toggle.checked;
+      });
+    };
+    toggle.addEventListener('change', sync);
+    sync();
+  });
+
+  document.getElementById('workAreaForm').addEventListener('submit', function () {
+    const customPPE = document.getElementById('customPPE').value;
+    customPPE.split('\n').map(function (line) {
+      return line.trim();
+    }).filter(Boolean).forEach(function (item) {
+      const input = document.createElement('input');
+      input.type = 'hidden';
+      input.name = 'ppeItems';
+      input.value = item;
+      this.appendChild(input);
+    }, this);
+  });
+
+  updateWizard();
 </script>
 
 <style>
-  .form-section {
-    border-left: 4px solid #26a69a;
-    padding-left: 1.5rem;
+  .work-area-create {
+    background: #f6f8fb;
   }
-  
-  .form-control:focus, .form-select:focus {
+
+  .intake-section {
+    background: #fff;
+    border: 1px solid #dfe7ef;
+    border-radius: 8px;
+    padding: 1.5rem;
+    margin-bottom: 1rem;
+  }
+
+  .wizard-panel {
+    background: #fff;
+    border: 1px solid #dfe7ef;
+    border-radius: 8px;
+    padding: 1rem 1.25rem;
+  }
+
+  .step-strip {
+    display: grid;
+    grid-template-columns: repeat(11, minmax(34px, 1fr));
+    gap: .45rem;
+  }
+
+  .step-dot {
+    min-width: 34px;
+    height: 34px;
+    border: 1px solid #cfd9e3;
+    border-radius: 999px;
+    background: #fff;
+    color: #607080;
+    font-weight: 700;
+    line-height: 1;
+  }
+
+  .step-dot.is-active {
+    background: #26a69a;
     border-color: #26a69a;
-    box-shadow: 0 0 0 0.2rem rgba(38, 166, 154, 0.25);
+    color: #fff;
   }
-  
+
+  .step-dot.is-complete {
+    background: #e7f5f3;
+    border-color: #26a69a;
+    color: #00796b;
+  }
+
+  .wizard-step {
+    display: none;
+  }
+
+  .wizard-step.is-active {
+    display: block;
+  }
+
+  .section-heading {
+    display: flex;
+    gap: 1rem;
+    align-items: flex-start;
+    margin-bottom: 1.25rem;
+  }
+
+  .section-heading span {
+    width: 2rem;
+    height: 2rem;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 999px;
+    background: #26a69a;
+    color: #fff;
+    font-weight: 700;
+    flex: 0 0 auto;
+  }
+
+  .section-heading h2 {
+    font-size: 1.15rem;
+    color: #1e3c5c;
+    margin: 0;
+    font-weight: 700;
+  }
+
+  .section-heading p {
+    color: #607080;
+    margin: .25rem 0 0;
+  }
+
+  .option-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(210px, 1fr));
+    gap: .65rem;
+  }
+
+  .option-grid.compact {
+    grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+  }
+
+  .check-tile {
+    min-height: 44px;
+    display: flex;
+    align-items: center;
+    gap: .55rem;
+    border: 1px solid #dfe7ef;
+    background: #fbfcfe;
+    border-radius: 8px;
+    padding: .65rem .8rem;
+    color: #263746;
+    font-weight: 500;
+  }
+
+  .check-tile input {
+    flex: 0 0 auto;
+  }
+
+  .hazard-list {
+    display: grid;
+    gap: .75rem;
+  }
+
+  .hazard-row {
+    border: 1px solid #dfe7ef;
+    border-radius: 8px;
+    overflow: hidden;
+    background: #fff;
+  }
+
+  .hazard-check {
+    border: 0;
+    border-radius: 0;
+    background: #fbfcfe;
+  }
+
+  .hazard-detail {
+    display: none;
+    padding: 1rem;
+    border-top: 1px solid #dfe7ef;
+    background: #f8fbfb;
+  }
+
+  .hazard-detail.is-open {
+    display: block;
+  }
+
+  .form-control:focus,
+  .form-select:focus,
+  .form-check-input:focus {
+    border-color: #26a69a;
+    box-shadow: 0 0 0 .2rem rgba(38, 166, 154, .18);
+  }
+
   .form-check-input:checked {
     background-color: #26a69a;
     border-color: #26a69a;
   }
-  
-  .badge {
-    font-size: 0.9rem;
-    padding: 0.5rem 1rem;
+
+  .submit-bar {
+    position: sticky;
+    bottom: 0;
+    z-index: 4;
+    display: flex;
+    justify-content: flex-end;
+    gap: .75rem;
+    padding: 1rem 0;
+    background: linear-gradient(180deg, rgba(246, 248, 251, 0), #f6f8fb 30%);
   }
-  
-  .hazard-entry {
-    transition: all 0.3s ease;
+
+  .submit-bar .btn-primary {
+    background: #00897b;
+    border-color: #00897b;
   }
-  
-  .hazard-entry:hover {
-    background-color: #f0f7f5 !important;
+
+  .submit-bar .btn-outline-primary {
+    color: #00897b;
+    border-color: #00897b;
+  }
+
+  .submit-bar .btn-outline-primary:hover,
+  .submit-bar .btn-outline-primary:focus {
+    background: #00897b;
+    border-color: #00897b;
+    color: #fff;
+  }
+
+  @media (max-width: 576px) {
+    .intake-section {
+      padding: 1rem;
+    }
+
+    .step-strip {
+      grid-template-columns: repeat(6, minmax(34px, 1fr));
+    }
+
+    .section-heading {
+      gap: .75rem;
+    }
+
+    .submit-bar {
+      flex-direction: column-reverse;
+    }
+
+    .submit-bar .btn {
+      width: 100%;
+    }
   }
 </style>
 

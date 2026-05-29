@@ -2,10 +2,11 @@
   "name": "all-safe",
   "version": "1.0.0",
   "description": "Safety Management System built for standalone safety officers",
-  "main": "app.js",
+  "main": "backend/server.js",
   "scripts": {
-    "start": "node app.js",
-    "dev": "nodemon app.js"
+    "start": "node backend/server.js",
+    "dev": "nodemon backend/server.js",
+    "seed": "node backend/utils/seedSafetyOfficer.js"
   },
   "keywords": [],
   "author": "Samuel Katumba",

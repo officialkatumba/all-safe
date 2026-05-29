@@ -13,7 +13,7 @@
           </h3>
           <div class="d-flex gap-2">
             <span class="badge text-bg-secondary">
-              <i class="fas fa-id-card me-1"></i> <%= officer.officerNumber %>
+              <i class="fas fa-id-card me-1"></i> Safety Officer
             </span>
             <span class="badge text-bg-success">
               <i class="fas fa-check-circle me-1"></i> <%= officer.verificationStatus %>
@@ -45,8 +45,8 @@
                   <p class="mb-1"><i class="fas fa-phone me-2 text-muted"></i> <%= officer.phone || 'Not provided' %></p>
                 </div>
                 <div class="col-md-6">
-                  <p class="mb-1"><i class="fas fa-building me-2 text-muted"></i> Worksites: <%= officer.worksites?.length || 0 %></p>
-                  <p class="mb-1"><i class="fas fa-layer-group me-2 text-muted"></i> Work Areas: <%= officer.workAreas?.length || 0 %></p>
+                  <p class="mb-1"><i class="fas fa-layer-group me-2 text-muted"></i> Work Areas: <%= workAreas?.length || 0 %></p>
+                  <p class="mb-1"><i class="fas fa-file-alt me-2 text-muted"></i> Documents: <%= (stats.riskAssessments || 0) + (stats.safetyTalks || 0) %></p>
                 </div>
               </div>
               <% if (officer.bio) { %>
@@ -110,6 +110,9 @@
       <hr /> -->
 
       <div class="d-flex gap-2 justify-content-end flex-wrap mb-4">
+        <a href="/work-areas/create" class="btn btn-primary btn-sm">
+          <i class="fas fa-plus me-1"></i> New Work Area
+        </a>
         <a href="/alerts" class="btn btn-outline-danger btn-sm">
           <i class="fas fa-bell me-1"></i> Alerts
         </a>
@@ -135,7 +138,6 @@
               <thead style="background: #f8f9fa;">
                 <tr>
                   <th class="px-4 py-3">Work Area</th>
-                  <th class="py-3">Worksite</th>
                   <th class="py-3">Location</th>
                   <th class="py-3">Status</th>
                   <th class="py-3 text-end pe-4">Actions</th>
@@ -153,8 +155,7 @@
                           <strong><%= area.name %></strong>
                         </div>
                       </td>
-                      <td class="py-3"><%= area.worksite?.name || 'N/A' %></td>
-                      <td class="py-3"><%= area.location || 'Not specified' %></td>
+                      <td class="py-3"><%= area.location?.zone || 'Not specified' %></td>
                       <td class="py-3">
                         <span class="badge bg-<%= area.status === 'active' ? 'success' : 'secondary' %> bg-opacity-10 text-<%= area.status === 'active' ? 'success' : 'secondary' %> px-3 py-2 rounded-pill">
                           <i class="fas fa-<%= area.status === 'active' ? 'check-circle' : 'pause-circle' %> me-1"></i>
@@ -170,10 +171,12 @@
                   <% }) %>
                 <% } else { %>
                   <tr>
-                    <td colspan="5" class="text-center py-5">
+                    <td colspan="4" class="text-center py-5">
                       <i class="fas fa-info-circle fa-2x text-muted mb-2 d-block"></i>
-                      <p class="text-muted mb-0">No work areas assigned yet.</p>
-                      <small class="text-muted">Contact your administrator to be assigned to work areas.</small>
+                      <p class="text-muted mb-3">No work areas yet.</p>
+                      <a href="/work-areas/create" class="btn btn-sm btn-primary">
+                        <i class="fas fa-plus me-1"></i> Create your first work area
+                      </a>
                     </td>
                   </tr>
                 <% } %>

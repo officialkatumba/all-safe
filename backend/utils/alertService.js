@@ -1,7 +1,6 @@
 const Alert = require("../models/Alert");
 const User = require("../models/User");
 const WorkArea = require("../models/WorkArea");
-const SafetyOfficer = require("../models/SafetyOfficer");
 const sendEmail = require("./sendEmail");
 const { trackUsage } = require("./usageTracker");
 
@@ -25,50 +24,16 @@ function configuredAlertEmails() {
 }
 
 async function getWorkAreaAlertRecipients(workAreaId) {
-  const workArea = await WorkArea.findById(workAreaId)
-    .populate("worksite")
-    .populate("assignedSafetyOfficers.officer");
+  const workArea = await WorkArea.findById(workAreaId);
 
   if (!workArea) return { workArea: null, recipients: configuredAlertEmails() };
 
   const recipients = configuredAlertEmails();
 
-  for (const assignment of workArea.assignedSafetyOfficers || []) {
-    if (assignment.officer?.email) {
-      recipients.push({
-        safetyOfficer: assignment.officer._id,
-        name: assignment.officer.name,
-        email: assignment.officer.email,
-      });
-    }
+  const officer = await User.findById(workArea.officerId).select("name email");
+  if (officer?.email) {
+    recipients.push({ user: officer._id, name: officer.name, email: officer.email });
   }
-
-  if (workArea.worksite?.assignedSafetyOfficers?.length) {
-    const officerIds = workArea.worksite.assignedSafetyOfficers
-      .map((assignment) => assignment.officer)
-      .filter(Boolean);
-    const officers = await SafetyOfficer.find({ _id: { $in: officerIds } });
-    officers.forEach((officer) => {
-      recipients.push({
-        safetyOfficer: officer._id,
-        name: officer.name,
-        email: officer.email,
-      });
-    });
-  }
-
-  const companyAdmins = await User.find({
-    role: { $in: ["enterprise_admin", "system_admin"] },
-    $or: [
-      { _id: workArea.worksite?.ownership?.createdBy },
-      { _id: workArea.worksite?.createdBy },
-      { companyName: workArea.worksite?.clientName },
-    ],
-  }).select("name email");
-
-  companyAdmins.forEach((admin) => {
-    recipients.push({ user: admin._id, name: admin.name, email: admin.email });
-  });
 
   return { workArea, recipients: uniqueRecipients(recipients) };
 }
@@ -125,7 +90,6 @@ async function createAlert(data) {
   await trackUsage({
     company: data.metadata?.company,
     user: data.createdBy,
-    worksite: data.worksite,
     workArea: data.workArea,
     eventType: "alert_created",
     module: data.type,
@@ -163,7 +127,6 @@ async function createIncidentAlert({ incident, createdBy }) {
     message,
     type: incident.type === "environmental" ? "environmental" : "incident",
     severity: alertSeverity,
-    worksite: workArea?.worksite?._id || workArea?.worksite,
     workArea: incident.workArea,
     relatedModel: "Incident",
     relatedId: incident._id,
@@ -186,3 +149,4 @@ module.exports = {
   getWorkAreaAlertRecipients,
   shouldAlertForIncident,
 };
+

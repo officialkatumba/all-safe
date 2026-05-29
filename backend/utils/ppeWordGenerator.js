@@ -120,8 +120,7 @@ function createMainHeading(text, color = "26A69A") {
 }
 
 function createInfoTable(checklist) {
-  const workAreaName =
-    checklist.workArea?.name || checklist.worksite?.name || "N/A";
+  const workAreaName = checklist.workArea?.name || "N/A";
 
   const rows = [
     [
@@ -129,7 +128,7 @@ function createInfoTable(checklist) {
       checklist.checklistNumber ? `#${checklist.checklistNumber}` : "N/A",
     ],
     ["Title", checklist.title || "PPE Requirements"],
-    ["Work Area / Worksite", workAreaName],
+    ["Work Area", workAreaName],
     [
       "Date",
       checklist.date
@@ -494,3 +493,4 @@ async function generatePPEWordBuffer({ checklist }) {
 module.exports = {
   generatePPEWordBuffer,
 };
+

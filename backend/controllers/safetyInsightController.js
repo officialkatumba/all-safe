@@ -55,9 +55,7 @@ exports.generateSafetyInsight = async (req, res) => {
   try {
     const { workAreaId } = req.params;
 
-    const workArea = await WorkArea.findById(workAreaId)
-      .populate("worksite")
-      .populate("assignedSafetyOfficers.officer");
+    const workArea = await WorkArea.findById(workAreaId);
 
     if (!workArea) {
       req.flash("error", "Work area not found");
@@ -125,7 +123,7 @@ This document must not ask for human input. It should identify emerging patterns
 
 WORK AREA:
 Name: ${workArea.name}
-Worksite: ${workArea.worksite?.name || "N/A"}
+Location: ${workArea.location?.zone || "N/A"}
 Status: ${workArea.status || "N/A"}
 Description: ${safeText(workArea.description, 500)}
 Current Work Types: ${
@@ -335,7 +333,7 @@ Return ONLY valid JSON in this exact shape:
         endDate,
         label: "Last 90 days",
       },
-      generatedBy: req.user.safetyOfficer,
+      generatedBy: req.user._id,
       aiGenerated: true,
       aiModel: "gpt-3.5-turbo-16k",
       status: "generated",
@@ -417,3 +415,4 @@ exports.downloadWord = async (req, res) => {
       .send("Error generating Safety Insight Word document");
   }
 };
+

@@ -2,22 +2,16 @@ const Alert = require("../models/Alert");
 
 exports.listAlerts = async (req, res) => {
   try {
-    const query = {};
-
-    if (
-      req.user.role !== "system_owner" &&
-      req.user.role !== "enterprise_admin" &&
-      req.user.role !== "system_admin"
-    ) {
-      query.$or = [
+    const query = {
+      $or: [
+        { createdBy: req.user._id },
         { "recipients.user": req.user._id },
         { "recipients.email": req.user.email },
-      ];
-    }
+      ],
+    };
 
     const alerts = await Alert.find(query)
       .populate("workArea", "name")
-      .populate("worksite", "name")
       .sort({ createdAt: -1 })
       .limit(100);
 
@@ -77,3 +71,4 @@ exports.resolveAlert = async (req, res) => {
     res.redirect("/alerts");
   }
 };
+

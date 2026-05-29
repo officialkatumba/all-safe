@@ -364,3 +364,4 @@ async function generateOHSComplianceWordBuffer({ audit }) {
 }
 
 module.exports = { generateOHSComplianceWordBuffer };
+

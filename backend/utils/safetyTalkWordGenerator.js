@@ -460,3 +460,4 @@ async function generateSafetyTalkWordBuffer({ talk }) {
 module.exports = {
   generateSafetyTalkWordBuffer,
 };
+

@@ -1,5 +1,6 @@
 const JSA = require("../models/JSA");
 const WorkArea = require("../models/WorkArea");
+const SafetyHub = require("../models/SafetyHub");
 const Incident = require("../models/Incident");
 const SafetyObservation = require("../models/SafetyObservation");
 const PPEChecklist = require("../models/PPEChecklist");
@@ -52,7 +53,7 @@ const jsaSections = [
 exports.showCreateForm = async (req, res) => {
   try {
     const { workAreaId } = req.params;
-    const workArea = await WorkArea.findById(workAreaId).populate("worksite");
+    const workArea = await WorkArea.findById(workAreaId);
     if (!workArea) {
       req.flash("error", "Work area not found");
       return res.redirect("/dashboard");
@@ -144,7 +145,7 @@ exports.createJSA = async (req, res) => {
       jobTask,
       location: location || workArea.name,
       shift: shift || "all",
-      preparedBy: req.user.safetyOfficer,
+      preparedBy: req.user._id,
       date: new Date(),
       requiredPPE: ppeItems,
       requiredTraining: trainingArray,
@@ -173,6 +174,14 @@ exports.createJSA = async (req, res) => {
     if (!workArea.documents.jsas) workArea.documents.jsas = [];
     workArea.documents.jsas.push(newJSA._id);
     await workArea.save();
+    await SafetyHub.findOneAndUpdate(
+      { officerId: req.user._id, workArea: workArea._id },
+      {
+        $setOnInsert: { officerId: req.user._id, workArea: workArea._id },
+        $addToSet: { "generatedDrafts.jsas": newJSA._id },
+      },
+      { upsert: true },
+    );
 
     req.flash(
       "success",
@@ -190,7 +199,7 @@ exports.createJSA = async (req, res) => {
 exports.getJSA = async (req, res) => {
   try {
     const jsa = await JSA.findById(req.params.id)
-      .populate("workArea", "name worksite")
+      .populate("workArea", "name")
       .populate("preparedBy", "name")
       .populate("reviewedBy", "name")
       .populate("approvedBy", "name");
@@ -525,7 +534,7 @@ exports.approveJSA = async (req, res) => {
     if (!jsa)
       return res.status(404).json({ success: false, error: "JSA not found" });
     jsa.status = "approved";
-    jsa.approvedBy = req.user.safetyOfficer;
+    jsa.approvedBy = req.user._id;
     await jsa.save();
     res.json({ success: true, message: "JSA approved" });
   } catch (error) {
@@ -581,3 +590,4 @@ exports.downloadWord = async (req, res) => {
     return res.status(500).send("Error generating JSA Word document");
   }
 };
+

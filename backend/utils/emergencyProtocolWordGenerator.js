@@ -445,3 +445,4 @@ async function generateEmergencyProtocolWordBuffer({ protocol }) {
 module.exports = {
   generateEmergencyProtocolWordBuffer,
 };
+

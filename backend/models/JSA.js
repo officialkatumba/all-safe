@@ -5,14 +5,12 @@
 //   {
 //     jsaNumber: { type: Number, unique: true },
 
-//     worksite: {
 //       type: mongoose.Schema.Types.ObjectId,
-//       ref: "Worksite",
 //       required: true,
 //     },
 //     createdBy: {
 //       type: mongoose.Schema.Types.ObjectId,
-//       ref: "SafetyOfficer",
+//       ref: "User",
 //       required: true,
 //     },
 
@@ -64,7 +62,7 @@
 //       {
 //         approver: {
 //           type: mongoose.Schema.Types.ObjectId,
-//           ref: "SafetyOfficer",
+//           ref: "User",
 //         },
 //         date: Date,
 //         comments: String,
@@ -126,16 +124,16 @@
 //     // Personnel
 //     preparedBy: {
 //       type: mongoose.Schema.Types.ObjectId,
-//       ref: "SafetyOfficer",
+//       ref: "User",
 //       required: true,
 //     },
 //     reviewedBy: {
 //       type: mongoose.Schema.Types.ObjectId,
-//       ref: "SafetyOfficer",
+//       ref: "User",
 //     },
 //     approvedBy: {
 //       type: mongoose.Schema.Types.ObjectId,
-//       ref: "SafetyOfficer",
+//       ref: "User",
 //     },
 
 //     // Required PPE
@@ -275,8 +273,8 @@
 //     validFrom: Date,
 //     validTo: Date,
 
-//     createdBy: { type: mongoose.Schema.Types.ObjectId, ref: "SafetyOfficer" },
-//     updatedBy: { type: mongoose.Schema.Types.ObjectId, ref: "SafetyOfficer" },
+//     createdBy: { type: mongoose.Schema.Types.ObjectId, ref: "User" },
+//     updatedBy: { type: mongoose.Schema.Types.ObjectId, ref: "User" },
 //   },
 //   { timestamps: true },
 // );
@@ -325,11 +323,11 @@ const jsaSchema = new mongoose.Schema(
 
     preparedBy: {
       type: mongoose.Schema.Types.ObjectId,
-      ref: "SafetyOfficer",
+      ref: "User",
       required: true,
     },
-    reviewedBy: { type: mongoose.Schema.Types.ObjectId, ref: "SafetyOfficer" },
-    approvedBy: { type: mongoose.Schema.Types.ObjectId, ref: "SafetyOfficer" },
+    reviewedBy: { type: mongoose.Schema.Types.ObjectId, ref: "User" },
+    approvedBy: { type: mongoose.Schema.Types.ObjectId, ref: "User" },
 
     // FIXED: quantity as String, not Number
     requiredPPE: [
@@ -457,8 +455,8 @@ const jsaSchema = new mongoose.Schema(
     validFrom: Date,
     validTo: Date,
 
-    createdBy: { type: mongoose.Schema.Types.ObjectId, ref: "SafetyOfficer" },
-    updatedBy: { type: mongoose.Schema.Types.ObjectId, ref: "SafetyOfficer" },
+    createdBy: { type: mongoose.Schema.Types.ObjectId, ref: "User" },
+    updatedBy: { type: mongoose.Schema.Types.ObjectId, ref: "User" },
   },
   { timestamps: true },
 );

@@ -78,9 +78,7 @@ exports.getObservations = async (req, res) => {
     const { status, type, page = 1, limit = 20 } = req.query;
 
     // Get work areas this officer manages
-    const workAreas = await WorkArea.find({
-      "assignedSafetyOfficers.officer": req.user.safetyOfficer,
-    }).select("_id name");
+    const workAreas = await WorkArea.find({ officerId: req.user._id }).select("_id name");
 
     const workAreaIds = workAreas.map((wa) => wa._id);
 
@@ -205,7 +203,7 @@ exports.getWorkAreaObservations = async (req, res) => {
 exports.showCreateForm = async (req, res) => {
   try {
     const { workAreaId } = req.params;
-    const workArea = await WorkArea.findById(workAreaId).populate("worksite");
+    const workArea = await WorkArea.findById(workAreaId);
 
     if (!workArea) {
       req.flash("error", "Work area not found");
@@ -222,3 +220,4 @@ exports.showCreateForm = async (req, res) => {
     res.redirect("/dashboard");
   }
 };
+

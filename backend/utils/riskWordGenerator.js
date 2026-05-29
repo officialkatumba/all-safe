@@ -520,3 +520,4 @@ async function generateRiskWordBuffer({ assessment, sections }) {
 module.exports = {
   generateRiskWordBuffer,
 };
+

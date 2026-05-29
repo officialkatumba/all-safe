@@ -16,7 +16,7 @@
 //     ],
 
 //     // Who conducted/created it
-//     conductedBy: { type: mongoose.Schema.Types.ObjectId, ref: "SafetyOfficer" },
+//     conductedBy: { type: mongoose.Schema.Types.ObjectId, ref: "User" },
 //     conductedByName: String,
 
 //     // AI Generation metadata
@@ -77,7 +77,7 @@
 //     date: { type: Date, default: Date.now },
 //     duration: Number, // in minutes
 //     scheduledFor: Date,
-//     scheduledBy: { type: mongoose.Schema.Types.ObjectId, ref: "SafetyOfficer" },
+//     scheduledBy: { type: mongoose.Schema.Types.ObjectId, ref: "User" },
 
 //     // Attendance
 //     attendance: {
@@ -174,7 +174,7 @@
 //       enum: ["pending", "approved", "rejected", "not_required"],
 //       default: "not_required",
 //     },
-//     approvedBy: { type: mongoose.Schema.Types.ObjectId, ref: "SafetyOfficer" },
+//     approvedBy: { type: mongoose.Schema.Types.ObjectId, ref: "User" },
 //     approvedAt: Date,
 
 //     // Effectiveness rating (by safety officer)
@@ -182,7 +182,7 @@
 //       rating: { type: Number, min: 1, max: 5 },
 //       reviewedBy: {
 //         type: mongoose.Schema.Types.ObjectId,
-//         ref: "SafetyOfficer",
+//         ref: "User",
 //       },
 //       reviewedAt: Date,
 //       comments: String,
@@ -206,8 +206,8 @@
 //     templateCategory: String,
 
 //     // Metadata
-//     createdBy: { type: mongoose.Schema.Types.ObjectId, ref: "SafetyOfficer" },
-//     updatedBy: { type: mongoose.Schema.Types.ObjectId, ref: "SafetyOfficer" },
+//     createdBy: { type: mongoose.Schema.Types.ObjectId, ref: "User" },
+//     updatedBy: { type: mongoose.Schema.Types.ObjectId, ref: "User" },
 //   },
 //   { timestamps: true },
 // );
@@ -284,11 +284,11 @@ const safetyTalkSchema = new mongoose.Schema(
     // Who created/generated it
     generatedBy: {
       type: mongoose.Schema.Types.ObjectId,
-      ref: "SafetyOfficer",
+      ref: "User",
     },
     conductedBy: {
       type: mongoose.Schema.Types.ObjectId,
-      ref: "SafetyOfficer",
+      ref: "User",
     },
     date: { type: Date, default: Date.now },
 
@@ -328,7 +328,7 @@ const safetyTalkSchema = new mongoose.Schema(
       comments: String,
       reviewedBy: {
         type: mongoose.Schema.Types.ObjectId,
-        ref: "SafetyOfficer",
+        ref: "User",
       },
       reviewedAt: Date,
     },
@@ -341,7 +341,7 @@ const safetyTalkSchema = new mongoose.Schema(
       },
       reviewedBy: {
         type: mongoose.Schema.Types.ObjectId,
-        ref: "SafetyOfficer",
+        ref: "User",
       },
       reviewedAt: Date,
       comments: String,

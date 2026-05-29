@@ -1,9 +1,7 @@
 const UsageEvent = require("../models/UsageEvent");
 
 async function trackUsage({
-  company,
   user,
-  worksite,
   workArea,
   eventType,
   module,
@@ -14,9 +12,7 @@ async function trackUsage({
 }) {
   try {
     await UsageEvent.create({
-      company,
       user,
-      worksite,
       workArea,
       eventType,
       module,
@@ -31,3 +27,4 @@ async function trackUsage({
 }
 
 module.exports = { trackUsage };
+

@@ -16,7 +16,7 @@
 //   try {
 //     const { workAreaId } = req.params;
 
-//     const workArea = await WorkArea.findById(workAreaId).populate("worksite");
+//     const workArea = await WorkArea.findById(workAreaId);
 
 //     if (!workArea) {
 //       req.flash("error", "Work area not found");
@@ -60,7 +60,6 @@
 
 // ## WORK AREA CONTEXT:
 // - Name: ${workArea.name}
-// - Worksite: ${workArea.worksite?.name || "N/A"}
 // - Current Work Types: ${workTypes}
 // - Status: ${workArea.status}
 
@@ -129,8 +128,7 @@
 
 //     // Create PPE Checklist
 //     const ppeChecklist = new PPEChecklist({
-//       worksite: workArea.worksite._id,
-//       createdBy: req.user.safetyOfficer,
+//       createdBy: req.user._id,
 //       title:
 //         ppeData.title ||
 //         `PPE Requirements - ${workArea.name} - ${new Date().toLocaleDateString()}`,
@@ -175,7 +173,7 @@
 // exports.getPPEChecklist = async (req, res) => {
 //   try {
 //     const checklist = await PPEChecklist.findById(req.params.id)
-//       .populate("worksite", "name")
+//
 //       .populate("createdBy", "name")
 //       .populate("workerSignoffs.workerId", "name");
 
@@ -205,7 +203,6 @@
 //       return res.status(404).json({ success: false });
 //     }
 
-//     const checklists = await PPEChecklist.find({ worksite: workArea.worksite })
 //       .sort({ createdAt: -1 })
 //       .limit(10);
 
@@ -242,7 +239,7 @@
 //     const { id } = req.params;
 
 //     const checklist = await PPEChecklist.findById(id)
-//       .populate("worksite", "name location")
+//
 //       .populate("workArea", "name location")
 //       .populate("generatedBy", "name");
 
@@ -317,7 +314,7 @@ exports.generatePPERequirements = async (req, res) => {
   try {
     const { workAreaId } = req.params;
 
-    const workArea = await WorkArea.findById(workAreaId).populate("worksite");
+    const workArea = await WorkArea.findById(workAreaId);
 
     if (!workArea) {
       req.flash("error", "Work area not found");
@@ -360,7 +357,7 @@ exports.generatePPERequirements = async (req, res) => {
 
 WORK AREA CONTEXT:
 - Name: ${workArea.name}
-- Worksite: ${workArea.worksite?.name || "N/A"}
+- Location: ${workArea.location?.zone || "N/A"}
 - Current Work Types: ${workTypes}
 - Status: ${workArea.status || "N/A"}
 - Location: ${workArea.location?.zone || workArea.location || "N/A"}
@@ -468,12 +465,9 @@ Return ONLY valid JSON in this exact shape:
     const ppeData = parseAIJson(aiResponse);
 
     const ppeChecklist = new PPEChecklist({
-      worksite: workArea.worksite?._id || workArea.worksite,
-
-      // Important new field
       workArea: workArea._id,
 
-      generatedBy: req.user.safetyOfficer,
+      generatedBy: req.user._id,
       title:
         ppeData.title ||
         `PPE Requirements - ${workArea.name} - ${new Date().toLocaleDateString()}`,
@@ -525,7 +519,6 @@ Return ONLY valid JSON in this exact shape:
 exports.getPPEChecklist = async (req, res) => {
   try {
     const checklist = await PPEChecklist.findById(req.params.id)
-      .populate("worksite", "name location")
       .populate("workArea", "name location")
       .populate("generatedBy", "name")
       .populate("completedBy", "name");
@@ -560,14 +553,7 @@ exports.getWorkAreaPPEChecklists = async (req, res) => {
       });
     }
 
-    const checklists = await PPEChecklist.find({
-      $or: [
-        { workArea: workArea._id },
-        // fallback for old records before workArea was added
-        { worksite: workArea.worksite },
-      ],
-    })
-      .populate("worksite", "name")
+    const checklists = await PPEChecklist.find({ workArea: workArea._id })
       .populate("workArea", "name")
       .sort({ createdAt: -1 })
       .limit(10);
@@ -593,7 +579,7 @@ exports.completeChecklist = async (req, res) => {
     }
 
     checklist.status = "completed";
-    checklist.completedBy = req.user.safetyOfficer;
+    checklist.completedBy = req.user._id;
     checklist.completedAt = new Date();
 
     await checklist.save();
@@ -613,7 +599,6 @@ exports.downloadWord = async (req, res) => {
     const { id } = req.params;
 
     const checklist = await PPEChecklist.findById(id)
-      .populate("worksite", "name location")
       .populate("workArea", "name location")
       .populate("generatedBy", "name")
       .populate("completedBy", "name");
@@ -640,3 +625,4 @@ exports.downloadWord = async (req, res) => {
     return res.status(500).send("Error generating PPE Word document");
   }
 };
+
