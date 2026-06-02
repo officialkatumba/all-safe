@@ -13,10 +13,86 @@ const {
   generateSafetyTalkWordBuffer,
 } = require("../utils/safetyTalkWordGenerator");
 const { trackUsage } = require("../utils/usageTracker");
+const { AI_MODEL, AI_MAX_TOKENS } = require("../utils/aiConfig");
 
 const openai = new OpenAI({
   apiKey: process.env.OPENAI_API_KEY,
 });
+
+function parseSafetyTalkContent(aiContent) {
+  const sections = {
+    opening: "",
+    mainPoints: [],
+    discussionQuestions: [],
+    supervisorVerification: [],
+    keyTakeaways: [],
+    closing: "",
+  };
+
+  let currentSection = "";
+  let title = "";
+
+  for (const line of aiContent.split("\n")) {
+    if (line.startsWith("# ")) {
+      title = line.substring(2);
+    } else if (
+      line.toLowerCase().includes("opening") ||
+      line.toLowerCase().includes("opening statement")
+    ) {
+      currentSection = "opening";
+    } else if (
+      line.toLowerCase().includes("main safety point") ||
+      line.toLowerCase().includes("main points")
+    ) {
+      currentSection = "mainPoints";
+    } else if (line.toLowerCase().includes("discussion question")) {
+      currentSection = "discussionQuestions";
+    } else if (line.toLowerCase().includes("supervisor verification")) {
+      currentSection = "supervisorVerification";
+    } else if (line.toLowerCase().includes("key takeaway")) {
+      currentSection = "keyTakeaways";
+    } else if (line.toLowerCase().includes("closing")) {
+      currentSection = "closing";
+    } else if (line.trim()) {
+      if (currentSection === "opening") {
+        sections.opening += line.trim() + " ";
+      } else if (
+        currentSection === "mainPoints" &&
+        (line.trim().match(/^\d+\./) || line.trim().startsWith("-"))
+      ) {
+        sections.mainPoints.push(
+          line
+            .trim()
+            .replace(/^\d+\.\s*/, "")
+            .replace(/^-\s*/, ""),
+        );
+      } else if (
+        currentSection === "discussionQuestions" &&
+        line.trim().startsWith("-")
+      ) {
+        sections.discussionQuestions.push(line.trim().replace(/^-\s*/, ""));
+      } else if (
+        currentSection === "supervisorVerification" &&
+        line.trim().startsWith("-")
+      ) {
+        sections.supervisorVerification.push(line.trim().replace(/^-\s*/, ""));
+      } else if (
+        currentSection === "keyTakeaways" &&
+        line.trim().startsWith("-")
+      ) {
+        sections.keyTakeaways.push(line.trim().replace(/^-\s*/, ""));
+      } else if (currentSection === "closing") {
+        sections.closing += line.trim() + " ";
+      }
+    }
+  }
+
+  return { title, sections };
+}
+
+function isSafetyOfficer(user) {
+  return user?.role === "safety_officer";
+}
 
 // Generate a new safety talk (AI-driven, no form needed)
 exports.generateSafetyTalk = async (req, res) => {
@@ -114,74 +190,15 @@ Generate a practical, professional 5-10 minute toolbox talk that:
 Generate the talk in 220-320 words total. Be direct, professional, and specific to this work area.`;
 
     const completion = await openai.chat.completions.create({
-      model: "gpt-3.5-turbo-16k",
+      model: AI_MODEL,
       messages: [{ role: "user", content: prompt }],
       temperature: 0.7,
-      max_tokens: 1000,
+      max_tokens: AI_MAX_TOKENS.safetyTalk,
     });
 
     const aiContent = completion.choices[0].message.content;
 
-    // Parse the AI response into sections
-    const sections = {
-      opening: "",
-      mainPoints: [],
-      discussionQuestions: [],
-      keyTakeaways: [],
-      closing: "",
-    };
-
-    let currentSection = "";
-    const lines = aiContent.split("\n");
-    let title = "";
-
-    for (const line of lines) {
-      if (line.startsWith("# ")) {
-        title = line.substring(2);
-      } else if (
-        line.toLowerCase().includes("opening") ||
-        line.toLowerCase().includes("opening statement")
-      ) {
-        currentSection = "opening";
-      } else if (
-        line.toLowerCase().includes("main safety point") ||
-        line.toLowerCase().includes("main points")
-      ) {
-        currentSection = "mainPoints";
-      } else if (line.toLowerCase().includes("discussion question")) {
-        currentSection = "discussionQuestions";
-      } else if (line.toLowerCase().includes("key takeaway")) {
-        currentSection = "keyTakeaways";
-      } else if (line.toLowerCase().includes("closing")) {
-        currentSection = "closing";
-      } else if (line.trim()) {
-        if (currentSection === "opening") {
-          sections.opening += line.trim() + " ";
-        } else if (
-          currentSection === "mainPoints" &&
-          (line.trim().match(/^\d+\./) || line.trim().startsWith("-"))
-        ) {
-          sections.mainPoints.push(
-            line
-              .trim()
-              .replace(/^\d+\.\s*/, "")
-              .replace(/^-\s*/, ""),
-          );
-        } else if (
-          currentSection === "discussionQuestions" &&
-          line.trim().startsWith("-")
-        ) {
-          sections.discussionQuestions.push(line.trim().replace(/^-\s*/, ""));
-        } else if (
-          currentSection === "keyTakeaways" &&
-          line.trim().startsWith("-")
-        ) {
-          sections.keyTakeaways.push(line.trim().replace(/^-\s*/, ""));
-        } else if (currentSection === "closing") {
-          sections.closing += line.trim() + " ";
-        }
-      }
-    }
+    const { title, sections } = parseSafetyTalkContent(aiContent);
 
     // Create safety talk
     const safetyTalk = new SafetyTalk({
@@ -196,7 +213,7 @@ Generate the talk in 220-320 words total. Be direct, professional, and specific 
       status: "draft",
       date: new Date(),
       aiGenerated: true,
-      aiModel: "gpt-3.5-turbo-16k",
+      aiModel: AI_MODEL,
       basedOn: {
         recentIncidents: recentIncidents.map((i) => i._id),
         identifiedHazards: activeHazards.map((h) => h.hazardId),
@@ -225,6 +242,11 @@ Generate the talk in 220-320 words total. Be direct, professional, and specific 
       description: "Safety talk draft generated",
       relatedModel: "SafetyTalk",
       relatedId: safetyTalk._id,
+      metadata: {
+        model: AI_MODEL,
+        maxTokens: AI_MAX_TOKENS.safetyTalk,
+        usage: completion.usage,
+      },
     });
 
     // Add to work area's documents
@@ -322,23 +344,178 @@ exports.markAsConducted = async (req, res) => {
   }
 };
 
-exports.reviewAndConfirm = async (req, res) => {
+exports.regenerateWithComments = async (req, res) => {
   try {
     const talk = await SafetyTalk.findById(req.params.id);
-    const { reviewComments } = req.body;
+    const reviewComments = req.body.reviewComments?.trim();
 
     if (!talk) {
       req.flash("error", "Safety talk not found");
       return res.redirect("/dashboard");
     }
 
+    if (!isSafetyOfficer(req.user)) {
+      req.flash("error", "Only a safety officer can review a safety talk");
+      return res.redirect(`/safety-talks/${talk._id}`);
+    }
+
+    if (talk.status === "published" || talk.review?.status === "confirmed") {
+      req.flash("error", "This safety talk has already been approved");
+      return res.redirect(`/safety-talks/${talk._id}`);
+    }
+
+    if (!reviewComments) {
+      req.flash("error", "Enter safety officer comments before regenerating");
+      return res.redirect(`/safety-talks/${talk._id}`);
+    }
+
+    if (reviewComments.length > 4000) {
+      req.flash("error", "Safety officer comments must be 4000 characters or fewer");
+      return res.redirect(`/safety-talks/${talk._id}`);
+    }
+
+    const prompt = `You are revising a professional DAILY SAFETY TALK after a safety officer review.
+
+${professionalSafetyGuidance}
+${miningContextGuidance}
+
+## CURRENT SAFETY TALK DRAFT:
+${talk.content}
+
+## SAFETY OFFICER COMMENTS:
+${reviewComments}
+
+## YOUR TASK:
+Revise the safety talk so the officer's comments are incorporated accurately. Preserve useful content, correct or add the site-specific details requested by the officer, and keep the document practical for workers. Do not mention the revision process or the comments in the final talk.
+
+## OUTPUT FORMAT (use exactly this structure):
+# [Engaging Title]
+
+## Opening Statement
+[2-3 sentences explaining why this talk matters today]
+
+## Main Safety Points
+1. [Hazard or risk and what workers must do]
+2. [Control measure and how it should be verified]
+3. [Supervisor or team check before work starts]
+4. [Environmental or housekeeping point if relevant]
+
+## Discussion Questions
+- [Question 1 for workers]
+- [Question 2 for workers]
+- [Question 3 for workers]
+
+## Supervisor Verification
+- [Specific item to check before or during work]
+- [Specific evidence or observation expected]
+
+## Key Takeaways
+- [Takeaway 1]
+- [Takeaway 2]
+- [Takeaway 3]
+
+## Closing Reminder
+[1-2 sentences, including that the facilitator must adapt this draft to actual site conditions]
+
+Generate the talk in 220-320 words total. Be direct, professional, and specific.`;
+
+    const completion = await openai.chat.completions.create({
+      model: AI_MODEL,
+      messages: [{ role: "user", content: prompt }],
+      temperature: 0.5,
+      max_tokens: AI_MAX_TOKENS.safetyTalk,
+    });
+
+    const aiContent = completion.choices[0].message.content;
+    const { title, sections } = parseSafetyTalkContent(aiContent);
+    const nextVersion = (talk.version || 1) + 1;
+
+    talk.previousVersions.push({
+      version: talk.version || 1,
+      title: talk.title,
+      content: talk.content,
+      sections: talk.sections?.toObject?.() || talk.sections,
+      officerComments: reviewComments,
+      generatedAt: talk.generationDate || talk.createdAt,
+    });
+    talk.title = title || talk.title;
+    talk.content = aiContent;
+    talk.sections = sections;
+    talk.version = nextVersion;
+    talk.generationDate = new Date();
+    talk.updatedBy = req.user._id;
+    talk.review.status = "changes_required";
+    talk.review.reviewedBy = req.user._id;
+    talk.review.reviewedAt = new Date();
+    talk.review.comments = reviewComments;
+    talk.review.history.push({
+      comments: reviewComments,
+      submittedBy: req.user._id,
+      submittedAt: new Date(),
+      generatedVersion: nextVersion,
+    });
+
+    await talk.save();
+
+    await trackUsage({
+      user: req.user?._id,
+      workArea: talk.targetWorkAreas?.[0],
+      eventType: "ai_generation",
+      module: "safety_talk",
+      description: "Safety talk regenerated with safety officer comments",
+      relatedModel: "SafetyTalk",
+      relatedId: talk._id,
+      metadata: {
+        model: AI_MODEL,
+        maxTokens: AI_MAX_TOKENS.safetyTalk,
+        usage: completion.usage,
+      },
+    });
+
+    req.flash(
+      "success",
+      `Safety talk regenerated as version ${nextVersion}. Review it again or approve the final version.`,
+    );
+    return res.redirect(`/safety-talks/${talk._id}`);
+  } catch (error) {
+    console.error("Error regenerating safety talk:", error);
+    req.flash("error", "Error regenerating safety talk: " + error.message);
+    return res.redirect(`/safety-talks/${req.params.id}`);
+  }
+};
+
+exports.approveSafetyTalk = async (req, res) => {
+  try {
+    const talk = await SafetyTalk.findById(req.params.id);
+
+    if (!talk) {
+      req.flash("error", "Safety talk not found");
+      return res.redirect("/dashboard");
+    }
+
+    if (!isSafetyOfficer(req.user)) {
+      req.flash("error", "Only a safety officer can approve a safety talk");
+      return res.redirect(`/safety-talks/${talk._id}`);
+    }
+
+    if (talk.status === "published" || talk.review?.status === "confirmed") {
+      req.flash("success", "Safety talk is already approved");
+      return res.redirect(`/safety-talks/${talk._id}`);
+    }
+
+    if (!talk.review?.history?.length) {
+      req.flash(
+        "error",
+        "Regenerate the safety talk with safety officer comments before approval",
+      );
+      return res.redirect(`/safety-talks/${talk._id}`);
+    }
+
     talk.status = "published";
-    talk.review = {
-      status: "confirmed",
-      reviewedBy: req.user._id,
-      reviewedAt: new Date(),
-      comments: reviewComments || "",
-    };
+    talk.review.status = "confirmed";
+    talk.review.reviewedBy = req.user._id;
+    talk.review.reviewedAt = new Date();
+    talk.updatedBy = req.user._id;
 
     await talk.save();
 
@@ -369,6 +546,11 @@ exports.downloadWord = async (req, res) => {
 
     if (!talk) {
       return res.status(404).send("Safety talk not found");
+    }
+
+    if (talk.status !== "published" || talk.review?.status !== "confirmed") {
+      req.flash("error", "Approve the final safety talk before downloading it");
+      return res.redirect(`/safety-talks/${talk._id}`);
     }
 
     const buffer = await generateSafetyTalkWordBuffer({ talk });

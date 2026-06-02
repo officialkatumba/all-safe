@@ -324,6 +324,21 @@
 </script>
 
 <script>
+  window.allSafeCsrfToken = "<%= typeof csrfToken !== 'undefined' ? csrfToken : '' %>";
+
+  const originalFetch = window.fetch.bind(window);
+  window.fetch = function (input, init = {}) {
+    const url = typeof input === 'string' ? input : input.url;
+    const target = new URL(url, window.location.origin);
+
+    if (target.origin === window.location.origin) {
+      init.headers = new Headers(init.headers || {});
+      init.headers.set('x-csrf-token', window.allSafeCsrfToken);
+    }
+
+    return originalFetch(input, init);
+  };
+
   document.addEventListener('DOMContentLoaded', function () {
     const backToTopButton = document.getElementById('backToTopButton');
     const submitOverlay = document.getElementById('submitLockOverlay');
@@ -405,7 +420,46 @@
 
     document.addEventListener('submit', function (event) {
       const form = event.target;
+      if (!form || form.tagName !== 'FORM' || form.dataset.swalConfirm !== 'true') return;
+      if (form.dataset.swalConfirmed === 'true') {
+        delete form.dataset.swalConfirmed;
+        return;
+      }
+
+      event.preventDefault();
+      const submitter = event.submitter;
+
+      Swal.fire({
+        icon: 'warning',
+        title: form.dataset.swalTitle || 'Are you sure?',
+        text: form.dataset.swalText || 'Please confirm that you want to continue.',
+        showCancelButton: true,
+        confirmButtonColor: '#198754',
+        cancelButtonColor: '#6c757d',
+        confirmButtonText: form.dataset.swalConfirmButton || 'Confirm',
+        cancelButtonText: 'Cancel'
+      }).then(function (result) {
+        if (!result.isConfirmed) return;
+
+        form.dataset.swalConfirmed = 'true';
+        if (typeof form.requestSubmit === 'function') {
+          form.requestSubmit(submitter || undefined);
+        } else {
+          form.submit();
+        }
+      });
+    });
+
+    document.addEventListener('submit', function (event) {
+      const form = event.target;
       if (!form || form.tagName !== 'FORM' || event.defaultPrevented) return;
+      if (!form.querySelector('input[name="_csrf"]')) {
+        const csrfInput = document.createElement('input');
+        csrfInput.type = 'hidden';
+        csrfInput.name = '_csrf';
+        csrfInput.value = window.allSafeCsrfToken;
+        form.appendChild(csrfInput);
+      }
       if (form.dataset.submitLock === 'false') return;
       if ((form.getAttribute('target') || '').toLowerCase() === '_blank') return;
 

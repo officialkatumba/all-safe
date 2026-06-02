@@ -277,6 +277,7 @@ const safetyTalkSchema = new mongoose.Schema(
       opening: String,
       mainPoints: [String],
       discussionQuestions: [String],
+      supervisorVerification: [String],
       keyTakeaways: [String],
       closing: String,
     },
@@ -345,7 +346,31 @@ const safetyTalkSchema = new mongoose.Schema(
       },
       reviewedAt: Date,
       comments: String,
+      history: [
+        {
+          comments: { type: String, required: true },
+          submittedBy: {
+            type: mongoose.Schema.Types.ObjectId,
+            ref: "User",
+          },
+          submittedAt: { type: Date, default: Date.now },
+          generatedVersion: Number,
+        },
+      ],
     },
+
+    // AI revision tracking
+    version: { type: Number, default: 1 },
+    previousVersions: [
+      {
+        version: Number,
+        title: String,
+        content: String,
+        sections: mongoose.Schema.Types.Mixed,
+        officerComments: String,
+        generatedAt: Date,
+      },
+    ],
 
     // AI generation metadata
     aiGenerated: { type: Boolean, default: true },

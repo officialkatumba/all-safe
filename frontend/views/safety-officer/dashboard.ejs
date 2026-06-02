@@ -1,141 +1,117 @@
+
 <%- include('../partials/header') %>
 <%- include('../partials/navbar') %>
 
 <div class="main-wrapper">
   <div class="content container py-4">
-    <div class="officer-dashboard-container" style="max-width: 900px; margin: 0 auto;">
-      <!-- Officer Header -->
-      <div class="d-flex justify-content-between align-items-center mb-3 flex-wrap gap-2">
+    <div class="officer-dashboard-container">
+
+      <!-- Clean Header -->
+      <section class="dashboard-hero mb-4">
+        <div class="d-flex justify-content-between align-items-center flex-wrap gap-3">
+          <div>
+            <p class="text-uppercase text-muted fw-bold small mb-1">
+              Safety Officer Dashboard
+            </p>
+
+            <h3 class="fw-bold mb-2">
+              <i class="fas fa-user-shield me-2"></i>
+              Welcome, <%= officer.name %>
+            </h3>
+
+            <div class="d-flex flex-wrap gap-2">
+              <span class="soft-pill teal">
+                <i class="fas fa-id-card me-1"></i> Safety Officer
+              </span>
+
+              <span class="soft-pill green">
+                <i class="fas fa-check-circle me-1"></i>
+                <%= officer.verificationStatus || 'Verified' %>
+              </span>
+
+              <span class="soft-pill blue">
+                <i class="fas fa-calendar me-1"></i>
+                <%= new Date().toLocaleDateString() %>
+              </span>
+            </div>
+          </div>
+
+          <div class="text-md-end">
+            <div class="hero-avatar">
+              <i class="fas fa-user-tie"></i>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Profile Summary -->
+      <div class="profile-card mb-4">
+        <div class="row g-3 align-items-center">
+          <div class="col-md-7">
+            <h5 class="fw-bold mb-2"><%= officer.name %></h5>
+
+            <div class="small text-muted mb-1">
+              <i class="fas fa-envelope me-2"></i><%= officer.email %>
+            </div>
+
+            <div class="small text-muted">
+              <i class="fas fa-phone me-2"></i><%= officer.phone || 'Not provided' %>
+            </div>
+
+            <% if (officer.bio) { %>
+              <div class="officer-bio mt-3">
+                <%= officer.bio %>
+              </div>
+            <% } %>
+          </div>
+
+          <div class="col-md-5">
+            <div class="summary-grid">
+              <div class="summary-pill">
+                <i class="fas fa-layer-group"></i>
+                <div>
+                  <strong><%= workAreas?.length || 0 %></strong>
+                  <span>Work Areas</span>
+                </div>
+              </div>
+
+              <div class="summary-pill">
+                <i class="fas fa-file-alt"></i>
+                <div>
+                  <strong><%= (stats.riskAssessments || 0) + (stats.safetyTalks || 0) %></strong>
+                  <span>Documents</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Work Areas Header -->
+      <div class="section-header mb-3">
         <div>
-          <h3 class="mb-1">
-            <i class="fas fa-user-shield me-2" style="color: #26a69a;"></i>
-            Safety Officer Dashboard
-          </h3>
-          <div class="d-flex gap-2">
-            <span class="badge text-bg-secondary">
-              <i class="fas fa-id-card me-1"></i> Safety Officer
-            </span>
-            <span class="badge text-bg-success">
-              <i class="fas fa-check-circle me-1"></i> <%= officer.verificationStatus %>
-            </span>
-            <span class="badge text-bg-info">
-              <i class="fas fa-calendar me-1"></i> <%= new Date().toLocaleDateString() %>
-            </span>
-          </div>
+          <h4 class="fw-bold mb-1">
+            <i class="fas fa-layer-group me-2"></i>
+            Work Areas
+          </h4>
+          <span class="soft-pill neutral">
+            <i class="fas fa-database me-1"></i>
+            <%= workAreas?.length || 0 %> assigned
+          </span>
         </div>
-        <span class="text-muted small">
-          <i class="fas fa-user me-1"></i> Welcome, <strong><%= officer.name %></strong>
-        </span>
-      </div>
 
-      <!-- Profile Card -->
-      <div class="card border-0 shadow-sm mb-4" style="border-radius: 16px;">
-        <div class="card-body p-4">
-          <div class="row">
-            <div class="col-md-3 text-center text-md-start">
-              <div class="mx-auto mb-3" style="width: 100px; height: 100px; background: linear-gradient(135deg, #26a69a 0%, #1e3c5c 100%); border-radius: 50%; display: flex; align-items: center; justify-content: center;">
-                <i class="fas fa-user-tie fa-3x text-white"></i>
-              </div>
-            </div>
-            <div class="col-md-9">
-              <h5 class="fw-bold mb-2"><%= officer.name %></h5>
-              <div class="row">
-                <div class="col-md-6">
-                  <p class="mb-1"><i class="fas fa-envelope me-2 text-muted"></i> <%= officer.email %></p>
-                  <p class="mb-1"><i class="fas fa-phone me-2 text-muted"></i> <%= officer.phone || 'Not provided' %></p>
-                </div>
-                <div class="col-md-6">
-                  <p class="mb-1"><i class="fas fa-layer-group me-2 text-muted"></i> Work Areas: <%= workAreas?.length || 0 %></p>
-                  <p class="mb-1"><i class="fas fa-file-alt me-2 text-muted"></i> Documents: <%= (stats.riskAssessments || 0) + (stats.safetyTalks || 0) %></p>
-                </div>
-              </div>
-              <% if (officer.bio) { %>
-              <div class="mt-2 p-2 rounded-3" style="background: #f8f9fa;">
-                <small class="text-muted"><%= officer.bio %></small>
-              </div>
-              <% } %>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <!-- Quick Stats -->
-      <!-- <div class="row g-3 mb-4">
-        <div class="col-md-3 col-6">
-          <div class="d-flex align-items-center p-2 rounded bg-light">
-            <div class="rounded-circle d-flex align-items-center justify-content-center me-2" style="background: #f44336; width: 35px; height: 35px;">
-              <i class="fas fa-flag text-white" style="font-size: 0.9rem;"></i>
-            </div>
-            <div>
-              <strong><%= stats.incidentsReported || 0 %></strong>
-              <small class="text-muted d-block">Incidents</small>
-            </div>
-          </div>
-        </div>
-        <div class="col-md-3 col-6">
-          <div class="d-flex align-items-center p-2 rounded bg-light">
-            <div class="rounded-circle d-flex align-items-center justify-content-center me-2" style="background: #ff9800; width: 35px; height: 35px;">
-              <i class="fas fa-chalkboard-teacher text-white" style="font-size: 0.9rem;"></i>
-            </div>
-            <div>
-              <strong><%= stats.safetyTalks || 0 %></strong>
-              <small class="text-muted d-block">Safety Talks</small>
-            </div>
-          </div>
-        </div>
-        <div class="col-md-3 col-6">
-          <div class="d-flex align-items-center p-2 rounded bg-light">
-            <div class="rounded-circle d-flex align-items-center justify-content-center me-2" style="background: #4caf50; width: 35px; height: 35px;">
-              <i class="fas fa-clipboard-list text-white" style="font-size: 0.9rem;"></i>
-            </div>
-            <div>
-              <strong><%= stats.riskAssessments || 0 %></strong>
-              <small class="text-muted d-block">Assessments</small>
-            </div>
-          </div>
-        </div>
-        <div class="col-md-3 col-6">
-          <div class="d-flex align-items-center p-2 rounded bg-light">
-            <div class="rounded-circle d-flex align-items-center justify-content-center me-2" style="background: #2196f3; width: 35px; height: 35px;">
-              <i class="fas fa-helmet-safety text-white" style="font-size: 0.9rem;"></i>
-            </div>
-            <div>
-              <strong><%= stats.ppeChecks || 0 %></strong>
-              <small class="text-muted d-block">PPE Checks</small>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <hr /> -->
-
-      <div class="d-flex gap-2 justify-content-end flex-wrap mb-4">
-        <a href="/work-areas/create" class="btn btn-primary btn-sm">
-          <i class="fas fa-plus me-1"></i> New Work Area
+        <a href="/work-areas/create" class="btn-new-workarea">
+          <i class="fas fa-plus-circle me-1"></i>
+          New Work Area
         </a>
-        <a href="/alerts" class="btn btn-outline-danger btn-sm">
-          <i class="fas fa-bell me-1"></i> Alerts
-        </a>
-        <% if (workAreas && workAreas.length > 0) { %>
-          <a href="/incidents" class="btn btn-outline-secondary btn-sm">
-            <i class="fas fa-clipboard-list me-1"></i> Incidents
-          </a>
-        <% } %>
       </div>
 
-      <hr />
-
-      <!-- Assigned Work Areas Section - Tabular Format -->
-      <h4 class="text-center mb-4 fw-bold">
-        <i class="fas fa-layer-group me-2" style="color: #26a69a;"></i>
-        My Assigned Work Areas
-      </h4>
-
-      <div class="card shadow-sm border-0 mb-4" style="border-radius: 16px;">
+      <!-- Assigned Work Areas -->
+      <div class="card shadow-sm border-0 mb-4 dashboard-table-card">
         <div class="card-body p-0">
           <div class="table-responsive">
             <table class="table table-hover align-middle mb-0">
-              <thead style="background: #f8f9fa;">
+              <thead>
                 <tr>
                   <th class="px-4 py-3">Work Area</th>
                   <th class="py-3">Location</th>
@@ -143,28 +119,35 @@
                   <th class="py-3 text-end pe-4">Actions</th>
                 </tr>
               </thead>
+
               <tbody>
                 <% if (workAreas && workAreas.length > 0) { %>
                   <% workAreas.forEach(area => { %>
                     <tr>
                       <td class="px-4 py-3">
                         <div class="d-flex align-items-center">
-                          <div class="icon-circle-sm me-2" style="background: linear-gradient(135deg, #26a69a 0%, #1e3c5c 100%); width: 32px; height: 32px; border-radius: 50%; display: flex; align-items: center; justify-content: center;">
-                            <i class="fas fa-map-marked-alt text-white" style="font-size: 0.8rem;"></i>
+                          <div class="icon-circle-sm me-2">
+                            <i class="fas fa-map-marked-alt"></i>
                           </div>
                           <strong><%= area.name %></strong>
                         </div>
                       </td>
-                      <td class="py-3"><%= area.location?.zone || 'Not specified' %></td>
+
                       <td class="py-3">
-                        <span class="badge bg-<%= area.status === 'active' ? 'success' : 'secondary' %> bg-opacity-10 text-<%= area.status === 'active' ? 'success' : 'secondary' %> px-3 py-2 rounded-pill">
+                        <%= area.location?.zone || 'Not specified' %>
+                      </td>
+
+                      <td class="py-3">
+                        <span class="status-badge <%= area.status === 'active' ? 'active' : 'inactive' %>">
                           <i class="fas fa-<%= area.status === 'active' ? 'check-circle' : 'pause-circle' %> me-1"></i>
                           <%= area.status || 'Active' %>
                         </span>
                       </td>
+
                       <td class="py-3 text-end pe-4">
-                        <a href="/work-areas/<%= area._id %>" class="btn btn-sm btn-outline-primary" style="border-radius: 40px;">
-                          <i class="fas fa-eye me-1"></i> View Details
+                        <a href="/work-areas/<%= area._id %>" class="btn-view-details">
+                          <i class="fas fa-eye me-1"></i>
+                          View Details
                         </a>
                       </td>
                     </tr>
@@ -174,8 +157,10 @@
                     <td colspan="4" class="text-center py-5">
                       <i class="fas fa-info-circle fa-2x text-muted mb-2 d-block"></i>
                       <p class="text-muted mb-3">No work areas yet.</p>
-                      <a href="/work-areas/create" class="btn btn-sm btn-primary">
-                        <i class="fas fa-plus me-1"></i> Create your first work area
+
+                      <a href="/work-areas/create" class="btn-new-workarea">
+                        <i class="fas fa-plus me-1"></i>
+                        Create your first work area
                       </a>
                     </td>
                   </tr>
@@ -186,37 +171,6 @@
         </div>
       </div>
 
-      <!-- Recent Activity Feed - Optional -->
-      <!-- <div class="card shadow-sm border-0 mt-4">
-        <div class="card-header bg-transparent border-0 pt-4 px-4">
-          <h5 class="fw-bold mb-0">
-            <i class="fas fa-history me-2" style="color: #26a69a;"></i>
-            Recent Activity
-          </h5>
-        </div>
-        <div class="card-body p-4">
-          <% if (recentActivities && recentActivities.length > 0) { %>
-            <div class="list-group list-group-flush">
-              <% recentActivities.slice(0, 5).forEach(activity => { %>
-                <div class="list-group-item px-0 d-flex align-items-center">
-                  <div class="me-3">
-                    <span class="badge bg-<%= activity.type === 'incident' ? 'danger' : activity.type === 'assessment' ? 'warning' : 'success' %> rounded-pill">
-                      <%= activity.type %>
-                    </span>
-                  </div>
-                  <div class="flex-grow-1">
-                    <p class="mb-0"><%= activity.description %></p>
-                    <small class="text-muted"><%= new Date(activity.createdAt).toLocaleString() %></small>
-                  </div>
-                  <a href="<%= activity.link %>" class="btn btn-sm btn-outline-secondary">View</a>
-                </div>
-              <% }) %>
-            </div>
-          <% } else { %>
-            <p class="text-muted text-center py-4">No recent activity.</p>
-          <% } %>
-        </div>
-      </div> -->
     </div>
   </div>
 </div>
@@ -226,73 +180,276 @@
     min-height: 100vh;
     display: flex;
     flex-direction: column;
+    background: #f6f8fb;
   }
-  
+
   .content {
     flex: 1;
   }
 
   .officer-dashboard-container {
-    max-width: 900px;
+    max-width: 980px;
     margin: 0 auto;
   }
 
-  .hover-card {
-    transition: transform 0.3s ease, box-shadow 0.3s ease;
-    border-radius: 16px;
+  .dashboard-hero {
+    background: #ffffff;
+    border: 1px solid #e1e8ef;
+    border-radius: 18px;
+    padding: 1.4rem;
+    box-shadow: 0 12px 28px rgba(20, 39, 60, 0.07);
   }
 
-  .hover-card:hover {
-    transform: translateY(-5px);
-    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15) !important;
+  .dashboard-hero h3 {
+    color: #1e3c5c;
   }
 
-  .icon-circle {
-    transition: transform 0.3s ease;
+  .dashboard-hero h3 i,
+  .section-header h4 i {
+    color: #26a69a;
   }
 
-  .icon-circle-sm {
-    transition: transform 0.3s ease;
+  .hero-avatar {
+    width: 72px;
+    height: 72px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #26a69a, #1e3c5c);
+    color: white;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 2rem;
+    box-shadow: 0 10px 22px rgba(38, 166, 154, 0.3);
   }
 
-  .hover-card:hover .icon-circle {
-    transform: scale(1.1);
+  .profile-card {
+    background: #ffffff;
+    border: 1px solid #e1e8ef;
+    border-radius: 18px;
+    padding: 1.25rem;
+    box-shadow: 0 10px 24px rgba(20, 39, 60, 0.05);
   }
 
-  .btn {
-    transition: all 0.3s ease;
-    border-radius: 40px;
+  .officer-bio {
+    background: #f8fafc;
+    border-left: 4px solid #26a69a;
+    border-radius: 10px;
+    padding: 0.75rem;
+    font-size: 0.85rem;
+    color: #526173;
   }
 
-  .btn:hover {
+  .soft-pill {
+    min-height: 32px;
+    display: inline-flex;
+    align-items: center;
+    border-radius: 999px;
+    padding: 0.38rem 0.8rem;
+    font-size: 0.78rem;
+    font-weight: 800;
+    border: 1px solid transparent;
+  }
+
+  .soft-pill.teal {
+    background: #e6fcf5;
+    color: #087f5b;
+    border-color: #b2f2dd;
+  }
+
+  .soft-pill.green {
+    background: #dff7ea;
+    color: #137a3d;
+    border-color: #bdeccc;
+  }
+
+  .soft-pill.blue {
+    background: #e7f5ff;
+    color: #1864ab;
+    border-color: #bfdbfe;
+  }
+
+  .soft-pill.neutral {
+    background: #edf2f7;
+    color: #405468;
+    border-color: #d8e1ea;
+  }
+
+  .summary-grid {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 0.75rem;
+  }
+
+  .summary-pill {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    background: #f8fafc;
+    border: 1px solid #e1e8ef;
+    border-radius: 999px;
+    padding: 0.75rem 1rem;
+  }
+
+  .summary-pill i {
+    width: 38px;
+    height: 38px;
+    border-radius: 50%;
+    background: #e6fcf5;
+    color: #087f5b;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .summary-pill strong {
+    display: block;
+    color: #1e3c5c;
+    font-size: 1.15rem;
+    line-height: 1;
+  }
+
+  .summary-pill span {
+    color: #6c757d;
+    font-size: 0.8rem;
+    font-weight: 700;
+  }
+
+  .section-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 1rem;
+    flex-wrap: wrap;
+  }
+
+  .section-header h4 {
+    color: #1e3c5c;
+  }
+
+  .btn-new-workarea {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    text-decoration: none;
+    border-radius: 999px;
+    padding: 0.65rem 1rem;
+    background: #e6fcf5;
+    color: #087f5b;
+    border: 1px solid #b2f2dd;
+    font-weight: 800;
+    font-size: 0.85rem;
+    transition: all 0.25s ease;
+  }
+
+  .btn-new-workarea:hover {
+    background: #26a69a;
+    color: #ffffff;
     transform: translateY(-2px);
-    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+    box-shadow: 0 8px 18px rgba(38, 166, 154, 0.28);
   }
-  
-  .card {
-    border-radius: 16px;
+
+  .dashboard-table-card {
+    border-radius: 18px;
+    overflow: hidden;
   }
-  
-  .badge {
-    font-size: 0.75rem;
-    padding: 0.35rem 0.75rem;
-    border-radius: 40px;
+
+  .table thead {
+    background: #f8fafc;
   }
 
   .table th {
-    font-weight: 600;
+    font-weight: 800;
     color: #1e3c5c;
     border-bottom: 2px solid #e9ecef;
+    font-size: 0.85rem;
   }
 
   .table td {
     vertical-align: middle;
     border-bottom: 1px solid #e9ecef;
+    color: #465668;
   }
 
   .table tr:hover {
-    background-color: #f8f9fa;
+    background-color: #f8fafc;
+  }
+
+  .icon-circle-sm {
+    width: 34px;
+    height: 34px;
+    border-radius: 50%;
+    background: #e6fcf5;
+    color: #087f5b;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .status-badge {
+    display: inline-flex;
+    align-items: center;
+    border-radius: 999px;
+    padding: 0.4rem 0.8rem;
+    font-size: 0.78rem;
+    font-weight: 800;
+  }
+
+  .status-badge.active {
+    background: #dff7ea;
+    color: #137a3d;
+  }
+
+  .status-badge.inactive {
+    background: #edf2f7;
+    color: #405468;
+  }
+
+  .btn-view-details {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 999px;
+    padding: 0.45rem 0.85rem;
+    text-decoration: none;
+    border: 1px solid #bfdbfe;
+    background: #e7f5ff;
+    color: #1864ab;
+    font-weight: 800;
+    font-size: 0.78rem;
+    transition: all 0.25s ease;
+  }
+
+  .btn-view-details:hover {
+    background: #1864ab;
+    color: #ffffff;
+    transform: translateY(-2px);
+  }
+
+  @media (max-width: 768px) {
+    .dashboard-hero,
+    .profile-card {
+      padding: 1rem;
+    }
+
+    .hero-avatar {
+      width: 58px;
+      height: 58px;
+      font-size: 1.5rem;
+    }
+
+    .section-header {
+      align-items: flex-start;
+    }
+
+    .btn-new-workarea {
+      width: 100%;
+    }
+
+    .table {
+      font-size: 0.85rem;
+    }
   }
 </style>
 
 <%- include('../partials/footer') %>
+```

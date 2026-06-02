@@ -218,7 +218,6 @@
 // const RiskAssessment = require("../models/RiskAssessment");
 // const SafetyObservation = require("../models/SafetyObservation");
 // const { OpenAI } = require("openai");
-
 // const openai = new OpenAI({
 //   apiKey: process.env.OPENAI_API_KEY,
 // });
@@ -345,7 +344,7 @@
 // }`;
 
 //     const completion = await openai.chat.completions.create({
-//       model: "gpt-3.5-turbo-16k",
+//       model: AI_MODEL,
 //       messages: [{ role: "user", content: prompt }],
 //       temperature: 0.7,
 //       max_tokens: 2500,
@@ -535,6 +534,8 @@ const Incident = require("../models/Incident");
 const RiskAssessment = require("../models/RiskAssessment");
 const SafetyObservation = require("../models/SafetyObservation");
 const { OpenAI } = require("openai");
+const { AI_MODEL, AI_MAX_TOKENS } = require("../utils/aiConfig");
+const { trackAiCompletion } = require("../utils/aiReview");
 
 const openai = new OpenAI({
   apiKey: process.env.OPENAI_API_KEY,
@@ -658,7 +659,7 @@ exports.showGenerateForm = async (req, res) => {
 // }`;
 
 //     const completion = await openai.chat.completions.create({
-//       model: "gpt-3.5-turbo-16k",
+//       model: AI_MODEL,
 //       messages: [{ role: "user", content: prompt }],
 //       temperature: 0.7,
 //       max_tokens: 2500,
@@ -931,10 +932,10 @@ Return ONLY valid JSON with this structure:
 }`;
 
     const completion = await openai.chat.completions.create({
-      model: "gpt-3.5-turbo-16k",
+      model: AI_MODEL,
       messages: [{ role: "user", content: prompt }],
       temperature: 0.7,
-      max_tokens: 3000,
+      max_tokens: AI_MAX_TOKENS.permit,
     });
 
     const aiResponse = completion.choices[0].message.content;
@@ -1011,6 +1012,16 @@ Return ONLY valid JSON with this structure:
     });
 
     await permit.save();
+    await trackAiCompletion({
+      completion,
+      user: req.user._id,
+      workArea: workAreaId,
+      module: "permit",
+      description: "Permit generated",
+      relatedModel: "Permit",
+      relatedId: permit._id,
+      maxTokens: AI_MAX_TOKENS.permit,
+    });
 
     // Add to work area documents
     if (!workArea.documents) workArea.documents = {};
@@ -1064,12 +1075,17 @@ exports.approvePermit = async (req, res) => {
       return res.redirect("/dashboard");
     }
 
+    if (permit.status !== "pending_approval") {
+      req.flash("error", "Only a pending permit can be approved");
+      return res.redirect(`/permits/${permit._id}`);
+    }
+
     permit.status = "issued";
     permit.authorizations.received.push({
       authorizer: req.user._id,
       role: "Safety Officer",
       date: new Date(),
-      comments: req.body.comments || "",
+      comments: req.body?.comments || "",
     });
 
     await permit.save();

@@ -180,16 +180,14 @@
               </div>
             </div>
 
-            <a
-              href="/ppe/<%= checklist._id %>/download-word"
-              class="btn btn-success btn-lg mt-2"
-            >
-              <i class="fas fa-file-word me-2"></i>
-              Download Editable PPE Word Checklist
-            </a>
+            <p class="small text-muted mb-0">
+              The approved Word checklist is available from the actions panel.
+            </p>
           </div>
         </div>
       </div>
+
+      <%- include('../partials/ai-review-panel', { record: checklist, basePath: '/ppe' }) %>
     </div>
 
     <!-- Sidebar -->
@@ -203,15 +201,14 @@
           </h6>
 
           <div class="d-grid gap-2">
-            <a
-              href="/ppe/<%= checklist._id %>/download-word"
-              class="btn btn-success"
-            >
-              <i class="fas fa-file-word me-2"></i>
-              Download Word Checklist
-            </a>
+            <% if (checklist.officerReview?.status === 'approved') { %>
+              <a href="/ppe/<%= checklist._id %>/download-word" class="btn btn-success">
+                <i class="fas fa-file-word me-2"></i>
+                Download Word Checklist
+              </a>
+            <% } %>
 
-            <% if (checklist.status !== 'completed' && user.role === 'safety_officer') { %>
+            <% if (checklist.officerReview?.status === 'approved' && checklist.status !== 'completed' && user.role === 'safety_officer') { %>
               <form method="POST" action="/ppe/<%= checklist._id %>/complete">
                 <button type="submit" class="btn btn-outline-success w-100">
                   <i class="fas fa-check-circle me-2"></i>
@@ -220,13 +217,6 @@
               </form>
             <% } %>
 
-            <a
-              href="/work-areas/<%= checklist.workArea?._id %>"
-              class="btn btn-outline-primary"
-            >
-              <i class="fas fa-arrow-left me-2"></i>
-              Back to Work Area
-            </a>
           </div>
         </div>
       </div>

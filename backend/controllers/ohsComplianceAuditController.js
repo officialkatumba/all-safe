@@ -19,6 +19,8 @@ const {
 const {
   generateOHSComplianceWordBuffer,
 } = require("../utils/ohsComplianceWordGenerator");
+const { AI_MODEL, AI_MAX_TOKENS } = require("../utils/aiConfig");
+const { approveReviewedDocument, ensureReviewable, isApproved, recordRevision, regenerateStructuredOutput, trackAiCompletion } = require("../utils/aiReview");
 
 const openai = new OpenAI({
   apiKey: process.env.OPENAI_API_KEY,
@@ -326,7 +328,7 @@ exports.generateAudit = async (req, res) => {
       },
       initiatedBy: req.user._id,
       aiGenerated: true,
-      aiModel: "gpt-3.5-turbo-16k",
+      aiModel: AI_MODEL,
     });
 
     await audit.save();
@@ -497,10 +499,10 @@ Return ONLY valid JSON in this exact structure:
 `;
 
     const completion = await openai.chat.completions.create({
-      model: "gpt-3.5-turbo-16k",
+      model: AI_MODEL,
       messages: [{ role: "user", content: prompt }],
       temperature: 0.25,
-      max_tokens: 4000,
+      max_tokens: AI_MAX_TOKENS.ohsComplianceFinal,
     });
 
     const parsed = parseAIJson(completion.choices[0].message.content, {
@@ -562,6 +564,16 @@ Return ONLY valid JSON in this exact structure:
 
     audit.auditStatus = "score_generated";
     await audit.save();
+    await trackAiCompletion({
+      completion,
+      user: req.user._id,
+      workArea: audit.workArea._id || audit.workArea,
+      module: "ohs_compliance_final",
+      description: "OHS compliance score generated",
+      relatedModel: "OHSComplianceAudit",
+      relatedId: audit._id,
+      maxTokens: AI_MAX_TOKENS.ohsComplianceFinal,
+    });
 
     req.flash("success", "OHS compliance score generated successfully.");
     return res.redirect(`/ohs-compliance-audits/${audit._id}`);
@@ -594,6 +606,63 @@ exports.viewAudit = async (req, res) => {
   }
 };
 
+exports.regenerateWithComments = async (req, res) => {
+  try {
+    const audit = await OHSComplianceAudit.findById(req.params.id);
+    if (!audit) return res.status(404).send("OHS compliance audit not found");
+    if (audit.auditStatus !== "score_generated") {
+      throw new Error("Complete the compliance interview before reviewing the final report");
+    }
+
+    ensureReviewable(audit);
+    const previousOutput =
+      audit.finalCompliance?.toObject?.() || audit.finalCompliance;
+    const revision = await regenerateStructuredOutput({
+      currentOutput: previousOutput,
+      comments: req.body.reviewComments,
+      documentType: "OHS compliance audit final report",
+      maxTokens: AI_MAX_TOKENS.ohsComplianceFinal,
+      user: req.user._id,
+      workArea: audit.workArea,
+      relatedModel: "OHSComplianceAudit",
+      relatedId: audit._id,
+      extraInstructions:
+        "Revise only the final compliance analysis and recommendations. Do not invent legal sections, rewrite officer responses, or alter evidence. Change the numeric score only when the officer comments identify a factual scoring correction.",
+    });
+
+    audit.finalCompliance = {
+      ...revision.output,
+      scoredAt: new Date(),
+    };
+    recordRevision(audit, {
+      comments: revision.comments,
+      previousOutput,
+      submittedBy: req.user._id,
+    });
+    await audit.save();
+
+    req.flash("success", "OHS compliance report regenerated for review");
+    return res.redirect(`/ohs-compliance-audits/${audit._id}`);
+  } catch (error) {
+    req.flash("error", error.message);
+    return res.redirect(`/ohs-compliance-audits/${req.params.id}`);
+  }
+};
+
+exports.approveAudit = async (req, res) => {
+  try {
+    const audit = await OHSComplianceAudit.findById(req.params.id);
+    if (!audit) return res.status(404).send("OHS compliance audit not found");
+    approveReviewedDocument(audit, req.user._id);
+    await audit.save();
+    req.flash("success", "OHS compliance report approved and locked");
+    return res.redirect(`/ohs-compliance-audits/${audit._id}`);
+  } catch (error) {
+    req.flash("error", error.message);
+    return res.redirect(`/ohs-compliance-audits/${req.params.id}`);
+  }
+};
+
 exports.downloadWord = async (req, res) => {
   try {
     const audit = await OHSComplianceAudit.findById(req.params.id)
@@ -602,6 +671,11 @@ exports.downloadWord = async (req, res) => {
 
     if (!audit) {
       return res.status(404).send("OHS compliance audit not found");
+    }
+
+    if (!isApproved(audit)) {
+      req.flash("error", "Approve the final OHS compliance report before downloading it");
+      return res.redirect(`/ohs-compliance-audits/${audit._id}`);
     }
 
     const buffer = await generateOHSComplianceWordBuffer({ audit });

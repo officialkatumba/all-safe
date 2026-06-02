@@ -1,16 +1,17 @@
 const Alert = require("../models/Alert");
 
+const accessibleBy = (user) => ({
+  $or: [
+    { createdBy: user._id },
+    { "recipients.user": user._id },
+    { "recipients.safetyOfficer": user._id },
+    { "recipients.email": user.email },
+  ],
+});
+
 exports.listAlerts = async (req, res) => {
   try {
-    const query = {
-      $or: [
-        { createdBy: req.user._id },
-        { "recipients.user": req.user._id },
-        { "recipients.email": req.user.email },
-      ],
-    };
-
-    const alerts = await Alert.find(query)
+    const alerts = await Alert.find(accessibleBy(req.user))
       .populate("workArea", "name")
       .sort({ createdAt: -1 })
       .limit(100);
@@ -28,7 +29,10 @@ exports.listAlerts = async (req, res) => {
 
 exports.acknowledgeAlert = async (req, res) => {
   try {
-    const alert = await Alert.findById(req.params.id);
+    const alert = await Alert.findOne({
+      _id: req.params.id,
+      ...accessibleBy(req.user),
+    });
 
     if (!alert) {
       req.flash("error", "Alert not found");
@@ -51,7 +55,10 @@ exports.acknowledgeAlert = async (req, res) => {
 
 exports.resolveAlert = async (req, res) => {
   try {
-    const alert = await Alert.findById(req.params.id);
+    const alert = await Alert.findOne({
+      _id: req.params.id,
+      ...accessibleBy(req.user),
+    });
 
     if (!alert) {
       req.flash("error", "Alert not found");

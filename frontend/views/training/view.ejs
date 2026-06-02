@@ -172,16 +172,14 @@
               The downloadable Word document includes a printable checklist with tick boxes for safety officer verification.
             </p>
 
-            <a
-              href="/training/<%= training._id %>/download-word"
-              class="btn btn-primary btn-lg mt-2"
-            >
-              <i class="fas fa-file-word me-2"></i>
-              Download Editable Training Word Checklist
-            </a>
+            <p class="small text-muted mb-0">
+              The approved Word checklist is available from the actions panel.
+            </p>
           </div>
         </div>
       </div>
+
+      <%- include('../partials/ai-review-panel', { record: training, basePath: '/training' }) %>
     </div>
 
     <div class="col-lg-4">
@@ -193,21 +191,13 @@
           </h6>
 
           <div class="d-grid gap-2">
-            <a
-              href="/training/<%= training._id %>/download-word"
-              class="btn btn-primary"
-            >
-              <i class="fas fa-file-word me-2"></i>
-              Download Word Checklist
-            </a>
+            <% if (training.officerReview?.status === 'approved') { %>
+              <a href="/training/<%= training._id %>/download-word" class="btn btn-primary">
+                <i class="fas fa-file-word me-2"></i>
+                Download Word Checklist
+              </a>
+            <% } %>
 
-            <a
-              href="/work-areas/<%= training.workArea?._id || training.workArea %>"
-              class="btn btn-outline-primary"
-            >
-              <i class="fas fa-arrow-left me-2"></i>
-              Back to Work Area
-            </a>
           </div>
         </div>
       </div>

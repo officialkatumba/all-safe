@@ -65,7 +65,21 @@
             <div class="p-3 bg-light rounded">
               <ul class="mb-0">
                 <% talk.sections.discussionQuestions.forEach(q => { %>
-                  <li class="mb-2">❓ <%= q %></li>
+                  <li class="mb-2"><i class="fas fa-circle-question text-warning me-2"></i><%= q %></li>
+                <% }) %>
+              </ul>
+            </div>
+          </div>
+          <% } %>
+
+          <!-- Supervisor Verification -->
+          <% if (talk.sections?.supervisorVerification && talk.sections.supervisorVerification.length > 0) { %>
+          <div class="mb-4">
+            <h5 class="fw-bold text-info"><i class="fas fa-clipboard-check me-2"></i>Supervisor Verification</h5>
+            <div class="p-3 bg-light rounded">
+              <ul class="mb-0">
+                <% talk.sections.supervisorVerification.forEach(item => { %>
+                  <li class="mb-2"><%= item %></li>
                 <% }) %>
               </ul>
             </div>
@@ -79,7 +93,7 @@
             <div class="p-3 bg-light rounded">
               <ul class="mb-0">
                 <% talk.sections.keyTakeaways.forEach(takeaway => { %>
-                  <li class="mb-2">✓ <%= takeaway %></li>
+                  <li class="mb-2"><i class="fas fa-check text-success me-2"></i><%= takeaway %></li>
                 <% }) %>
               </ul>
             </div>
@@ -132,6 +146,76 @@
         </div>
       </div>
       <% } %>
+
+      <!-- Inline Safety Officer Review -->
+      <% if (user.role === 'safety_officer') { %>
+      <div class="card shadow-sm mb-4 border-0">
+        <div class="card-header <%= talk.status === 'published' ? 'bg-success' : 'bg-warning' %> <%= talk.status === 'published' ? 'text-white' : 'text-dark' %>">
+          <h5 class="mb-0 fw-bold">
+            <i class="fas fa-user-shield me-2"></i>Safety Officer Review
+          </h5>
+        </div>
+        <div class="card-body p-4">
+          <% if (talk.status === 'published' && talk.review?.status === 'confirmed') { %>
+            <div class="alert alert-success mb-0">
+              <h6 class="fw-bold"><i class="fas fa-lock me-2"></i>Final Safety Talk Approved</h6>
+              <p class="mb-0">
+                This document is locked. It was approved on
+                <%= new Date(talk.review.reviewedAt).toLocaleString() %>.
+                The approved Word document is ready to download.
+              </p>
+            </div>
+          <% } else { %>
+            <div class="alert alert-info">
+              Review the draft against actual site conditions. Add your comments and regenerate the Safety Talk until it is ready, then approve the final version.
+            </div>
+
+            <form method="POST" action="/safety-talks/<%= talk._id %>/regenerate" data-swal-confirm="true" data-swal-title="Regenerate Safety Talk?" data-swal-text="The AI will revise this Safety Talk using your safety officer comments." data-swal-confirm-button="Regenerate">
+              <div class="mb-3">
+                <label for="reviewComments" class="form-label fw-bold">Safety Officer Comments</label>
+                <textarea
+                  id="reviewComments"
+                  name="reviewComments"
+                  class="form-control"
+                  rows="5"
+                  maxlength="4000"
+                  required
+                  placeholder="Describe corrections, missing controls, site-specific instructions, or details the AI must incorporate."
+                ></textarea>
+                <div class="form-text">Comments are required and will be sent back to the AI with the current draft.</div>
+              </div>
+              <button type="submit" id="regenerateSafetyTalkButton" class="btn btn-warning" disabled>
+                <i class="fas fa-rotate me-2"></i>Regenerate with Comments
+              </button>
+            </form>
+
+            <% if (talk.review?.history?.length > 0) { %>
+              <hr class="my-4">
+              <form method="POST" action="/safety-talks/<%= talk._id %>/approve" data-swal-confirm="true" data-swal-title="Approve Final Safety Talk?" data-swal-text="This Safety Talk will be approved and locked. Only the final download will remain available." data-swal-confirm-button="Approve Safety Talk">
+                <button type="submit" class="btn btn-success">
+                  <i class="fas fa-check-circle me-2"></i>Approve Final Safety Talk
+                </button>
+              </form>
+            <% } %>
+          <% } %>
+
+          <% if (talk.review?.history?.length > 0) { %>
+            <hr class="my-4">
+            <h6 class="fw-bold"><i class="fas fa-clock-rotate-left me-2"></i>Review History</h6>
+            <% [...talk.review.history].reverse().forEach(entry => { %>
+              <div class="border rounded p-3 mt-3 bg-light">
+                <div class="small text-muted mb-2">
+                  Comments used to generate version <strong><%= entry.generatedVersion %></strong>
+                  on <%= new Date(entry.submittedAt).toLocaleString() %>
+                </div>
+                <div style="white-space: pre-wrap;"><%= entry.comments %></div>
+              </div>
+            <% }) %>
+          <% } %>
+        </div>
+      </div>
+      <% } %>
+
     </div>
 
     <!-- Sidebar -->
@@ -144,23 +228,19 @@
             <!-- <button class="btn btn-outline-secondary" onclick="window.print()">
               <i class="fas fa-print me-2"></i>Print / Save as PDF
             </button> -->
-            <a href="/safety-talks/<%= talk._id %>/download-word" class="btn btn-outline-primary">
-              <i class="fas fa-download me-2"></i>Download Word Document
-            </a>
-            <% if (talk.status === 'draft' && user.role === 'safety_officer') { %>
-            <button class="btn btn-success" data-bs-toggle="modal" data-bs-target="#reviewModal">
-              <i class="fas fa-check-circle me-2"></i>Review & Confirm
-            </button>
-            <% } %>
             <% if (talk.status === 'published') { %>
+              <a href="/safety-talks/<%= talk._id %>/download-word" class="btn btn-outline-primary">
+                <i class="fas fa-download me-2"></i>Download Word Document
+              </a>
               <div class="alert alert-success py-2 mb-0">
-                <i class="fas fa-check-circle me-1"></i> Reviewed and ready for use.
+                <i class="fas fa-check-circle me-1"></i> Approved, locked, and ready for use.
+              </div>
+            <% } else { %>
+              <div class="alert alert-warning py-2 mb-0">
+                <i class="fas fa-lock me-1"></i> Download unlocks after final approval.
               </div>
             <% } %>
             
-            <a href="/work-areas/<%= talk.targetWorkAreas[0]?._id %>" class="btn btn-outline-primary">
-              <i class="fas fa-arrow-left me-2"></i>Back to Work Area
-            </a>
           </div>
         </div>
       </div>
@@ -185,6 +265,10 @@
             <tr>
               <td><strong>Status:</strong></td>
               <td><span class="badge <%= talk.status === 'published' ? 'bg-success' : talk.status === 'draft' ? 'bg-warning text-dark' : 'bg-primary' %>"><%= talk.status %></span></td>
+            </tr>
+            <tr>
+              <td><strong>Version:</strong></td>
+              <td><%= talk.version || 1 %></td>
             </tr>
             <% if (talk.review?.reviewedAt) { %>
             <tr>
@@ -219,33 +303,6 @@
   </div>
 </div>
 
-<!-- Review and Confirm Modal -->
-<div class="modal fade" id="reviewModal" tabindex="-1">
-  <div class="modal-dialog">
-    <div class="modal-content">
-      <div class="modal-header bg-success text-white">
-        <h5 class="modal-title"><i class="fas fa-check-circle me-2"></i>Review and Confirm Safety Talk</h5>
-        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
-      </div>
-      <form method="POST" action="/safety-talks/<%= talk._id %>/review-confirm">
-        <div class="modal-body">
-          <div class="alert alert-warning">
-            Confirm that you have reviewed this AI-generated draft and adapted it to actual site conditions.
-          </div>
-          <div class="mb-3">
-            <label class="form-label fw-bold">Review Comments</label>
-            <textarea name="reviewComments" class="form-control" rows="3" placeholder="Record changes made, assumptions checked, or site-specific instructions added."></textarea>
-          </div>
-        </div>
-        <div class="modal-footer">
-          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-          <button type="submit" class="btn btn-success">Confirm Reviewed</button>
-        </div>
-      </form>
-    </div>
-  </div>
-</div>
-
 <style>
   @media print {
     .navbar, .btn, .modal, .card-header .btn, .actions-card, .no-print {
@@ -261,5 +318,21 @@
     }
   }
 </style>
+
+<script>
+  document.addEventListener('DOMContentLoaded', function () {
+    const comments = document.getElementById('reviewComments');
+    const regenerateButton = document.getElementById('regenerateSafetyTalkButton');
+
+    if (!comments || !regenerateButton) return;
+
+    const updateRegenerateButton = function () {
+      regenerateButton.disabled = comments.value.trim().length === 0;
+    };
+
+    comments.addEventListener('input', updateRegenerateButton);
+    updateRegenerateButton();
+  });
+</script>
 
 <%- include('../partials/footer') %>

@@ -6,6 +6,8 @@
 // const SafetyTalk = require("../models/SafetyTalk");
 // const { OpenAI } = require("openai");
 // const { generatePPEWordBuffer } = require("../utils/ppeWordGenerator");
+const { AI_MODEL, AI_MAX_TOKENS } = require("../utils/aiConfig");
+const { approveReviewedDocument, ensureReviewable, isApproved, recordRevision, regenerateStructuredOutput, trackAiCompletion } = require("../utils/aiReview");
 
 // const openai = new OpenAI({
 //   apiKey: process.env.OPENAI_API_KEY,
@@ -108,7 +110,7 @@
 // Return ONLY valid JSON, no other text. Base your recommendations on the actual hazards, incidents, and observations provided.`;
 
 //     const completion = await openai.chat.completions.create({
-//       model: "gpt-3.5-turbo-16k",
+//       model: AI_MODEL,
 //       messages: [{ role: "user", content: prompt }],
 //       temperature: 0.7,
 //       max_tokens: 2000,
@@ -455,10 +457,10 @@ Return ONLY valid JSON in this exact shape:
 }`;
 
     const completion = await openai.chat.completions.create({
-      model: "gpt-3.5-turbo-16k",
+      model: AI_MODEL,
       messages: [{ role: "user", content: prompt }],
       temperature: 0.5,
-      max_tokens: 2200,
+      max_tokens: AI_MAX_TOKENS.ppeChecklist,
     });
 
     const aiResponse = completion.choices[0].message.content;
@@ -489,13 +491,23 @@ Return ONLY valid JSON in this exact shape:
           "PPE must be available, suitable, clean, and in good condition.",
       })),
 
-      status: "active",
+      status: "draft",
       aiGenerated: true,
-      aiModel: "gpt-3.5-turbo-16k",
+      aiModel: AI_MODEL,
       generationPrompt: prompt,
     });
 
     await ppeChecklist.save();
+    await trackAiCompletion({
+      completion,
+      user: req.user._id,
+      workArea: workArea._id,
+      module: "ppe_checklist",
+      description: "PPE checklist generated",
+      relatedModel: "PPEChecklist",
+      relatedId: ppeChecklist._id,
+      maxTokens: AI_MAX_TOKENS.ppeChecklist,
+    });
 
     // Update work area document references if your WorkArea model supports it
     if (!workArea.documents) workArea.documents = {};
@@ -578,6 +590,11 @@ exports.completeChecklist = async (req, res) => {
       return res.redirect("/dashboard");
     }
 
+    if (!isApproved(checklist)) {
+      req.flash("error", "Approve the PPE checklist before marking it completed");
+      return res.redirect(`/ppe/${checklist._id}`);
+    }
+
     checklist.status = "completed";
     checklist.completedBy = req.user._id;
     checklist.completedAt = new Date();
@@ -589,6 +606,63 @@ exports.completeChecklist = async (req, res) => {
   } catch (error) {
     console.error("Error completing checklist:", error);
     req.flash("error", "Error updating checklist");
+    return res.redirect(`/ppe/${req.params.id}`);
+  }
+};
+
+exports.regenerateWithComments = async (req, res) => {
+  try {
+    const checklist = await PPEChecklist.findById(req.params.id);
+    if (!checklist) return res.status(404).send("PPE checklist not found");
+
+    ensureReviewable(checklist);
+    const previousOutput = {
+      title: checklist.title,
+      ppeItems: checklist.ppeItems,
+      inspectionItems: checklist.inspectionItems,
+    };
+    const revision = await regenerateStructuredOutput({
+      currentOutput: previousOutput,
+      comments: req.body.reviewComments,
+      documentType: "PPE requirements checklist",
+      maxTokens: AI_MAX_TOKENS.ppeChecklist,
+      user: req.user._id,
+      workArea: checklist.workArea,
+      relatedModel: "PPEChecklist",
+      relatedId: checklist._id,
+    });
+
+    checklist.title = revision.output.title || checklist.title;
+    checklist.ppeItems = revision.output.ppeItems || checklist.ppeItems;
+    checklist.inspectionItems =
+      revision.output.inspectionItems || checklist.inspectionItems;
+    checklist.aiModel = AI_MODEL;
+    recordRevision(checklist, {
+      comments: revision.comments,
+      previousOutput,
+      submittedBy: req.user._id,
+    });
+    await checklist.save();
+
+    req.flash("success", "PPE checklist regenerated for review");
+    return res.redirect(`/ppe/${checklist._id}`);
+  } catch (error) {
+    req.flash("error", error.message);
+    return res.redirect(`/ppe/${req.params.id}`);
+  }
+};
+
+exports.approveChecklist = async (req, res) => {
+  try {
+    const checklist = await PPEChecklist.findById(req.params.id);
+    if (!checklist) return res.status(404).send("PPE checklist not found");
+    approveReviewedDocument(checklist, req.user._id);
+    checklist.status = "active";
+    await checklist.save();
+    req.flash("success", "PPE checklist approved and locked");
+    return res.redirect(`/ppe/${checklist._id}`);
+  } catch (error) {
+    req.flash("error", error.message);
     return res.redirect(`/ppe/${req.params.id}`);
   }
 };
@@ -605,6 +679,11 @@ exports.downloadWord = async (req, res) => {
 
     if (!checklist) {
       return res.status(404).send("PPE checklist not found");
+    }
+
+    if (!isApproved(checklist)) {
+      req.flash("error", "Approve the final PPE checklist before downloading it");
+      return res.redirect(`/ppe/${checklist._id}`);
     }
 
     const buffer = await generatePPEWordBuffer({ checklist });

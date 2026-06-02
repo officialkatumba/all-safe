@@ -6,6 +6,9 @@ const mongoose = require("mongoose");
 const dotenv = require("dotenv");
 const path = require("path");
 const session = require("express-session");
+const MongoStore = require("connect-mongo");
+const helmet = require("helmet");
+const { rateLimit } = require("express-rate-limit");
 const passport = require("passport");
 const LocalStrategy = require("passport-local").Strategy;
 const flash = require("connect-flash");
@@ -22,10 +25,19 @@ mongoose
   .catch((err) => console.error("MongoDB connection error:", err));
 
 const app = express();
+app.disable("x-powered-by");
+
+if (!process.env.SESSION_SECRET) {
+  throw new Error("SESSION_SECRET is required.");
+}
 
 app.use(
   session({
-    secret: process.env.SESSION_SECRET || "secret",
+    secret: process.env.SESSION_SECRET,
+    store: MongoStore.create({
+      mongoUrl: process.env.MONGO_URI,
+      collectionName: "sessions",
+    }),
     resave: false,
     saveUninitialized: false,
     cookie: {
@@ -37,6 +49,19 @@ app.use(
   }),
 );
 
+app.use(
+  helmet({
+    contentSecurityPolicy: false,
+  }),
+);
+app.use(
+  rateLimit({
+    windowMs: 15 * 60 * 1000,
+    limit: 500,
+    standardHeaders: "draft-8",
+    legacyHeaders: false,
+  }),
+);
 app.use(flash());
 app.use(passport.initialize());
 app.use(passport.session());
@@ -48,6 +73,18 @@ passport.deserializeUser(User.deserializeUser());
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(express.static(path.join(__dirname, "../frontend/public")));
+const { ensureCsrfToken, verifyCsrfToken } = require("./middlewares/csrf");
+const { rejectUnsafeKeys } = require("./middlewares/security");
+app.use(ensureCsrfToken);
+app.use(verifyCsrfToken);
+app.use(rejectUnsafeKeys);
+
+const authLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000,
+  limit: 30,
+  standardHeaders: "draft-8",
+  legacyHeaders: false,
+});
 
 app.set("view engine", "ejs");
 app.set("views", path.join(__dirname, "../frontend/views"));
@@ -87,8 +124,8 @@ app.get("/", (req, res) => {
 });
 
 app.use("/dashboard", require("./routes/dashboardRoutes"));
-app.use("/register", require("./routes/registrationRoutes"));
-app.use("/api/users", require("./routes/usersRoutes"));
+app.use("/register", authLimiter, require("./routes/registrationRoutes"));
+app.use("/api/users", authLimiter, require("./routes/usersRoutes"));
 app.use("/work-areas", require("./routes/workAreaRoutes"));
 app.use("/incidents", require("./routes/incidentRoutes"));
 app.use("/risk-assessments", require("./routes/riskAssessmentRoutes"));

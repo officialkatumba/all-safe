@@ -9,6 +9,8 @@ const { OpenAI } = require("openai");
 const {
   generateSafetyInsightWordBuffer,
 } = require("../utils/safetyInsightWordGenerator");
+const { AI_MODEL, AI_MAX_TOKENS } = require("../utils/aiConfig");
+const { approveReviewedDocument, ensureReviewable, isApproved, recordRevision, regenerateStructuredOutput, trackAiCompletion } = require("../utils/aiReview");
 
 const openai = new OpenAI({
   apiKey: process.env.OPENAI_API_KEY,
@@ -278,10 +280,10 @@ Return ONLY valid JSON in this exact shape:
 `;
 
     const completion = await openai.chat.completions.create({
-      model: "gpt-3.5-turbo-16k",
+      model: AI_MODEL,
       messages: [{ role: "user", content: prompt }],
       temperature: 0.4,
-      max_tokens: 2500,
+      max_tokens: AI_MAX_TOKENS.safetyInsight,
     });
 
     const aiText = completion.choices[0].message.content;
@@ -335,11 +337,21 @@ Return ONLY valid JSON in this exact shape:
       },
       generatedBy: req.user._id,
       aiGenerated: true,
-      aiModel: "gpt-3.5-turbo-16k",
+      aiModel: AI_MODEL,
       status: "generated",
     });
 
     await insight.save();
+    await trackAiCompletion({
+      completion,
+      user: req.user._id,
+      workArea: workAreaId,
+      module: "safety_insight",
+      description: "AI safety insight generated",
+      relatedModel: "SafetyInsight",
+      relatedId: insight._id,
+      maxTokens: AI_MAX_TOKENS.safetyInsight,
+    });
 
     req.flash("success", "AI Safety Insight generated successfully.");
     return res.redirect(`/work-areas/${workAreaId}#insights`);
@@ -378,6 +390,75 @@ exports.getSafetyInsight = async (req, res) => {
   }
 };
 
+exports.regenerateWithComments = async (req, res) => {
+  try {
+    const insight = await SafetyInsight.findById(req.params.id);
+    if (!insight) return res.status(404).send("Safety insight not found");
+
+    ensureReviewable(insight);
+    const previousOutput = {
+      title: insight.title,
+      summary: insight.summary,
+      priorityLevel: insight.priorityLevel,
+      recommendedFocusAreas: insight.recommendedFocusAreas,
+      safetyConcernsAndObservations: insight.safetyConcernsAndObservations,
+      actionableRecommendations: insight.actionableRecommendations,
+      recommendedDocumentActions: insight.recommendedDocumentActions,
+    };
+    const revision = await regenerateStructuredOutput({
+      currentOutput: previousOutput,
+      comments: req.body.reviewComments,
+      documentType: "safety insight report",
+      maxTokens: AI_MAX_TOKENS.safetyInsight,
+      user: req.user._id,
+      workArea: insight.workArea,
+      relatedModel: "SafetyInsight",
+      relatedId: insight._id,
+    });
+
+    Object.assign(insight, revision.output);
+    insight.aiModel = AI_MODEL;
+    insight.status = "generated";
+    recordRevision(insight, {
+      comments: revision.comments,
+      previousOutput,
+      submittedBy: req.user._id,
+    });
+    await insight.save();
+    await trackAiCompletion({
+      completion,
+      user: req.user._id,
+      workArea: workAreaId,
+      module: "safety_insight",
+      description: "Safety insight generated",
+      relatedModel: "SafetyInsight",
+      relatedId: insight._id,
+      maxTokens: AI_MAX_TOKENS.safetyInsight,
+    });
+
+    req.flash("success", "Safety insight regenerated for review");
+    return res.redirect(`/safety-insights/${insight._id}`);
+  } catch (error) {
+    req.flash("error", error.message);
+    return res.redirect(`/safety-insights/${req.params.id}`);
+  }
+};
+
+exports.approveInsight = async (req, res) => {
+  try {
+    const insight = await SafetyInsight.findById(req.params.id);
+    if (!insight) return res.status(404).send("Safety insight not found");
+    approveReviewedDocument(insight, req.user._id);
+    insight.status = "reviewed";
+    await insight.save();
+    req.flash("success", "Safety insight approved and locked");
+    return res.redirect(`/safety-insights/${insight._id}`);
+  } catch (error) {
+    req.flash("error", error.message);
+    return res.redirect(`/safety-insights/${req.params.id}`);
+  }
+};
+
 exports.downloadWord = async (req, res) => {
   try {
     const { id } = req.params;
@@ -393,6 +474,11 @@ exports.downloadWord = async (req, res) => {
 
     if (!insight) {
       return res.status(404).send("Safety insight not found");
+    }
+
+    if (!isApproved(insight)) {
+      req.flash("error", "Approve the final safety insight before downloading it");
+      return res.redirect(`/safety-insights/${insight._id}`);
     }
 
     const buffer = await generateSafetyInsightWordBuffer({ insight });

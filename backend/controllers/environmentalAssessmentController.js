@@ -11,6 +11,8 @@ const { trackUsage } = require("../utils/usageTracker");
 const {
   generateEnvironmentalAssessmentWordBuffer,
 } = require("../utils/environmentalAssessmentWordGenerator");
+const { AI_MODEL, AI_MAX_TOKENS } = require("../utils/aiConfig");
+const { approveReviewedDocument, ensureReviewable, isApproved, recordRevision, regenerateStructuredOutput } = require("../utils/aiReview");
 
 const openai = new OpenAI({
   apiKey: process.env.OPENAI_API_KEY,
@@ -161,10 +163,10 @@ Return ONLY valid JSON in this exact structure:
 }`;
 
     const completion = await openai.chat.completions.create({
-      model: "gpt-3.5-turbo-16k",
+      model: AI_MODEL,
       messages: [{ role: "user", content: prompt }],
       temperature: 0.35,
-      max_tokens: 3200,
+      max_tokens: AI_MAX_TOKENS.environmentalAssessment,
     });
 
     const parsed = parseAIJson(completion.choices[0].message.content);
@@ -177,7 +179,7 @@ Return ONLY valid JSON in this exact structure:
       impacts: parsed.impacts || [],
       aiSummary: parsed.aiSummary || {},
       aiGenerated: true,
-      aiModel: "gpt-3.5-turbo-16k",
+      aiModel: AI_MODEL,
       generatedBy: req.user._id,
       createdBy: req.user._id,
     });
@@ -199,6 +201,11 @@ Return ONLY valid JSON in this exact structure:
       description: "Environmental assessment generated",
       relatedModel: "EnvironmentalAssessment",
       relatedId: assessment._id,
+      metadata: {
+        model: AI_MODEL,
+        maxTokens: AI_MAX_TOKENS.environmentalAssessment,
+        usage: completion.usage,
+      },
     });
 
     req.flash(
@@ -245,10 +252,11 @@ exports.approveAssessment = async (req, res) => {
       return res.redirect("/dashboard/officer");
     }
 
+    approveReviewedDocument(assessment, req.user._id);
     assessment.approval.status = "approved";
     assessment.approval.reviewedBy = req.user._id;
     assessment.approval.reviewedAt = new Date();
-    assessment.approval.comments = req.body.comments || "";
+    assessment.approval.comments = req.body?.comments || "";
     await assessment.save();
 
     req.flash("success", "Environmental assessment approved");
@@ -260,6 +268,52 @@ exports.approveAssessment = async (req, res) => {
   }
 };
 
+exports.regenerateWithComments = async (req, res) => {
+  try {
+    const assessment = await EnvironmentalAssessment.findById(req.params.id);
+    if (!assessment) return res.status(404).send("Environmental assessment not found");
+
+    ensureReviewable(assessment);
+    const previousOutput = {
+      title: assessment.title,
+      receptors: assessment.receptors,
+      impacts: assessment.impacts,
+      aiSummary: assessment.aiSummary,
+    };
+    const revision = await regenerateStructuredOutput({
+      currentOutput: previousOutput,
+      comments: req.body.reviewComments,
+      documentType: "environmental screening and impact register",
+      maxTokens: AI_MAX_TOKENS.environmentalAssessment,
+      user: req.user._id,
+      workArea: assessment.workArea,
+      relatedModel: "EnvironmentalAssessment",
+      relatedId: assessment._id,
+      extraInstructions:
+        "Keep this as a screening tool. Do not claim statutory or regulatory approval.",
+    });
+
+    assessment.title = revision.output.title || assessment.title;
+    assessment.receptors = revision.output.receptors || assessment.receptors;
+    assessment.impacts = revision.output.impacts || assessment.impacts;
+    assessment.aiSummary = revision.output.aiSummary || assessment.aiSummary;
+    assessment.aiModel = AI_MODEL;
+    assessment.approval.status = "changes_required";
+    recordRevision(assessment, {
+      comments: revision.comments,
+      previousOutput,
+      submittedBy: req.user._id,
+    });
+    await assessment.save();
+
+    req.flash("success", "Environmental assessment regenerated for review");
+    return res.redirect(`/environmental-assessments/${assessment._id}`);
+  } catch (error) {
+    req.flash("error", error.message);
+    return res.redirect(`/environmental-assessments/${req.params.id}`);
+  }
+};
+
 exports.downloadWord = async (req, res) => {
   try {
     const assessment = await EnvironmentalAssessment.findById(req.params.id)
@@ -267,6 +321,11 @@ exports.downloadWord = async (req, res) => {
 
     if (!assessment) {
       return res.status(404).send("Environmental assessment not found");
+    }
+
+    if (!isApproved(assessment)) {
+      req.flash("error", "Approve the final environmental assessment before downloading it");
+      return res.redirect(`/environmental-assessments/${assessment._id}`);
     }
 
     const buffer = await generateEnvironmentalAssessmentWordBuffer({

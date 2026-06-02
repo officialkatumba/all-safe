@@ -209,6 +209,7 @@
 
 const mongoose = require("mongoose");
 const Counter = require("./Counter");
+const { addAiReviewFields } = require("../utils/aiReviewSchema");
 
 const ppeChecklistSchema = new mongoose.Schema(
   {
@@ -325,6 +326,8 @@ const ppeChecklistSchema = new mongoose.Schema(
   },
   { timestamps: true },
 );
+
+addAiReviewFields(ppeChecklistSchema);
 
 // Auto-increment checklist number
 ppeChecklistSchema.pre("save", async function (next) {

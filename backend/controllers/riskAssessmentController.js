@@ -13,6 +13,8 @@ const path = require("path");
 
 const { generateRiskWordBuffer } = require("../utils/riskWordGenerator");
 const { generateRiskPDF } = require("../utils/riskWordGenerator");
+const { AI_MODEL, AI_MAX_TOKENS } = require("../utils/aiConfig");
+const { trackAiCompletion } = require("../utils/aiReview");
 const openai = new OpenAI({
   apiKey: process.env.OPENAI_API_KEY,
 });
@@ -231,15 +233,6 @@ exports.getRiskAssessment = async (req, res) => {
     ).length;
     const allConfirmedNow = confirmedCount === sections.length;
 
-    console.log("=== DEBUG INFO ===");
-    console.log("Confirmed count:", confirmedCount);
-    console.log("All confirmed:", allConfirmedNow);
-    console.log(
-      "PDF Uploaded:",
-      assessment.consolidatedAssessment?.pdfUploaded,
-    );
-    console.log("=================");
-
     res.render("risk-assessments/view", {
       user: req.user,
       assessment,
@@ -336,13 +329,23 @@ ${humanContent}
 Enhance by improving clarity, adding practical controls, noting evidence gaps, applying hierarchy of controls, and keeping the final text suitable for review and approval by a competent safety officer. Return ONLY enhanced content.`;
 
     const completion = await openai.chat.completions.create({
-      model: "gpt-3.5-turbo-16k",
+      model: AI_MODEL,
       messages: [{ role: "user", content: prompt }],
       temperature: 0.7,
-      max_tokens: 2000,
+      max_tokens: AI_MAX_TOKENS.riskAssessmentSection,
     });
 
     const enhancedContent = completion.choices[0].message.content.trim();
+    await trackAiCompletion({
+      completion,
+      user: req.user._id,
+      workArea: assessment.workArea,
+      module: "risk_assessment_section",
+      description: `Risk assessment section enhanced: ${sectionKey}`,
+      relatedModel: "RiskAssessment",
+      relatedId: assessment._id,
+      maxTokens: AI_MAX_TOKENS.riskAssessmentSection,
+    });
     if (!assessment.aiSections) assessment.aiSections = {};
     assessment.aiSections[sectionKey] = {
       content: enhancedContent,
@@ -504,6 +507,11 @@ exports.generateConsolidated = async (req, res) => {
 
     if (!allConfirmed) {
       req.flash("error", "Please confirm all sections first");
+      return res.redirect(`/risk-assessments/${assessment._id}`);
+    }
+
+    if (assessment.status !== "approved") {
+      req.flash("error", "Approve the final risk assessment before downloading it");
       return res.redirect(`/risk-assessments/${assessment._id}`);
     }
 
@@ -678,9 +686,17 @@ exports.approveAssessment = async (req, res) => {
       return res
         .status(404)
         .json({ success: false, error: "Assessment not found" });
+    const allConfirmed = sections.every(
+      (section) => assessment.sectionConfirmed?.[section.key] === true,
+    );
+    if (!allConfirmed) {
+      req.flash("error", "Confirm every section before approving the assessment");
+      return res.redirect(`/risk-assessments/${assessment._id}`);
+    }
     assessment.status = "approved";
     await assessment.save();
-    res.json({ success: true, message: "Assessment approved" });
+    req.flash("success", "Risk assessment approved and locked");
+    res.redirect(`/risk-assessments/${assessment._id}`);
   } catch (error) {
     console.error("Error approving:", error);
     res.status(500).json({ success: false, error: error.message });

@@ -12,6 +12,8 @@ const {
 const fs = require("fs");
 const path = require("path");
 const { generateJSAWordBuffer } = require("../utils/jsaWordGenerator");
+const { AI_MODEL, AI_MAX_TOKENS } = require("../utils/aiConfig");
+const { trackAiCompletion } = require("../utils/aiReview");
 const openai = new OpenAI({
   apiKey: process.env.OPENAI_API_KEY,
 });
@@ -306,13 +308,23 @@ ${humanContent}
 Enhance by improving task sequence, identifying missed hazards, adding practical controls, clarifying supervisor verification, and keeping the final text suitable for safety officer review. Return ONLY enhanced content.`;
 
     const completion = await openai.chat.completions.create({
-      model: "gpt-3.5-turbo-16k",
+      model: AI_MODEL,
       messages: [{ role: "user", content: prompt }],
       temperature: 0.7,
-      max_tokens: 2000,
+      max_tokens: AI_MAX_TOKENS.jsaSection,
     });
 
     const enhancedContent = completion.choices[0].message.content.trim();
+    await trackAiCompletion({
+      completion,
+      user: req.user._id,
+      workArea: jsa.workArea,
+      module: "jsa_section",
+      description: `JSA section enhanced: ${sectionKey}`,
+      relatedModel: "JSA",
+      relatedId: jsa._id,
+      maxTokens: AI_MAX_TOKENS.jsaSection,
+    });
     if (!jsa.aiSections) jsa.aiSections = {};
     jsa.aiSections[sectionKey] = {
       content: enhancedContent,
@@ -533,10 +545,18 @@ exports.approveJSA = async (req, res) => {
     const jsa = await JSA.findById(req.params.id);
     if (!jsa)
       return res.status(404).json({ success: false, error: "JSA not found" });
+    const allConfirmed = jsaSections.every(
+      (section) => jsa.sectionConfirmed?.[section.key] === true,
+    );
+    if (!allConfirmed) {
+      req.flash("error", "Confirm every JSA section before approval");
+      return res.redirect(`/jsa/${jsa._id}`);
+    }
     jsa.status = "approved";
     jsa.approvedBy = req.user._id;
     await jsa.save();
-    res.json({ success: true, message: "JSA approved" });
+    req.flash("success", "JSA approved and locked");
+    res.redirect(`/jsa/${jsa._id}`);
   } catch (error) {
     console.error("Error approving:", error);
     res.status(500).json({ success: false, error: error.message });
@@ -567,6 +587,11 @@ exports.downloadWord = async (req, res) => {
         .send(
           "Please confirm all JSA sections before downloading the Word document.",
         );
+    }
+
+    if (jsa.status !== "approved") {
+      req.flash("error", "Approve the final JSA before downloading it");
+      return res.redirect(`/jsa/${jsa._id}`);
     }
 
     const buffer = await generateJSAWordBuffer({

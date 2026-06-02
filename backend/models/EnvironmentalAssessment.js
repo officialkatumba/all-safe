@@ -1,5 +1,6 @@
 const mongoose = require("mongoose");
 const Counter = require("./Counter");
+const { addAiReviewFields } = require("../utils/aiReviewSchema");
 
 const environmentalAssessmentSchema = new mongoose.Schema(
   {
@@ -110,6 +111,8 @@ const environmentalAssessmentSchema = new mongoose.Schema(
   },
   { timestamps: true },
 );
+
+addAiReviewFields(environmentalAssessmentSchema);
 
 environmentalAssessmentSchema.pre("save", async function (next) {
   if (!this.isNew) return next();

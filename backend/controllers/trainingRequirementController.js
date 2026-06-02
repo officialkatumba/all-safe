@@ -8,6 +8,8 @@ const { OpenAI } = require("openai");
 const {
   generateTrainingWordBuffer,
 } = require("../utils/trainingWordGenerator");
+const { AI_MODEL, AI_MAX_TOKENS } = require("../utils/aiConfig");
+const { approveReviewedDocument, ensureReviewable, isApproved, recordRevision, regenerateStructuredOutput, trackAiCompletion } = require("../utils/aiReview");
 
 const openai = new OpenAI({
   apiKey: process.env.OPENAI_API_KEY,
@@ -221,10 +223,10 @@ Return ONLY valid JSON in this exact structure:
 }`;
 
     const completion = await openai.chat.completions.create({
-      model: "gpt-3.5-turbo-16k",
+      model: AI_MODEL,
       messages: [{ role: "user", content: prompt }],
       temperature: 0.5,
-      max_tokens: 2600,
+      max_tokens: AI_MAX_TOKENS.trainingRequirement,
     });
 
     const aiResponse = completion.choices[0].message.content;
@@ -264,14 +266,24 @@ Return ONLY valid JSON in this exact structure:
       trainingChecklist: trainingData.trainingChecklist || [],
 
       aiGenerated: true,
-      aiModel: "gpt-3.5-turbo-16k",
+      aiModel: AI_MODEL,
       generatedBy: req.user._id,
       createdBy: req.user._id,
-      status: "published",
+      status: "draft",
       targetDate: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000),
     });
 
     await trainingReq.save();
+    await trackAiCompletion({
+      completion,
+      user: req.user._id,
+      workArea: workAreaId,
+      module: "training_requirement",
+      description: "Training requirements generated",
+      relatedModel: "TrainingRequirement",
+      relatedId: trainingReq._id,
+      maxTokens: AI_MAX_TOKENS.trainingRequirement,
+    });
 
     req.flash("success", "Training requirements generated successfully!");
     res.redirect(`/training/${trainingReq._id}`);
@@ -352,6 +364,72 @@ exports.markComplete = async (req, res) => {
   }
 };
 
+exports.regenerateWithComments = async (req, res) => {
+  try {
+    const training = await TrainingRequirement.findById(req.params.id);
+    if (!training) return res.status(404).send("Training requirement not found");
+
+    ensureReviewable(training);
+    const previousOutput = {
+      title: training.title,
+      description: training.description,
+      category: training.category,
+      priority: training.priority,
+      requiredForRoles: training.requiredForRoles,
+      prerequisites: training.prerequisites,
+      learningObjectives: training.learningObjectives,
+      keyTopics: training.keyTopics,
+      duration: training.duration,
+      certificationRequired: training.certificationRequired,
+      certificationExpiry: training.certificationExpiry,
+      refresherFrequency: training.refresherFrequency,
+      recommendedTrainings: training.recommendedTrainings,
+      trainingChecklist: training.trainingChecklist,
+    };
+    const revision = await regenerateStructuredOutput({
+      currentOutput: previousOutput,
+      comments: req.body.reviewComments,
+      documentType: "training requirements document",
+      maxTokens: AI_MAX_TOKENS.trainingRequirement,
+      user: req.user._id,
+      workArea: training.workArea,
+      relatedModel: "TrainingRequirement",
+      relatedId: training._id,
+    });
+
+    Object.assign(training, revision.output);
+    training.aiModel = AI_MODEL;
+    training.status = "draft";
+    recordRevision(training, {
+      comments: revision.comments,
+      previousOutput,
+      submittedBy: req.user._id,
+    });
+    await training.save();
+
+    req.flash("success", "Training requirements regenerated for review");
+    return res.redirect(`/training/${training._id}`);
+  } catch (error) {
+    req.flash("error", error.message);
+    return res.redirect(`/training/${req.params.id}`);
+  }
+};
+
+exports.approveTraining = async (req, res) => {
+  try {
+    const training = await TrainingRequirement.findById(req.params.id);
+    if (!training) return res.status(404).send("Training requirement not found");
+    approveReviewedDocument(training, req.user._id);
+    training.status = "published";
+    await training.save();
+    req.flash("success", "Training requirements approved and locked");
+    return res.redirect(`/training/${training._id}`);
+  } catch (error) {
+    req.flash("error", error.message);
+    return res.redirect(`/training/${req.params.id}`);
+  }
+};
+
 // Download editable Word checklist
 exports.downloadWord = async (req, res) => {
   try {
@@ -364,6 +442,11 @@ exports.downloadWord = async (req, res) => {
 
     if (!training) {
       return res.status(404).send("Training requirement not found");
+    }
+
+    if (!isApproved(training)) {
+      req.flash("error", "Approve the final training requirements before downloading them");
+      return res.redirect(`/training/${training._id}`);
     }
 
     const buffer = await generateTrainingWordBuffer({ training });

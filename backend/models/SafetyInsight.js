@@ -1,5 +1,6 @@
 const mongoose = require("mongoose");
 const Counter = require("./Counter");
+const { addAiReviewFields } = require("../utils/aiReviewSchema");
 
 const safetyInsightSchema = new mongoose.Schema(
   {
@@ -105,7 +106,7 @@ const safetyInsightSchema = new mongoose.Schema(
 
     aiModel: {
       type: String,
-      default: "gpt-3.5-turbo-16k",
+      default: "gpt-4o-mini",
     },
 
     generatedBy: {
@@ -121,6 +122,8 @@ const safetyInsightSchema = new mongoose.Schema(
   },
   { timestamps: true },
 );
+
+addAiReviewFields(safetyInsightSchema);
 
 safetyInsightSchema.pre("save", async function (next) {
   if (this.isNew) {

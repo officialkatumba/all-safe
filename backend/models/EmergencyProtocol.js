@@ -1,5 +1,6 @@
 const mongoose = require("mongoose");
 const Counter = require("./Counter");
+const { addAiReviewFields } = require("../utils/aiReviewSchema");
 
 const emergencyProtocolSchema = new mongoose.Schema(
   {
@@ -101,7 +102,7 @@ const emergencyProtocolSchema = new mongoose.Schema(
 
     aiModel: {
       type: String,
-      default: "gpt-3.5-turbo-16k",
+      default: "gpt-4o-mini",
     },
 
     generatedBy: {
@@ -117,6 +118,8 @@ const emergencyProtocolSchema = new mongoose.Schema(
   },
   { timestamps: true },
 );
+
+addAiReviewFields(emergencyProtocolSchema);
 
 emergencyProtocolSchema.pre("save", async function (next) {
   if (this.isNew) {

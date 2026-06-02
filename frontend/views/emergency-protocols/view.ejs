@@ -190,6 +190,8 @@
           </div>
         </div>
       </div>
+
+      <%- include('../partials/ai-review-panel', { record: protocol, basePath: '/emergency-protocols' }) %>
     </div>
 
     <!-- Sidebar -->
@@ -203,21 +205,15 @@
           </h6>
 
           <div class="d-grid gap-2">
-            <a
-              href="/emergency-protocols/<%= protocol._id %>/download-word"
-              class="btn btn-success"
-            >
-              <i class="fas fa-file-word me-2"></i>
-              Download Emergency Word Document
-            </a>
+            <% if (protocol.officerReview?.status === 'approved') { %>
+              <a href="/emergency-protocols/<%= protocol._id %>/download-word" class="btn btn-success">
+                <i class="fas fa-file-word me-2"></i>
+                Download Emergency Word Document
+              </a>
+            <% } else { %>
+              <div class="alert alert-warning py-2 mb-0">Download unlocks after approval.</div>
+            <% } %>
 
-            <a
-              href="/work-areas/<%= protocol.workArea?._id || protocol.workArea %>"
-              class="btn btn-outline-primary"
-            >
-              <i class="fas fa-arrow-left me-2"></i>
-              Back to Work Area
-            </a>
           </div>
 
           <div class="small text-muted mt-3">

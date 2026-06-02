@@ -390,6 +390,16 @@ async function generateSafetyTalkWordBuffer({ talk }) {
     });
   }
 
+  if (
+    talk.sections?.supervisorVerification &&
+    talk.sections.supervisorVerification.length > 0
+  ) {
+    children.push(createMainHeading("Supervisor Verification"));
+    talk.sections.supervisorVerification.forEach((item) => {
+      children.push(createBullet(item));
+    });
+  }
+
   if (talk.sections?.keyTakeaways && talk.sections.keyTakeaways.length > 0) {
     children.push(createMainHeading("Key Takeaways"));
     talk.sections.keyTakeaways.forEach((takeaway) => {

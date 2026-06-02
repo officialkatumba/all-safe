@@ -12,6 +12,8 @@ const { OpenAI } = require("openai");
 const {
   generateEmergencyProtocolWordBuffer,
 } = require("../utils/emergencyProtocolWordGenerator");
+const { AI_MODEL, AI_MAX_TOKENS } = require("../utils/aiConfig");
+const { approveReviewedDocument, ensureReviewable, isApproved, recordRevision, regenerateStructuredOutput, trackAiCompletion } = require("../utils/aiReview");
 
 const openai = new OpenAI({
   apiKey: process.env.OPENAI_API_KEY,
@@ -279,10 +281,10 @@ Return ONLY valid JSON in this exact shape:
 `;
 
     const completion = await openai.chat.completions.create({
-      model: "gpt-3.5-turbo-16k",
+      model: AI_MODEL,
       messages: [{ role: "user", content: prompt }],
       temperature: 0.4,
-      max_tokens: 2800,
+      max_tokens: AI_MAX_TOKENS.emergencyProtocol,
     });
 
     const aiText = completion.choices[0].message.content;
@@ -331,11 +333,21 @@ Return ONLY valid JSON in this exact shape:
       },
       generatedBy: req.user._id,
       aiGenerated: true,
-      aiModel: "gpt-3.5-turbo-16k",
+      aiModel: AI_MODEL,
       status: "generated",
     });
 
     await protocol.save();
+    await trackAiCompletion({
+      completion,
+      user: req.user._id,
+      workArea: workAreaId,
+      module: "emergency_protocol",
+      description: "AI emergency preparedness protocol generated",
+      relatedModel: "EmergencyProtocol",
+      relatedId: protocol._id,
+      maxTokens: AI_MAX_TOKENS.emergencyProtocol,
+    });
 
     req.flash(
       "success",
@@ -374,6 +386,79 @@ exports.getEmergencyProtocol = async (req, res) => {
   }
 };
 
+exports.regenerateWithComments = async (req, res) => {
+  try {
+    const protocol = await EmergencyProtocol.findById(req.params.id);
+    if (!protocol) return res.status(404).send("Emergency protocol not found");
+
+    ensureReviewable(protocol);
+    const previousOutput = {
+      title: protocol.title,
+      summary: protocol.summary,
+      priorityLevel: protocol.priorityLevel,
+      emergencyTypesCovered: protocol.emergencyTypesCovered,
+      emergencyRiskAssessment: protocol.emergencyRiskAssessment,
+      emergencyResponseProcedures: protocol.emergencyResponseProcedures,
+      evacuationPlan: protocol.evacuationPlan,
+      communicationPlan: protocol.communicationPlan,
+      requiredEquipment: protocol.requiredEquipment,
+      requiredTraining: protocol.requiredTraining,
+      recommendedActions: protocol.recommendedActions,
+    };
+    const revision = await regenerateStructuredOutput({
+      currentOutput: previousOutput,
+      comments: req.body.reviewComments,
+      documentType: "emergency preparedness protocol",
+      maxTokens: AI_MAX_TOKENS.emergencyProtocol,
+      user: req.user._id,
+      workArea: protocol.workArea,
+      relatedModel: "EmergencyProtocol",
+      relatedId: protocol._id,
+    });
+
+    Object.assign(protocol, revision.output);
+    protocol.aiModel = AI_MODEL;
+    protocol.status = "generated";
+    recordRevision(protocol, {
+      comments: revision.comments,
+      previousOutput,
+      submittedBy: req.user._id,
+    });
+    await protocol.save();
+    await trackAiCompletion({
+      completion,
+      user: req.user._id,
+      workArea: workAreaId,
+      module: "emergency_protocol",
+      description: "Emergency protocol generated",
+      relatedModel: "EmergencyProtocol",
+      relatedId: protocol._id,
+      maxTokens: AI_MAX_TOKENS.emergencyProtocol,
+    });
+
+    req.flash("success", "Emergency protocol regenerated for review");
+    return res.redirect(`/emergency-protocols/${protocol._id}`);
+  } catch (error) {
+    req.flash("error", error.message);
+    return res.redirect(`/emergency-protocols/${req.params.id}`);
+  }
+};
+
+exports.approveProtocol = async (req, res) => {
+  try {
+    const protocol = await EmergencyProtocol.findById(req.params.id);
+    if (!protocol) return res.status(404).send("Emergency protocol not found");
+    approveReviewedDocument(protocol, req.user._id);
+    protocol.status = "reviewed";
+    await protocol.save();
+    req.flash("success", "Emergency protocol approved and locked");
+    return res.redirect(`/emergency-protocols/${protocol._id}`);
+  } catch (error) {
+    req.flash("error", error.message);
+    return res.redirect(`/emergency-protocols/${req.params.id}`);
+  }
+};
+
 exports.downloadWord = async (req, res) => {
   try {
     const { id } = req.params;
@@ -384,6 +469,11 @@ exports.downloadWord = async (req, res) => {
 
     if (!protocol) {
       return res.status(404).send("Emergency protocol not found");
+    }
+
+    if (!isApproved(protocol)) {
+      req.flash("error", "Approve the final emergency protocol before downloading it");
+      return res.redirect(`/emergency-protocols/${protocol._id}`);
     }
 
     const buffer = await generateEmergencyProtocolWordBuffer({ protocol });

@@ -1,5 +1,6 @@
 const mongoose = require("mongoose");
 const Counter = require("./Counter");
+const { addAiReviewFields } = require("../utils/aiReviewSchema");
 
 const safetyAuditScorecardSchema = new mongoose.Schema(
   {
@@ -225,7 +226,7 @@ const safetyAuditScorecardSchema = new mongoose.Schema(
 
     aiModel: {
       type: String,
-      default: "gpt-3.5-turbo-16k",
+      default: "gpt-4o-mini",
     },
 
     initiatedBy: {
@@ -235,6 +236,8 @@ const safetyAuditScorecardSchema = new mongoose.Schema(
   },
   { timestamps: true },
 );
+
+addAiReviewFields(safetyAuditScorecardSchema);
 
 safetyAuditScorecardSchema.pre("save", async function (next) {
   if (this.isNew) {

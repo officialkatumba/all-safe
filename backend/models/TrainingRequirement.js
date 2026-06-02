@@ -1,5 +1,6 @@
 const mongoose = require("mongoose");
 const Counter = require("./Counter");
+const { addAiReviewFields } = require("../utils/aiReviewSchema");
 
 const trainingRequirementSchema = new mongoose.Schema(
   {
@@ -153,6 +154,8 @@ const trainingRequirementSchema = new mongoose.Schema(
   },
   { timestamps: true },
 );
+
+addAiReviewFields(trainingRequirementSchema);
 
 // Auto-increment requirement number
 trainingRequirementSchema.pre("save", async function (next) {

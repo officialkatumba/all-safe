@@ -74,25 +74,31 @@ const express = require("express");
 const router = express.Router();
 const incidentController = require("../controllers/incidentController");
 const { ensureAuthenticated } = require("../middlewares/auth");
+const { ensureOwnedDocument, ensureOwnedWorkArea } = require("../middlewares/ownership");
+const Incident = require("../models/Incident");
+
+const ownIncident = ensureOwnedDocument(Incident);
+const ownWorkArea = ensureOwnedWorkArea();
 
 // All routes require authentication (safety officers and workers)
 router.use(ensureAuthenticated);
 
 // Incident routes
 router.get("/", incidentController.getMyIncidents);
-router.get("/report/:workAreaId", incidentController.showIncidentReportForm);
-router.post("/report/:workAreaId", incidentController.submitIncidentReport);
+router.get("/report/:workAreaId", ownWorkArea, incidentController.showIncidentReportForm);
+router.post("/report/:workAreaId", ownWorkArea, incidentController.submitIncidentReport);
 router.get("/thank-you", incidentController.thankYou);
-router.get("/api/recent/:workAreaId", incidentController.getRecentIncidents);
-router.get("/:id", incidentController.getIncident);
-router.get("/:id/edit", incidentController.showEditIncidentForm);
-router.post("/:id/edit", incidentController.updateIncident);
-router.post("/:id/investigation", incidentController.addInvestigation);
-router.post("/:id/corrective-action", incidentController.addCorrectiveAction);
+router.get("/api/recent/:workAreaId", ownWorkArea, incidentController.getRecentIncidents);
+router.get("/:id", ownIncident, incidentController.getIncident);
+router.get("/:id/edit", ownIncident, incidentController.showEditIncidentForm);
+router.post("/:id/edit", ownIncident, incidentController.updateIncident);
+router.post("/:id/investigation", ownIncident, incidentController.addInvestigation);
+router.post("/:id/corrective-action", ownIncident, incidentController.addCorrectiveAction);
 router.post(
   "/:id/complete-action",
+  ownIncident,
   incidentController.completeCorrectiveAction,
 );
-router.post("/:id/close", incidentController.closeIncident);
+router.post("/:id/close", ownIncident, incidentController.closeIncident);
 
 module.exports = router;

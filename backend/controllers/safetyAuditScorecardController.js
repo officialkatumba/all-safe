@@ -19,6 +19,8 @@ const {
 const {
   generateSafetyAuditWordBuffer,
 } = require("../utils/safetyAuditWordGenerator");
+const { AI_MODEL, AI_MAX_TOKENS } = require("../utils/aiConfig");
+const { approveReviewedDocument, ensureReviewable, isApproved, recordRevision, regenerateStructuredOutput, trackAiCompletion } = require("../utils/aiReview");
 
 const openai = new OpenAI({
   apiKey: process.env.OPENAI_API_KEY,
@@ -412,10 +414,10 @@ Return ONLY valid JSON in this exact shape:
 `;
 
     const completion = await openai.chat.completions.create({
-      model: "gpt-3.5-turbo-16k",
+      model: AI_MODEL,
       messages: [{ role: "user", content: prompt }],
       temperature: 0.4,
-      max_tokens: 3500,
+      max_tokens: AI_MAX_TOKENS.safetyAuditQuestions,
     });
 
     const aiText = completion.choices[0].message.content;
@@ -461,11 +463,21 @@ Return ONLY valid JSON in this exact shape:
         permits: data.permits.length,
       },
       aiGenerated: true,
-      aiModel: "gpt-3.5-turbo-16k",
+      aiModel: AI_MODEL,
       initiatedBy: req.user._id,
     });
 
     await audit.save();
+    await trackAiCompletion({
+      completion,
+      user: req.user._id,
+      workArea: workAreaId,
+      module: "safety_audit_questions",
+      description: "Safety audit questions generated",
+      relatedModel: "SafetyAuditScorecard",
+      relatedId: audit._id,
+      maxTokens: AI_MAX_TOKENS.safetyAuditQuestions,
+    });
 
     req.flash("success", "AI safety audit questions generated successfully.");
     return res.redirect(`/safety-audits/${audit._id}/interview`);
@@ -630,10 +642,10 @@ Return ONLY valid JSON in this exact shape:
 `;
 
     const completion = await openai.chat.completions.create({
-      model: "gpt-3.5-turbo-16k",
+      model: AI_MODEL,
       messages: [{ role: "user", content: scoringPrompt }],
       temperature: 0.25,
-      max_tokens: 3500,
+      max_tokens: AI_MAX_TOKENS.safetyAuditFinal,
     });
 
     const aiText = completion.choices[0].message.content;
@@ -696,6 +708,16 @@ Return ONLY valid JSON in this exact shape:
     audit.auditStatus = "score_generated";
 
     await audit.save();
+    await trackAiCompletion({
+      completion,
+      user: req.user._id,
+      workArea: audit.workArea._id || audit.workArea,
+      module: "safety_audit_final",
+      description: "Safety audit final score generated",
+      relatedModel: "SafetyAuditScorecard",
+      relatedId: audit._id,
+      maxTokens: AI_MAX_TOKENS.safetyAuditFinal,
+    });
 
     req.flash("success", "AI safety score generated successfully.");
     return res.redirect(`/safety-audits/${audit._id}`);
@@ -729,6 +751,62 @@ exports.viewScorecard = async (req, res) => {
   }
 };
 
+exports.regenerateWithComments = async (req, res) => {
+  try {
+    const audit = await SafetyAuditScorecard.findById(req.params.id);
+    if (!audit) return res.status(404).send("Safety audit not found");
+    if (audit.auditStatus !== "score_generated") {
+      throw new Error("Complete the audit interview before reviewing the final report");
+    }
+
+    ensureReviewable(audit);
+    const previousOutput = audit.finalScore?.toObject?.() || audit.finalScore;
+    const revision = await regenerateStructuredOutput({
+      currentOutput: previousOutput,
+      comments: req.body.reviewComments,
+      documentType: "safety audit scorecard final report",
+      maxTokens: AI_MAX_TOKENS.safetyAuditFinal,
+      user: req.user._id,
+      workArea: audit.workArea,
+      relatedModel: "SafetyAuditScorecard",
+      relatedId: audit._id,
+      extraInstructions:
+        "Revise only the final analysis, findings, recommendations, and management advice. Do not rewrite interview questions, officer responses, evidence, or the numeric score unless the officer comments identify a factual scoring correction.",
+    });
+
+    audit.finalScore = {
+      ...revision.output,
+      scoredAt: new Date(),
+    };
+    recordRevision(audit, {
+      comments: revision.comments,
+      previousOutput,
+      submittedBy: req.user._id,
+    });
+    await audit.save();
+
+    req.flash("success", "Safety audit report regenerated for review");
+    return res.redirect(`/safety-audits/${audit._id}`);
+  } catch (error) {
+    req.flash("error", error.message);
+    return res.redirect(`/safety-audits/${req.params.id}`);
+  }
+};
+
+exports.approveAudit = async (req, res) => {
+  try {
+    const audit = await SafetyAuditScorecard.findById(req.params.id);
+    if (!audit) return res.status(404).send("Safety audit not found");
+    approveReviewedDocument(audit, req.user._id);
+    await audit.save();
+    req.flash("success", "Safety audit report approved and locked");
+    return res.redirect(`/safety-audits/${audit._id}`);
+  } catch (error) {
+    req.flash("error", error.message);
+    return res.redirect(`/safety-audits/${req.params.id}`);
+  }
+};
+
 // Word download
 exports.downloadWord = async (req, res) => {
   try {
@@ -738,6 +816,11 @@ exports.downloadWord = async (req, res) => {
 
     if (!audit) {
       return res.status(404).send("Safety audit not found");
+    }
+
+    if (!isApproved(audit)) {
+      req.flash("error", "Approve the final safety audit report before downloading it");
+      return res.redirect(`/safety-audits/${audit._id}`);
     }
 
     const buffer = await generateSafetyAuditWordBuffer({ audit });

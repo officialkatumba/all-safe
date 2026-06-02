@@ -1,5 +1,6 @@
 const mongoose = require("mongoose");
 const Counter = require("./Counter");
+const { addAiReviewFields } = require("../utils/aiReviewSchema");
 
 const ohsComplianceAuditSchema = new mongoose.Schema(
   {
@@ -172,7 +173,7 @@ const ohsComplianceAuditSchema = new mongoose.Schema(
     },
 
     aiGenerated: { type: Boolean, default: true },
-    aiModel: { type: String, default: "gpt-3.5-turbo-16k" },
+    aiModel: { type: String, default: "gpt-4o-mini" },
 
     initiatedBy: {
       type: mongoose.Schema.Types.ObjectId,
@@ -181,6 +182,8 @@ const ohsComplianceAuditSchema = new mongoose.Schema(
   },
   { timestamps: true },
 );
+
+addAiReviewFields(ohsComplianceAuditSchema);
 
 ohsComplianceAuditSchema.pre("save", async function (next) {
   if (this.isNew) {

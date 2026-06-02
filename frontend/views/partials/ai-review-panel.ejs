@@ -1,0 +1,51 @@
+<div class="card shadow-sm mb-4 border-0">
+  <div class="card-header <%= record.officerReview?.status === 'approved' ? 'bg-success text-white' : 'bg-warning text-dark' %>">
+    <h5 class="mb-0 fw-bold">
+      <i class="fas fa-user-shield me-2"></i>Safety Officer Review
+    </h5>
+  </div>
+  <div class="card-body">
+    <% if (record.officerReview?.status === 'approved') { %>
+      <div class="alert alert-success mb-0">
+        <i class="fas fa-lock me-2"></i>
+        Final document approved and locked on
+        <%= new Date(record.officerReview.approvedAt).toLocaleString() %>.
+      </div>
+    <% } else { %>
+      <p class="text-muted">
+        Review the AI draft against actual site conditions. Add comments and regenerate until the document is ready for final approval.
+      </p>
+      <form method="POST" action="<%= basePath %>/<%= record._id %>/regenerate" data-swal-confirm="true" data-swal-title="Regenerate Document?" data-swal-text="The AI will revise this document using your safety officer comments." data-swal-confirm-button="Regenerate">
+        <div class="mb-3">
+          <label class="form-label fw-bold">Safety Officer Comments</label>
+          <textarea name="reviewComments" class="form-control" rows="4" maxlength="4000" required placeholder="Record corrections, missing controls, evidence gaps, or site-specific instructions."></textarea>
+        </div>
+        <button type="submit" class="btn btn-warning">
+          <i class="fas fa-rotate me-2"></i>Regenerate with Comments
+        </button>
+      </form>
+
+      <% if (record.officerReview?.history?.length > 0) { %>
+        <form method="POST" action="<%= basePath %>/<%= record._id %>/approve" class="mt-3" data-swal-confirm="true" data-swal-title="Approve Final Document?" data-swal-text="This document will be approved and locked. Only the final download will remain available." data-swal-confirm-button="Approve Document">
+          <button type="submit" class="btn btn-success">
+            <i class="fas fa-check-circle me-2"></i>Approve Final Document
+          </button>
+        </form>
+      <% } %>
+    <% } %>
+
+    <% if (record.officerReview?.history?.length > 0) { %>
+      <hr>
+      <h6 class="fw-bold">Review History</h6>
+      <% [...record.officerReview.history].reverse().forEach(entry => { %>
+        <div class="border rounded bg-light p-3 mt-2">
+          <div class="small text-muted mb-1">
+            Version <%= entry.generatedVersion %> generated on
+            <%= new Date(entry.submittedAt).toLocaleString() %>
+          </div>
+          <div style="white-space: pre-wrap;"><%= entry.comments %></div>
+        </div>
+      <% }) %>
+    <% } %>
+  </div>
+</div>

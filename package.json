@@ -6,13 +6,15 @@
   "scripts": {
     "start": "node backend/server.js",
     "dev": "nodemon backend/server.js",
-    "seed": "node backend/utils/seedSafetyOfficer.js"
+    "seed": "node backend/utils/seedSafetyOfficer.js",
+    "test": "npm run test:beta",
+    "test:beta": "node tests/betaSmoke.js"
   },
   "keywords": [],
   "author": "Samuel Katumba",
   "license": "ISC",
   "dependencies": {
-    "@google-cloud/storage": "^7.16.0",
+    "@google-cloud/storage": "^7.19.0",
     "bcrypt": "^6.0.0",
     "body-parser": "^2.2.0",
     "connect-flash": "^0.1.1",
@@ -21,11 +23,13 @@
     "dotenv": "^16.5.0",
     "ejs": "^3.1.10",
     "express": "^5.1.0",
+    "express-rate-limit": "^8.5.2",
     "express-session": "^1.18.1",
+    "helmet": "^8.2.0",
     "joi": "^17.13.3",
     "mongoose": "^8.13.1",
-    "node-cron": "^3.0.3",
-    "nodemailer": "^7.0.3",
+    "node-cron": "^4.2.1",
+    "nodemailer": "^8.0.10",
     "openai": "^4.95.1",
     "passport": "^0.7.0",
     "passport-local": "^1.0.0",

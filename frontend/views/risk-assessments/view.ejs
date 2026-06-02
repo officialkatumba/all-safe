@@ -24,6 +24,8 @@
     </div>
   </div>
 
+  <div class="row">
+    <div class="col-lg-8">
   <div class="card shadow-sm mb-4 border-0">
     <div class="card-body">
       <h6 class="fw-bold mb-3">
@@ -150,7 +152,7 @@
     </div>
 
     <div class="card-body text-center">
-      <% if (allConfirmedNow) { %>
+      <% if (allConfirmedNow && assessment.status === 'approved') { %>
         <div class="alert alert-success border-success mb-0">
           <i class="fas fa-check-circle fa-3x mb-3 d-block text-success"></i>
 
@@ -162,13 +164,7 @@
             sign it, and file it as the official risk assessment record.
           </p>
 
-          <a
-            href="/risk-assessments/<%= assessment._id %>/download-word"
-            class="btn btn-success btn-lg px-5 py-3"
-          >
-            <i class="fas fa-file-word me-2"></i>
-            Download Editable Word Document
-          </a>
+          <p class="mb-0">The approved Word document is available from the actions panel.</p>
 
           <div class="mt-3">
             <small class="text-muted d-block">
@@ -180,6 +176,17 @@
               No PDF. No cloud upload. Fully editable Microsoft Word format.
             </small>
           </div>
+        </div>
+      <% } else if (allConfirmedNow) { %>
+        <div class="alert alert-warning mb-0">
+          <i class="fas fa-user-shield fa-3x mb-3 d-block text-warning"></i>
+          <h4 class="fw-bold">Final Approval Required</h4>
+          <p>All sections are confirmed. Approve the final assessment to unlock the Word document.</p>
+          <form method="POST" action="/risk-assessments/<%= assessment._id %>/approve" data-swal-confirm="true" data-swal-title="Approve Final Risk Assessment?" data-swal-text="This Risk Assessment will be approved and its final Word download will be unlocked." data-swal-confirm-button="Approve Assessment">
+            <button type="submit" class="btn btn-success btn-lg">
+              <i class="fas fa-check-circle me-2"></i>Approve Final Risk Assessment
+            </button>
+          </form>
         </div>
       <% } else { %>
         <div class="alert alert-secondary mb-0">
@@ -208,11 +215,33 @@
     </div>
   </div>
 
-  <div class="text-center mt-3">
-    <a href="/work-areas/<%= assessment.workArea?._id %>" class="btn btn-outline-secondary px-4">
-      <i class="fas fa-arrow-left me-2"></i>
-      Back to Work Area
-    </a>
+    </div>
+
+    <div class="col-lg-4">
+      <div class="card shadow-sm border-0 mb-4">
+        <div class="card-body">
+          <h6 class="fw-bold mb-3"><i class="fas fa-cog me-2 text-primary"></i>Actions</h6>
+          <% if (allConfirmedNow && assessment.status === 'approved') { %>
+            <a href="/risk-assessments/<%= assessment._id %>/download-word" class="btn btn-success w-100">
+              <i class="fas fa-file-word me-2"></i>Download Word Document
+            </a>
+          <% } else { %>
+            <div class="alert alert-warning py-2 mb-0"><i class="fas fa-lock me-1"></i>Download unlocks after final approval.</div>
+          <% } %>
+        </div>
+      </div>
+
+      <div class="card shadow-sm border-0 mb-4">
+        <div class="card-body">
+          <h6 class="fw-bold mb-3"><i class="fas fa-info-circle me-2 text-primary"></i>Assessment Information</h6>
+          <table class="table table-sm mb-0">
+            <tr><td><strong>Number:</strong></td><td>#<%= assessment.assessmentNumber || 'N/A' %></td></tr>
+            <tr><td><strong>Sections:</strong></td><td><%= confirmedCount %>/<%= sections.length %> confirmed</td></tr>
+            <tr><td><strong>Status:</strong></td><td><%= assessment.status || 'draft' %></td></tr>
+          </table>
+        </div>
+      </div>
+    </div>
   </div>
 </div>
 
