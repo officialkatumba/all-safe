@@ -26,6 +26,7 @@ mongoose
 
 const app = express();
 app.disable("x-powered-by");
+app.set("trust proxy", 1);
 
 if (!process.env.SESSION_SECRET) {
   throw new Error("SESSION_SECRET is required.");
