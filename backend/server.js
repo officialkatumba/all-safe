@@ -28,6 +28,43 @@ const app = express();
 app.disable("x-powered-by");
 app.set("trust proxy", 1);
 
+const blockedProbePaths = new Set([
+  "/.vscode/sftp.json",
+  "/@vite/env",
+  "/actuator/env",
+  "/debug/default/view",
+  "/info.php",
+  "/telescope/requests",
+  "/trace.axd",
+]);
+
+app.use((req, res, next) => {
+  if (process.env.NODE_ENV !== "production") {
+    return next();
+  }
+
+  if (req.get("x-forwarded-proto") && req.protocol !== "https") {
+    return res.redirect(301, `https://${req.get("host")}${req.originalUrl}`);
+  }
+
+  const canonicalHost = "www.safety365.work";
+  if (req.hostname === "safety365.work") {
+    return res.redirect(301, `https://${canonicalHost}${req.originalUrl}`);
+  }
+
+  return next();
+});
+
+app.use((req, res, next) => {
+  if (blockedProbePaths.has(req.path) || req.query.rest_route) {
+    return res.status(404).type("text/plain").send("Not found");
+  }
+
+  return next();
+});
+
+app.get("/favicon.ico", (req, res) => res.status(204).end());
+
 if (!process.env.SESSION_SECRET) {
   throw new Error("SESSION_SECRET is required.");
 }
