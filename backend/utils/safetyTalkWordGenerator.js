@@ -444,7 +444,7 @@ async function generateSafetyTalkWordBuffer({ talk }) {
   children.push(...createSignOffSection());
 
   const doc = new Document({
-    creator: "TrueSafe Safety Talk System",
+    creator: "TrueSafe365 Safety Talk System",
     title: cleanText(talk.title || "Safety Talk"),
     description: "Editable Safety Talk Word document",
     sections: [

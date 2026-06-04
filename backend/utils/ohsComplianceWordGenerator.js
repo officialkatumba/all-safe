@@ -345,7 +345,7 @@ async function generateOHSComplianceWordBuffer({ audit }) {
   children.push(signOffTable());
 
   const doc = new Document({
-    creator: "TrueSafe OHS Compliance Audit System",
+    creator: "TrueSafe365 OHS Compliance Audit System",
     title: cleanText(audit.title || "OHS Compliance Audit Report"),
     description: "AI-assisted OHS compliance audit Word report",
     sections: [

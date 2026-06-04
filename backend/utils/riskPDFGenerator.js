@@ -116,7 +116,7 @@ const generateRiskPDF = async ({
             margin: [40, 0, 0, 20],
           },
           {
-            text: "© TrueSafe Safety Management System",
+            text: "© TrueSafe365 Safety Management System",
             alignment: "right",
             style: "copyright",
             margin: [0, 0, 40, 20],
@@ -191,7 +191,7 @@ const generateRiskPDF = async ({
     pageSize: "A4",
     info: {
       title: `${sectionTitle} - Risk Assessment`,
-      author: "TrueSafe Safety System",
+      author: "TrueSafe365 Safety System",
       subject: "Risk Assessment Report",
       keywords: "risk assessment, safety, confidential",
     },

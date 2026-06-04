@@ -103,7 +103,7 @@
       <div class="mb-4">
         <p class="text-uppercase text-muted fw-semibold small mb-1">Safety officer intake</p>
         <h1 class="h3 fw-bold mb-1" style="color: #1e3c5c;">Edit Work Area</h1>
-        <p class="text-muted mb-0">Update the saved safety context used by All-Safe documents.</p>
+        <p class="text-muted mb-0">Update the saved safety context used by TrueSafe365 documents.</p>
       </div>
 
       <form action="/work-areas/<%= workArea._id %>/edit" method="POST" id="workAreaForm">
@@ -265,7 +265,7 @@
         </section>
 
         <section class="intake-section wizard-step" data-step-title="AI Document Intent">
-          <div class="section-heading"><span>11</span><div><h2>AI Document Intent</h2><p>Edit the documents All-Safe should treat as intended outputs for this work area.</p></div></div>
+          <div class="section-heading"><span>11</span><div><h2>AI Document Intent</h2><p>Edit the documents TrueSafe365 should treat as intended outputs for this work area.</p></div></div>
           <div class="option-grid"><% documents.forEach(([value, label]) => { %><label class="check-tile"><input type="checkbox" name="documentIntent" value="<%= value %>" <%= checked(contains(intake.documentIntent, value)) %>> <%= label %></label><% }) %></div>
         </section>
 

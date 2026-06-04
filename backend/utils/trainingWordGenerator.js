@@ -432,7 +432,7 @@ async function generateTrainingWordBuffer({ training }) {
   children.push(createSignOffSection());
 
   const doc = new Document({
-    creator: "TrueSafe Training Requirement System",
+    creator: "TrueSafe365 Training Requirement System",
     title: cleanText(training.title || "Training Requirements and Checklist"),
     description: "Editable training requirements and checklist Word document",
     sections: [

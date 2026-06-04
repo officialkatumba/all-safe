@@ -417,7 +417,7 @@ async function generateEmergencyProtocolWordBuffer({ protocol }) {
   children.push(createManagementSignOffBox());
 
   const doc = new Document({
-    creator: "TrueSafe Emergency Preparedness System",
+    creator: "TrueSafe365 Emergency Preparedness System",
     title: cleanText(
       protocol.title || "Emergency Procedure and Preparedness Protocol",
     ),

@@ -1,681 +1,697 @@
-<%- include('partials/header') %> <%- include('partials/navbar') %>
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>TrueSafe365 | AI Safety Intelligence</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=Plus+Jakarta+Sans:wght@500;600;700;800&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet">
+    <link
+      href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css"
+      rel="stylesheet"
+    />
+    <link
+      rel="stylesheet"
+      href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css"
+    />
+  </head>
+  <body>
 
-<!-- Main Content -->
-<main>
-  <!-- Hero Section -->
-  <div class="container my-5">
-    <div class="row align-items-center">
-      <!-- Left Column - Text Content -->
-      <div class="col-lg-6">
-        <span
-          class="safety-badge mb-4 d-inline-block floating"
-          style="
-            background-color: var(--accent);
-            color: white;
-            padding: 0.5rem 1rem;
-            border-radius: 50px;
-            font-size: 0.9rem;
-            font-weight: 600;
-          "
-        >
-          <i class="bi bi-shield-fill-check me-2"></i>
-          ISO 45001 Compliant
-        </span>
-        <h1 class="display-4 fw-bold mb-4">
-          <span class="gradient-text">AI-Powered</span> work area Safety
-          Intelligence
-        </h1>
-        <p class="lead fs-4 text-secondary mb-4">
-          Prevent incidents before they happen. Real-time risk assessment,
-          automated safety talks, and intelligent compliance monitoring for
-          Zambian workplaces.
-        </p>
+<main class="truesafe365-landing" data-landing>
+  <section class="ts-screen ts-screen-hero is-active" id="welcome" aria-labelledby="TrueSafe365-title">
+    <div class="ts-orb ts-orb-one"></div>
+    <div class="ts-orb ts-orb-two"></div>
+    <div class="ts-orb ts-orb-three"></div>
+
+    <nav class="ts-topbar" aria-label="Landing navigation">
+      <a class="ts-mini-brand" href="/" aria-label="TrueSafe365 home">
+        <span class="ts-mark"><i class="bi bi-shield-check"></i></span>
+        <span>TrueSafe365</span>
+      </a>
+      <div class="ts-nav-links">
+        <% if (user) { %>
+          <a href="/dashboard/officer">Dashboard</a>
+          <a href="/api/users/logout">Sign out</a>
+        <% } else { %>
+          <a href="/api/users/login">Sign in</a>
+          <a href="/register/safety-officer">Register</a>
+        <% } %>
       </div>
+    </nav>
 
-      <!-- Right Column - Image -->
-      <div class="col-lg-6 mt-5 mt-lg-0">
-        <img
-          src="https://plus.unsplash.com/premium_photo-1677529102407-0d075eb2cbb9?q=80&w=1170&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D"
-          alt="Safety Officer at work area"
-          class="img-fluid rounded-3 shadow floating"
-          style="
-            border-radius: 20px;
-            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
-          "
-        />
-      </div>
-    </div>
-  </div>
-
-  <!-- Full Width Stats Section (Below Hero) -->
-  <div class="container-fluid bg-light py-5">
-    <div class="container">
-      <div class="row g-4">
-        <!-- work areas Protected -->
-        <div class="col-md-3 col-6">
-          <div class="text-center">
-            <h3 class="display-4 fw-bold gradient-text">500+</h3>
-            <p class="text-secondary">work areas Protected</p>
-          </div>
-        </div>
-        <!-- Incidents Reported -->
-        <div class="col-md-3 col-6">
-          <div class="text-center">
-            <h3 class="display-4 fw-bold gradient-text">50k+</h3>
-            <p class="text-secondary">Incidents Reported</p>
-          </div>
-        </div>
-        <!-- Client Satisfaction -->
-        <div class="col-md-3 col-6">
-          <div class="text-center">
-            <h3 class="display-4 fw-bold gradient-text">98%</h3>
-            <p class="text-secondary">Client Satisfaction</p>
-          </div>
-        </div>
-        <!-- Support Available -->
-        <div class="col-md-3 col-6">
-          <div class="text-center">
-            <h3 class="display-4 fw-bold gradient-text">24/7</h3>
-            <p class="text-secondary">Support Available</p>
-          </div>
-        </div>
-      </div>
-    </div>
-  </div>
-
-  <!-- Features Section -->
-  <div class="container my-5 py-5" id="features">
-    <div class="text-center mb-5">
-      <h2 class="display-5 fw-bold mb-3">
-        Why Choose <span class="gradient-text">All-Safe</span>
-      </h2>
-      <p class="lead text-secondary">
-        Comprehensive safety intelligence for modern workplaces
+    <div class="ts-hero-center">
+      <p class="ts-eyebrow">Stop starting safety from an empty canvas</p>
+      <h1 id="TrueSafe365-title">TrueSafe365</h1>
+      <p class="ts-hero-copy">
+        Safety officers are expected to imagine every accident, delay, fine, injury, equipment failure, and production stoppage before it happens. TrueSafe365 starts from your site description and real safety data, then uses AI to predict what ordinary paperwork can miss.
       </p>
+      <button class="ts-primary-action" type="button" data-go-onboarding>
+        How it Works
+        <i class="bi bi-arrow-right-short"></i>
+      </button>
     </div>
 
-    <div class="row g-4">
-      <div class="col-md-6 col-lg-4">
-        <div class="card feature-card p-4 h-100 border-0 shadow-sm">
-          <div class="feature-icon">
-            <i class="bi bi-exclamation-triangle"></i>
-          </div>
-          <h5 class="card-title fw-semibold mb-3">
-            Real-Time Incident Reporting
-          </h5>
-          <p class="card-text text-secondary">
-            Workers can anonymously report incidents, near-misses, and hazards
-            instantly.
-          </p>
-        </div>
-      </div>
-
-      <div class="col-md-6 col-lg-4">
-        <div class="card feature-card p-4 h-100 border-0 shadow-sm">
-          <div class="feature-icon"><i class="bi bi-robot"></i></div>
-          <h5 class="card-title fw-semibold mb-3">
-            AI-Powered Risk Assessment
-          </h5>
-          <p class="card-text text-secondary">
-            Our AI analyzes patterns to predict risks and suggest preventive
-            measures.
-          </p>
-        </div>
-      </div>
-
-      <div class="col-md-6 col-lg-4">
-        <div class="card feature-card p-4 h-100 border-0 shadow-sm">
-          <div class="feature-icon"><i class="bi bi-chat-dots"></i></div>
-          <h5 class="card-title fw-semibold mb-3">
-            Daily Safety Talks Generator
-          </h5>
-          <p class="card-text text-secondary">
-            Generate tailored daily safety briefings based on site conditions.
-          </p>
-        </div>
-      </div>
-
-      <div class="col-md-6 col-lg-4">
-        <div class="card feature-card p-4 h-100 border-0 shadow-sm">
-          <div class="feature-icon">
-            <i class="bi bi-file-earmark-text"></i>
-          </div>
-          <h5 class="card-title fw-semibold mb-3">
-            Professional Documentation
-          </h5>
-          <p class="card-text text-secondary">
-            Create risk assessments, incident reports, and PPE checklists
-            automatically.
-          </p>
-        </div>
-      </div>
-
-      <div class="col-md-6 col-lg-4">
-        <div class="card feature-card p-4 h-100 border-0 shadow-sm">
-          <div class="feature-icon"><i class="bi bi-shield-check"></i></div>
-          <h5 class="card-title fw-semibold mb-3">PPE Compliance Monitoring</h5>
-          <p class="card-text text-secondary">
-            Track PPE requirements and ensure worker safety across all sites.
-          </p>
-        </div>
-      </div>
-
-      <div class="col-md-6 col-lg-4">
-        <div class="card feature-card p-4 h-100 border-0 shadow-sm">
-          <div class="feature-icon"><i class="bi bi-graph-up"></i></div>
-          <h5 class="card-title fw-semibold mb-3">Safety Trend Analytics</h5>
-          <p class="card-text text-secondary">
-            Visualize safety data and measure the impact of interventions.
-          </p>
-        </div>
-      </div>
-    </div>
-  </div>
-
-  <!-- How It Works Section (6 Steps) -->
-  <div class="container my-5 py-5 bg-light rounded-4" id="how-it-works">
-    <div class="text-center mb-5">
-      <h2 class="display-5 fw-bold mb-3">
-        How <span class="gradient-text">All-Safe</span> Works
-      </h2>
-      <p class="lead text-secondary">
-        Six integrated steps to a safer, smarter workplace
-      </p>
-    </div>
-
-    <div class="row g-4">
-      <!-- Step 1: Register work area -->
-      <div class="col-md-4">
-        <div class="text-center p-4 h-100">
-          <div class="position-relative mb-4">
-            <div class="display-1 gradient-text fw-bold">1</div>
-            <div
-              class="position-absolute top-0 start-100 translate-middle d-none d-md-block"
-            >
-              <i class="bi bi-arrow-right fs-1 text-secondary opacity-50"></i>
-            </div>
-          </div>
-          <div
-            class="icon-circle mb-3 mx-auto"
-            style="
-              background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-              width: 70px;
-              height: 70px;
-              border-radius: 50%;
-              display: flex;
-              align-items: center;
-              justify-content: center;
-            "
-          >
-            <i class="bi bi-building fs-1 text-white"></i>
-          </div>
-          <h4 class="fw-semibold mb-3">1. Register Your work area</h4>
-          <p class="text-secondary">
-            Create comprehensive digital profiles for each work area, documenting
-            hazards, equipment inventory, safety requirements, and site-specific
-            protocols.
-          </p>
-        </div>
-      </div>
-
-      <!-- Step 2: Anonymous Worker Reports -->
-      <div class="col-md-4">
-        <div class="text-center p-4 h-100">
-          <div class="position-relative mb-4">
-            <div class="display-1 gradient-text fw-bold">2</div>
-            <div
-              class="position-absolute top-0 start-100 translate-middle d-none d-md-block"
-            >
-              <i class="bi bi-arrow-right fs-1 text-secondary opacity-50"></i>
-            </div>
-          </div>
-          <div
-            class="icon-circle mb-3 mx-auto"
-            style="
-              background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
-              width: 70px;
-              height: 70px;
-              border-radius: 50%;
-              display: flex;
-              align-items: center;
-              justify-content: center;
-            "
-          >
-            <i class="bi bi-people fs-1 text-white"></i>
-          </div>
-          <h4 class="fw-semibold mb-3">2. Workers Report Anonymously</h4>
-          <p class="text-secondary">
-            Any worker can report incidents, near-misses, or unsafe conditions
-            without logging in. Safety officers also add professional
-            observations for complete site awareness.
-          </p>
-        </div>
-      </div>
-
-      <!-- Step 3: AI Analysis & Insights -->
-      <div class="col-md-4">
-        <div class="text-center p-4 h-100">
-          <div class="position-relative mb-4">
-            <div class="display-1 gradient-text fw-bold">3</div>
-            <div
-              class="position-absolute top-0 start-100 translate-middle d-none d-md-block"
-            >
-              <i class="bi bi-arrow-right fs-1 text-secondary opacity-50"></i>
-            </div>
-          </div>
-          <div
-            class="icon-circle mb-3 mx-auto"
-            style="
-              background: linear-gradient(135deg, #5f2c82 0%, #49a09d 100%);
-              width: 70px;
-              height: 70px;
-              border-radius: 50%;
-              display: flex;
-              align-items: center;
-              justify-content: center;
-            "
-          >
-            <i class="bi bi-robot fs-1 text-white"></i>
-          </div>
-          <h4 class="fw-semibold mb-3">3. AI Analyzes & Predicts</h4>
-          <p class="text-secondary">
-            Our AI processes all data—worker reports and officer observations—to
-            identify patterns, predict risks, and generate actionable
-            intelligence for a holistic safety view.
-          </p>
-        </div>
-      </div>
-
-      <!-- Step 4: Professional Documentation -->
-      <div class="col-md-4 mt-4">
-        <div class="text-center p-4 h-100">
-          <div class="position-relative mb-4">
-            <div class="display-1 gradient-text fw-bold">4</div>
-            <div
-              class="position-absolute top-0 start-100 translate-middle d-none d-md-block"
-            >
-              <i class="bi bi-arrow-right fs-1 text-secondary opacity-50"></i>
-            </div>
-          </div>
-          <div
-            class="icon-circle mb-3 mx-auto"
-            style="
-              background: linear-gradient(135deg, #ff9a9e 0%, #fad0c4 100%);
-              width: 70px;
-              height: 70px;
-              border-radius: 50%;
-              display: flex;
-              align-items: center;
-              justify-content: center;
-            "
-          >
-            <i class="bi bi-file-earmark-text fs-1 text-white"></i>
-          </div>
-          <h4 class="fw-semibold mb-3">4. Generate Professional Documents</h4>
-          <p class="text-secondary">
-            Create comprehensive safety documentation with the efficiency of 100
-            safety professionals:
-          </p>
-          <div class="text-start mt-3">
-            <div class="d-flex align-items-center mb-2">
-              <i class="bi bi-check-circle-fill text-success me-2"></i>
-              <span class="small"
-                >Detailed risk assessments & method statements</span
-              >
-            </div>
-            <div class="d-flex align-items-center mb-2">
-              <i class="bi bi-check-circle-fill text-success me-2"></i>
-              <span class="small"
-                >Professional incident investigation reports</span
-              >
-            </div>
-            <div class="d-flex align-items-center mb-2">
-              <i class="bi bi-check-circle-fill text-success me-2"></i>
-              <span class="small">PPE compliance checklists & audits</span>
-            </div>
-            <div class="d-flex align-items-center">
-              <i class="bi bi-check-circle-fill text-success me-2"></i>
-              <span class="small">Site-specific safety procedures</span>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <!-- Step 5: AI-Powered Safety Talks -->
-      <div class="col-md-4 mt-4">
-        <div class="text-center p-4 h-100">
-          <div class="position-relative mb-4">
-            <div class="display-1 gradient-text fw-bold">5</div>
-            <div
-              class="position-absolute top-0 start-100 translate-middle d-none d-md-block"
-            >
-              <i class="bi bi-arrow-right fs-1 text-secondary opacity-50"></i>
-            </div>
-          </div>
-          <div
-            class="icon-circle mb-3 mx-auto"
-            style="
-              background: linear-gradient(135deg, #a8edea 0%, #fed6e3 100%);
-              width: 70px;
-              height: 70px;
-              border-radius: 50%;
-              display: flex;
-              align-items: center;
-              justify-content: center;
-            "
-          >
-            <i class="bi bi-chat-dots fs-1 text-white"></i>
-          </div>
-          <h4 class="fw-semibold mb-3">
-            5. AI-Generated Safety Talks & Toolbox Topics
-          </h4>
-          <p class="text-secondary">
-            Empower your team with daily safety briefings that combine:
-          </p>
-          <div class="text-start mt-3">
-            <div class="d-flex align-items-center mb-2">
-              <i class="bi bi-lightbulb-fill text-warning me-2"></i>
-              <span class="small"
-                ><strong>Human Intelligence:</strong> Safety officer
-                observations & expertise</span
-              >
-            </div>
-            <div class="d-flex align-items-center mb-2">
-              <i class="bi bi-cpu text-info me-2"></i>
-              <span class="small"
-                ><strong>AI Insights:</strong> Data-driven risk patterns &
-                predictions</span
-              >
-            </div>
-            <div class="d-flex align-items-center">
-              <i class="bi bi-people-fill text-primary me-2"></i>
-              <span class="small"
-                ><strong>Collective Wisdom:</strong> Anonymous worker feedback
-                integration</span
-              >
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <!-- Step 6: Holistic Safe Workplace -->
-      <div class="col-md-4 mt-4">
-        <div class="text-center p-4 h-100">
-          <div class="position-relative mb-4">
-            <div class="display-1 gradient-text fw-bold">6</div>
-          </div>
-          <div
-            class="icon-circle mb-3 mx-auto"
-            style="
-              background: linear-gradient(135deg, #fbc2eb 0%, #a6c1ee 100%);
-              width: 70px;
-              height: 70px;
-              border-radius: 50%;
-              display: flex;
-              align-items: center;
-              justify-content: center;
-            "
-          >
-            <i class="bi bi-shield-check fs-1 text-white"></i>
-          </div>
-          <h4 class="fw-semibold mb-3">
-            6. Achieve a Holistic & Inclusive Safe Workplace
-          </h4>
-          <p class="text-secondary">
-            Bring everything together for a comprehensive safety culture:
-          </p>
-          <div class="text-start mt-3">
-            <div class="d-flex align-items-center mb-2">
-              <i class="bi bi-graph-up-arrow text-success me-2"></i>
-              <span class="small">Real-time safety performance dashboards</span>
-            </div>
-            <div class="d-flex align-items-center mb-2">
-              <i class="bi bi-bar-chart text-info me-2"></i>
-              <span class="small"
-                >Trend analysis & predictive risk mapping</span
-              >
-            </div>
-            <div class="d-flex align-items-center mb-2">
-              <i class="bi bi-arrow-repeat text-primary me-2"></i>
-              <span class="small">Continuous improvement feedback loop</span>
-            </div>
-            <div class="d-flex align-items-center">
-              <i class="bi bi-people-fill text-warning me-2"></i>
-              <span class="small"
-                >Inclusive safety culture where every voice matters</span
-              >
-            </div>
-          </div>
-        </div>
+    <div class="ts-home-video">
+      <div class="ts-video-frame">
+        <iframe
+          src="https://www.youtube-nocookie.com/embed/s6XWkHzuJ2g?rel=0&modestbranding=1&playsinline=1"
+          title="Safety video"
+          allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+          allowfullscreen
+          referrerpolicy="strict-origin-when-cross-origin"
+        ></iframe>
       </div>
     </div>
 
-    <!-- Summary Banner -->
-    <div class="row mt-5">
-      <div class="col-12">
-        <div
-          class="p-4 rounded-3"
-          style="background: linear-gradient(135deg, #1e3c5c 0%, #2c5a82 100%)"
-        >
-          <div class="row align-items-center">
-            <div class="col-md-8">
-              <h4 class="text-white fw-bold mb-2">
-                <i class="bi bi-stars me-2"></i>The Power of 100 Safety
-                Professionals
-              </h4>
-              <p class="text-white-50 mb-0 mb-md-0">
-                All-Safe combines human expertise with AI intelligence to
-                deliver documentation and insights at a scale and speed that
-                would require an entire team of safety experts.
-              </p>
-            </div>
-            <div class="col-md-4 text-md-end mt-3 mt-md-0">
-              <span class="badge bg-warning text-dark p-3 fs-6">
-                <i class="bi bi-robot me-2"></i>AI-Powered | Human-Centered
-              </span>
-            </div>
-          </div>
-        </div>
+    <div class="ts-floating-note ts-note-left">
+      <span>Risk</span>
+      Predict before it costs you
+    </div>
+    <div class="ts-floating-note ts-note-right">
+      <span>1000x</span>
+      One officer, amplified
+    </div>
+
+    <footer class="ts-legal-links" aria-label="Legal links">
+      <a href="#">Privacy Notice</a>
+      <a href="#">Terms &amp; Privacy</a>
+      <a href="#">Third Party Notices</a>
+    </footer>
+  </section>
+
+  <section class="ts-screen ts-screen-onboarding" id="onboarding" aria-labelledby="onboarding-title">
+    <div class="ts-orb ts-orb-four"></div>
+    <div class="ts-orb ts-orb-five"></div>
+
+    <nav class="ts-topbar" aria-label="Onboarding navigation">
+      <a class="ts-mini-brand" href="/" aria-label="TrueSafe365 home">
+        <span class="ts-mark"><i class="bi bi-shield-check"></i></span>
+        <span>TrueSafe365</span>
+      </a>
+      <div class="ts-nav-links">
+        <a href="/">Home</a>
+        <% if (user) { %>
+          <a href="/dashboard/officer">Dashboard</a>
+          <a href="/api/users/logout">Sign out</a>
+        <% } else { %>
+          <a href="/api/users/login">Sign in</a>
+          <a href="/register/safety-officer">Register</a>
+        <% } %>
       </div>
-    </div>
-  </div>
+    </nav>
 
-  <!-- Testimonials Section -->
-  <div class="container my-5 py-5">
-    <div class="text-center mb-5">
-      <h2 class="display-5 fw-bold mb-3">
-        Trusted by <span class="gradient-text">Safety Professionals</span>
-      </h2>
-      <p class="lead text-secondary">
-        Hear from those who have transformed their workplace safety
-      </p>
-    </div>
+    <div class="ts-onboarding-wrap">
+      <div class="ts-onboarding-intro">
+        <p class="ts-eyebrow">Welcome to TrueSafe365</p>
+        <h2 id="onboarding-title">
+          Giving 1 safety officer the power of 1000 Skilled safety officers <span aria-hidden="true">💪</span>
+        </h2>
+      </div>
 
-    <div class="row g-4">
-      <div class="col-md-4">
-        <div class="testimonial-card p-4 h-100 bg-white rounded-4 shadow-sm">
-          <div class="d-flex align-items-center mb-4">
-            <div
-              class="testimonial-avatar me-3"
-              style="
-                width: 60px;
-                height: 60px;
-                border-radius: 50%;
-                background: linear-gradient(135deg, #667eea, #764ba2);
-                display: flex;
-                align-items: center;
-                justify-content: center;
-              "
-            >
-              <span class="text-white fw-bold fs-4">JM</span>
-            </div>
+      <div class="ts-path-panel" aria-label="TrueSafe365 onboarding steps">
+        <a class="ts-path-action" href="/register/safety-officer">
+          Start onboarding
+          <i class="bi bi-arrow-up-right"></i>
+        </a>
+        <ol class="ts-path-list">
+          <li>
+            <span>01</span>
             <div>
-              <h5 class="fw-bold mb-1">John Mwila</h5>
-              <p class="text-secondary small mb-0">
-                Safety Officer, Mining Co.
-              </p>
+              <strong>Register on the system</strong>
+              <p>Create the safety officer account that will own the work areas and documents.</p>
             </div>
-          </div>
-          <div class="mb-3">
-            <i class="bi bi-star-fill text-warning"></i>
-            <i class="bi bi-star-fill text-warning"></i>
-            <i class="bi bi-star-fill text-warning"></i>
-            <i class="bi bi-star-fill text-warning"></i>
-            <i class="bi bi-star-fill text-warning"></i>
-          </div>
-          <p class="text-secondary fst-italic mb-0">
-            "All-Safe reduced our incident reporting time by 80%. The AI
-            insights helped us identify a recurring hazard we had missed for
-            years. Now our team feels truly protected."
-          </p>
-        </div>
-      </div>
-
-      <div class="col-md-4">
-        <div class="testimonial-card p-4 h-100 bg-white rounded-4 shadow-sm">
-          <div class="d-flex align-items-center mb-4">
-            <div
-              class="testimonial-avatar me-3"
-              style="
-                width: 60px;
-                height: 60px;
-                border-radius: 50%;
-                background: linear-gradient(135deg, #f093fb, #f5576c);
-                display: flex;
-                align-items: center;
-                justify-content: center;
-              "
-            >
-              <span class="text-white fw-bold fs-4">SK</span>
-            </div>
+          </li>
+          <li>
+            <span>02</span>
             <div>
-              <h5 class="fw-bold mb-1">Sarah Kapata</h5>
-              <p class="text-secondary small mb-0">
-                Site Manager, Construction
-              </p>
+              <strong>Create a work area</strong>
+              <p>Add the site, department, project, or operating area where safety risk must be managed.</p>
             </div>
-          </div>
-          <div class="mb-3">
-            <i class="bi bi-star-fill text-warning"></i>
-            <i class="bi bi-star-fill text-warning"></i>
-            <i class="bi bi-star-fill text-warning"></i>
-            <i class="bi bi-star-fill text-warning"></i>
-            <i class="bi bi-star-fill text-warning"></i>
-          </div>
-          <p class="text-secondary fst-italic mb-0">
-            "The daily safety talks are a game-changer. My team actually engages
-            with safety briefings now that they're relevant to our actual work.
-            We've seen a 40% increase in hazard reporting."
-          </p>
-        </div>
-      </div>
-
-      <div class="col-md-4">
-        <div class="testimonial-card p-4 h-100 bg-white rounded-4 shadow-sm">
-          <div class="d-flex align-items-center mb-4">
-            <div
-              class="testimonial-avatar me-3"
-              style="
-                width: 60px;
-                height: 60px;
-                border-radius: 50%;
-                background: linear-gradient(135deg, #5f2c82, #49a09d);
-                display: flex;
-                align-items: center;
-                justify-content: center;
-              "
-            >
-              <span class="text-white fw-bold fs-4">DC</span>
-            </div>
+          </li>
+          <li>
+            <span>03</span>
             <div>
-              <h5 class="fw-bold mb-1">David Chisanga</h5>
-              <p class="text-secondary small mb-0">
-                HSE Director, Manufacturing
-              </p>
+              <strong>Describe the activities correctly</strong>
+              <p>Tell TrueSafe365 what work is being done, who is exposed, what equipment is used, and what could go wrong.</p>
             </div>
-          </div>
-          <div class="mb-3">
-            <i class="bi bi-star-fill text-warning"></i>
-            <i class="bi bi-star-fill text-warning"></i>
-            <i class="bi bi-star-fill text-warning"></i>
-            <i class="bi bi-star-fill text-warning"></i>
-            <i class="bi bi-star-fill text-warning"></i>
-          </div>
-          <p class="text-secondary fst-italic mb-0">
-            "Passed our ISO audit with zero non-conformities. The compliance
-            reports alone are worth the investment. All-Safe has become an
-            indispensable part of our safety program."
-          </p>
-        </div>
+          </li>
+          <li>
+            <span>04</span>
+            <div>
+              <strong>Identify hazards and controls</strong>
+              <p>Capture known hazards, site conditions, emergency readiness, PPE needs, and worker concerns.</p>
+            </div>
+          </li>
+          <li>
+            <span>05</span>
+            <div>
+              <strong>Ask AI for professional drafts</strong>
+              <p>Generate safety documents such as risk assessments, JSA, safety talks, PPE, permits, audits, training, emergency plans, and environmental screenings.</p>
+            </div>
+          </li>
+          <li>
+            <span>06</span>
+            <div>
+              <strong>Correct, approve, and download</strong>
+              <p>Add officer comments, regenerate where needed, approve the final version, then download the approved Word document.</p>
+            </div>
+          </li>
+        </ol>
       </div>
     </div>
-  </div>
+  </section>
 </main>
 
-<%- include('partials/footer') %>
-
 <style>
-  .floating {
-    animation: floating 3s ease-in-out infinite;
+  :root {
+    --ts-ink: #1f2937;
+    --ts-muted: #667085;
+    --ts-surface: rgba(255, 255, 255, 0.74);
+    --ts-line: rgba(190, 18, 60, 0.14);
+    --ts-blue: #2563eb;
+    --ts-green: #059669;
+    --ts-orange: #ff9f1c;
+    --ts-red: #e11d48;
+    --ts-red-dark: #be123c;
+    --ts-clinical: #fff5f7;
+    --ts-shadow: 0 28px 80px rgba(190, 18, 60, 0.12);
   }
 
-  @keyframes floating {
-    0% {
-      transform: translateY(0px);
+  body {
+    background: #fffafa;
+    overflow-x: hidden;
+  }
+
+  .truesafe365-landing {
+    color: var(--ts-ink);
+    font-family: "Plus Jakarta Sans", "Inter", system-ui, sans-serif;
+    min-height: 100vh;
+  }
+
+  .ts-screen {
+    display: none;
+    isolation: isolate;
+    min-height: 100vh;
+    overflow: hidden;
+    padding: clamp(1.2rem, 3vw, 2rem);
+    position: relative;
+  }
+
+  .ts-screen.is-active {
+    animation: tsScreenIn 0.55s ease both;
+    display: block;
+  }
+
+  .ts-screen-hero {
+    background:
+      radial-gradient(circle at 16% 18%, rgba(225, 29, 72, 0.14), transparent 27rem),
+      radial-gradient(circle at 82% 22%, rgba(255, 255, 255, 0.92), transparent 30rem),
+      linear-gradient(135deg, #ffffff 0%, #fff1f4 48%, #f8fbff 100%);
+  }
+
+  .ts-screen-onboarding {
+    background:
+      radial-gradient(circle at 12% 12%, rgba(225, 29, 72, 0.14), transparent 22rem),
+      radial-gradient(circle at 90% 20%, rgba(255, 255, 255, 0.9), transparent 24rem),
+      linear-gradient(135deg, #fff 0%, #fff5f7 100%);
+  }
+
+  .ts-topbar {
+    align-items: center;
+    display: flex;
+    justify-content: space-between;
+    margin: 0 auto;
+    max-width: 1180px;
+    position: relative;
+    z-index: 3;
+  }
+
+  .ts-mini-brand,
+  .ts-nav-links a {
+    align-items: center;
+    color: var(--ts-ink);
+    display: inline-flex;
+    font-weight: 700;
+    gap: 0.55rem;
+    text-decoration: none;
+  }
+
+  .ts-nav-links {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.55rem;
+    justify-content: flex-end;
+  }
+
+  .ts-mark {
+    align-items: center;
+    background: #fff;
+    border: 1px solid var(--ts-line);
+    border-radius: 1rem;
+    box-shadow: 0 12px 34px rgba(23, 32, 51, 0.1);
+    color: var(--ts-red);
+    display: inline-flex;
+    height: 2.7rem;
+    justify-content: center;
+    width: 2.7rem;
+  }
+
+  .ts-nav-links a {
+    background: rgba(255, 255, 255, 0.68);
+    border: 1px solid var(--ts-line);
+    border-radius: 999px;
+    box-shadow: 0 10px 30px rgba(23, 32, 51, 0.08);
+    padding: 0.8rem 1.15rem;
+  }
+
+  .ts-nav-links a:hover {
+    background: var(--ts-red);
+    color: #fff;
+  }
+
+  .ts-hero-center {
+    align-items: center;
+    display: flex;
+    flex-direction: column;
+    margin: clamp(5rem, 12vh, 9rem) auto 0;
+    max-width: 1050px;
+    min-height: 58vh;
+    position: relative;
+    text-align: center;
+    z-index: 2;
+  }
+
+  .ts-eyebrow {
+    background: rgba(255, 255, 255, 0.66);
+    border: 1px solid rgba(23, 32, 51, 0.1);
+    border-radius: 999px;
+    box-shadow: 0 14px 40px rgba(23, 32, 51, 0.08);
+    color: #31415c;
+    display: inline-flex;
+    font-size: 0.82rem;
+    font-weight: 800;
+    letter-spacing: 0.14em;
+    margin-bottom: 1.5rem;
+    padding: 0.62rem 1rem;
+    text-transform: uppercase;
+  }
+
+  .ts-hero-center h1 {
+    font-family: "Space Grotesk", "Plus Jakarta Sans", sans-serif;
+    font-size: clamp(5rem, 18vw, 15.5rem);
+    font-weight: 700;
+    letter-spacing: -0.11em;
+    line-height: 0.82;
+    margin: 0;
+    padding-right: 0.1em;
+    text-wrap: balance;
+  }
+
+  .ts-hero-copy {
+    color: var(--ts-muted);
+    font-size: clamp(1.05rem, 2vw, 1.45rem);
+    line-height: 1.55;
+    margin: 2rem auto 1.8rem;
+    max-width: 760px;
+  }
+
+  .ts-primary-action {
+    align-items: center;
+    background: var(--ts-red);
+    border: 0;
+    border-radius: 999px;
+    box-shadow: 0 18px 45px rgba(23, 32, 51, 0.22);
+    color: #fff;
+    display: inline-flex;
+    font-size: 1.04rem;
+    font-weight: 800;
+    gap: 0.35rem;
+    padding: 1rem 1.45rem 1rem 1.7rem;
+    transition:
+      transform 0.25s ease,
+      box-shadow 0.25s ease;
+  }
+
+  .ts-primary-action:hover {
+    box-shadow: 0 24px 60px rgba(23, 32, 51, 0.3);
+    transform: translateY(-3px);
+  }
+
+  .ts-primary-action i {
+    font-size: 1.6rem;
+  }
+
+  .ts-orb {
+    border-radius: 999px;
+    filter: blur(1px);
+    opacity: 0.9;
+    position: absolute;
+    z-index: 0;
+  }
+
+  .ts-orb-one {
+    animation: tsFloat 8s ease-in-out infinite;
+    background: #fecdd3;
+    height: 12rem;
+    left: 8%;
+    top: 22%;
+    width: 12rem;
+  }
+
+  .ts-orb-two {
+    animation: tsFloat 10s ease-in-out infinite reverse;
+    background: #ffffff;
+    height: 16rem;
+    right: 9%;
+    top: 17%;
+    width: 16rem;
+  }
+
+  .ts-orb-three {
+    animation: tsFloat 12s ease-in-out infinite;
+    background: #fee2e2;
+    bottom: 10%;
+    height: 18rem;
+    left: 32%;
+    width: 18rem;
+  }
+
+  .ts-orb-four {
+    background: #cce2ff;
+    height: 22rem;
+    left: -8rem;
+    top: 12rem;
+    width: 22rem;
+  }
+
+  .ts-orb-five {
+    background: #ffe0a3;
+    bottom: -7rem;
+    height: 24rem;
+    right: -7rem;
+    width: 24rem;
+  }
+
+  .ts-floating-note {
+    backdrop-filter: blur(18px);
+    background: rgba(255, 255, 255, 0.58);
+    border: 1px solid rgba(255, 255, 255, 0.8);
+    border-radius: 1.5rem;
+    box-shadow: var(--ts-shadow);
+    color: #34425d;
+    font-weight: 800;
+    padding: 1rem 1.15rem;
+    position: absolute;
+    z-index: 2;
+  }
+
+  .ts-floating-note span {
+    color: var(--ts-blue);
+    display: block;
+    font-family: "Space Grotesk", sans-serif;
+    font-size: 1.7rem;
+    line-height: 1;
+  }
+
+  .ts-note-left {
+    bottom: 17%;
+    left: 8%;
+    transform: rotate(-4deg);
+  }
+
+  .ts-note-right {
+    right: 8%;
+    top: 46%;
+    transform: rotate(4deg);
+  }
+
+  .ts-onboarding-wrap {
+    margin: clamp(3rem, 7vh, 5.5rem) auto 0;
+    max-width: 1180px;
+    position: relative;
+    z-index: 2;
+  }
+
+  .ts-home-video {
+    background: #fff;
+    border: 1px solid rgba(225, 29, 72, 0.14);
+    border-radius: 2.2rem;
+    box-shadow: 0 30px 90px rgba(190, 18, 60, 0.16);
+    margin: clamp(4rem, 9vh, 7rem) auto 3rem;
+    max-width: 980px;
+    overflow: hidden;
+    padding: clamp(0.65rem, 1.8vw, 1rem);
+    position: relative;
+    z-index: 2;
+  }
+
+  .ts-video-frame {
+    aspect-ratio: 16 / 9;
+    background: #0a0f1d;
+    border-radius: 1.55rem;
+    box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.08);
+    overflow: hidden;
+    width: 100%;
+  }
+
+  .ts-video-frame iframe {
+    border: 0;
+    height: 100%;
+    width: 100%;
+  }
+
+  .ts-legal-links {
+    align-items: center;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1.2rem;
+    justify-content: center;
+    margin: 2rem auto 0;
+    max-width: 720px;
+    padding: 1rem 0 0.25rem;
+    position: relative;
+    z-index: 2;
+  }
+
+  .ts-legal-links a {
+    color: var(--ts-muted);
+    font-size: 0.9rem;
+    font-weight: 700;
+    text-decoration: none;
+  }
+
+  .ts-legal-links a:hover {
+    color: var(--ts-red);
+  }
+
+  .ts-onboarding-intro {
+    max-width: 760px;
+  }
+
+  .ts-onboarding-intro h2 {
+    font-family: "Space Grotesk", "Plus Jakarta Sans", sans-serif;
+    font-size: clamp(2.25rem, 5.8vw, 4.75rem);
+    font-weight: 700;
+    letter-spacing: -0.055em;
+    line-height: 1;
+    margin-bottom: 1.3rem;
+  }
+
+  .ts-onboarding-intro p:not(.ts-eyebrow) {
+    color: var(--ts-muted);
+    font-size: 1.2rem;
+    line-height: 1.65;
+  }
+
+  .ts-path-panel {
+    background: rgba(255, 255, 255, 0.72);
+    border: 1px solid rgba(255, 255, 255, 0.92);
+    border-radius: 2rem;
+    box-shadow: 0 24px 75px rgba(23, 32, 51, 0.12);
+    margin: 2rem 0 2rem;
+    overflow: hidden;
+    padding: clamp(1rem, 3vw, 1.6rem);
+    position: relative;
+  }
+
+  .ts-path-action {
+    align-items: center;
+    background: var(--ts-red);
+    border-radius: 999px;
+    color: #fff;
+    display: inline-flex;
+    font-weight: 800;
+    gap: 0.35rem;
+    margin-bottom: 1.2rem;
+    padding: 0.95rem 1.25rem;
+    text-decoration: none;
+    transition:
+      box-shadow 0.25s ease,
+      transform 0.25s ease;
+  }
+
+  .ts-path-action:hover {
+    box-shadow: 0 18px 45px rgba(23, 32, 51, 0.22);
+    color: #fff;
+    transform: translateY(-3px);
+  }
+
+  .ts-path-list {
+    counter-reset: path;
+    display: grid;
+    gap: 0.85rem;
+    list-style: none;
+    margin: 0;
+    padding: 0;
+  }
+
+  .ts-path-list li {
+    align-items: flex-start;
+    background: rgba(255, 255, 255, 0.72);
+    border: 1px solid rgba(23, 32, 51, 0.08);
+    border-radius: 1.35rem;
+    display: grid;
+    gap: 1rem;
+    grid-template-columns: auto 1fr;
+    padding: 1rem;
+    transition:
+      background 0.25s ease,
+      box-shadow 0.25s ease,
+      transform 0.25s ease;
+  }
+
+  .ts-path-list li:hover {
+    background: #fff;
+    box-shadow: 0 16px 44px rgba(23, 32, 51, 0.1);
+    transform: translateX(6px);
+  }
+
+  .ts-path-list span {
+    align-items: center;
+    background: linear-gradient(135deg, var(--ts-red), var(--ts-red-dark));
+    border-radius: 999px;
+    color: #fff;
+    display: inline-flex;
+    font-family: "Space Grotesk", sans-serif;
+    font-weight: 700;
+    height: 3rem;
+    justify-content: center;
+    width: 3rem;
+  }
+
+  .ts-path-list strong {
+    display: block;
+    font-family: "Space Grotesk", sans-serif;
+    font-size: 1.28rem;
+    letter-spacing: -0.035em;
+    margin-bottom: 0.25rem;
+  }
+
+  .ts-path-list p {
+    color: var(--ts-muted);
+    font-size: 0.96rem;
+    line-height: 1.55;
+    margin: 0;
+  }
+
+  @keyframes tsFloat {
+    0%, 100% {
+      transform: translate3d(0, 0, 0) scale(1);
     }
     50% {
-      transform: translateY(-10px);
-    }
-    100% {
-      transform: translateY(0px);
+      transform: translate3d(0, -18px, 0) scale(1.04);
     }
   }
 
-  .feature-card {
-    transition:
-      transform 0.3s ease,
-      box-shadow 0.3s ease;
-    border-radius: 15px;
-  }
-
-  .feature-card:hover {
-    transform: translateY(-10px);
-    box-shadow: 0 15px 30px rgba(0, 0, 0, 0.1) !important;
-  }
-
-  .feature-icon {
-    font-size: 2.5rem;
-    color: var(--secondary);
-    margin-bottom: 1rem;
-  }
-
-  .icon-circle {
-    transition:
-      transform 0.3s ease,
-      box-shadow 0.3s ease;
-  }
-
-  .icon-circle:hover {
-    transform: scale(1.1);
-    box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
-  }
-
-  .testimonial-card {
-    transition:
-      transform 0.3s ease,
-      box-shadow 0.3s ease;
-    border: 1px solid rgba(0, 0, 0, 0.05);
-  }
-
-  .testimonial-card:hover {
-    transform: translateY(-5px);
-    box-shadow: 0 15px 30px rgba(0, 0, 0, 0.1) !important;
-  }
-
-  @media (max-width: 768px) {
-    .position-absolute {
-      display: none !important;
+  @keyframes tsScreenIn {
+    from {
+      opacity: 0;
+      transform: translateY(14px) scale(0.99);
     }
+    to {
+      opacity: 1;
+      transform: translateY(0) scale(1);
+    }
+  }
+
+  @media (max-width: 900px) {
+    .ts-home-video {
+      grid-template-columns: 1fr;
+    }
+
+    .ts-floating-note {
+      display: none;
+    }
+  }
+
+  @media (max-width: 640px) {
+    .ts-screen {
+      padding: 1rem;
+    }
+
+    .ts-topbar {
+      gap: 0.75rem;
+    }
+
+    .ts-nav-links {
+      justify-content: flex-start;
+    }
+
+    .ts-nav-links a {
+      padding: 0.65rem 0.85rem;
+    }
+
+    .ts-hero-center h1 {
+      font-size: clamp(4.4rem, 26vw, 7rem);
+    }
+
+    .ts-hero-copy {
+      font-size: 1rem;
+    }
+
+    .ts-onboarding-intro h2 {
+      font-size: clamp(2.35rem, 11vw, 3.4rem);
+    }
+
   }
 </style>
 
+<script>
+  document.addEventListener("DOMContentLoaded", function () {
+    const hero = document.querySelector(".ts-screen-hero");
+    const onboarding = document.querySelector(".ts-screen-onboarding");
+    const goOnboardingButton = document.querySelector("[data-go-onboarding]");
+
+    const showScreen = function (screen, hash) {
+      hero.classList.remove("is-active");
+      onboarding.classList.remove("is-active");
+      screen.classList.add("is-active");
+      window.history.replaceState(null, "", hash || window.location.pathname);
+      window.scrollTo({ top: 0, behavior: "smooth" });
+    };
+
+    const showOnboarding = function () {
+      showScreen(onboarding, "#onboarding");
+    };
+
+    const showHero = function () {
+      showScreen(hero, window.location.pathname);
+    };
+
+    const syncScreenFromHash = function () {
+      if (window.location.hash === "#onboarding") {
+        showOnboarding();
+      } else {
+        showHero();
+      }
+    };
+
+    syncScreenFromHash();
+
+    goOnboardingButton?.addEventListener("click", showOnboarding);
+    window.addEventListener("hashchange", syncScreenFromHash);
+  });
+</script>
+  </body>
+</html>

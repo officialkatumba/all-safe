@@ -467,7 +467,7 @@ async function generatePPEWordBuffer({ checklist }) {
   children.push(createSignOffSection());
 
   const doc = new Document({
-    creator: "TrueSafe PPE Checklist System",
+    creator: "TrueSafe365 PPE Checklist System",
     title: cleanText(checklist.title || "PPE Requirements and Checklist"),
     description: "Editable PPE requirements and checklist Word document",
     sections: [

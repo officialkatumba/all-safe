@@ -33,6 +33,7 @@ if (!process.env.SESSION_SECRET) {
 
 app.use(
   session({
+    name: "truesafe365.sid",
     secret: process.env.SESSION_SECRET,
     store: MongoStore.create({
       mongoUrl: process.env.MONGO_URI,
@@ -52,8 +53,15 @@ app.use(
 app.use(
   helmet({
     contentSecurityPolicy: false,
+    crossOriginResourcePolicy: { policy: "same-site" },
+    referrerPolicy: { policy: "strict-origin-when-cross-origin" },
   }),
 );
+app.use((req, res, next) => {
+  res.setHeader("Permissions-Policy", "camera=(), microphone=(), geolocation=()");
+  res.setHeader("X-Permitted-Cross-Domain-Policies", "none");
+  next();
+});
 app.use(
   rateLimit({
     windowMs: 15 * 60 * 1000,

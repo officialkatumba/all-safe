@@ -1,9 +1,5 @@
 const User = require("../models/User");
 
-exports.showRegistrationOptions = (req, res) => {
-  res.render("registration/options");
-};
-
 exports.showSafetyOfficerForm = (req, res) => {
   res.render("registration/solo", {
     title: "Create Safety Officer Account",

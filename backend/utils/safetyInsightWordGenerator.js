@@ -569,7 +569,7 @@ async function generateSafetyInsightWordBuffer({ insight }) {
   children.push(createManagementDecisionBox());
 
   const doc = new Document({
-    creator: "TrueSafe AI Safety Insight System",
+    creator: "TrueSafe365 AI Safety Insight System",
     title: cleanText(insight.title || "AI Safety Insight Report"),
     description:
       "AI-generated safety insight report for management decision-making",

@@ -1,7 +1,7 @@
 <%- include('../partials/header') %>
 <%- include('../partials/navbar') %>
 
-<div class="main-wrapper">
+<div class="main-wrapper workarea-view-page">
   <div class="content container py-4">
     <div class="workarea-details-container" style="max-width: 1080px; margin: 0 auto;">
       <%
@@ -916,6 +916,22 @@
   .workarea-details-container {
     max-width: 1080px;
     margin: 0 auto;
+    padding-bottom: clamp(3rem, 6vw, 5rem);
+  }
+
+  .workarea-view-page {
+    display: block;
+    min-height: auto;
+  }
+
+  .workarea-view-page .content {
+    display: block;
+    min-height: auto;
+    padding-bottom: clamp(5rem, 8vw, 7rem) !important;
+  }
+
+  .workarea-view-page + .site-footer {
+    margin-top: 0 !important;
   }
 
   .workarea-hero {

@@ -3,7 +3,7 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>All-Safe | AI-Powered Work Area Safety Intelligence</title>
+    <title>TrueSafe365 | AI-Powered Work Area Safety Intelligence</title>
 
     <!-- Bootstrap 5 CSS -->
     <link
@@ -28,21 +28,29 @@
       href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&display=swap"
       rel="stylesheet"
     />
+    <link rel="stylesheet" href="/css/theme.css" />
 
     <style>
       :root {
-        --primary: #1e3c5c;
-        --secondary: #e67e22;
-        --accent: #27ae60;
-        --light: #f8f9fa;
-        --dark: #1e2a3a;
-        --warning: #f39c12;
-        --danger: #e74c3c;
+        --primary: #be123c;
+        --secondary: #e11d48;
+        --accent: #0f766e;
+        --light: #fff7f8;
+        --dark: #1f2937;
+        --warning: #f59e0b;
+        --danger: #dc2626;
+        --medical-red: #e11d48;
+        --medical-red-dark: #be123c;
+        --medical-red-soft: #fff1f2;
+        --medical-line: rgba(225, 29, 72, 0.14);
+        --medical-shadow: 0 18px 45px rgba(190, 18, 60, 0.1);
       }
 
       body {
         font-family: "Poppins", sans-serif;
-        background: linear-gradient(135deg, var(--light) 0%, #ffffff 100%);
+        background:
+          radial-gradient(circle at top left, rgba(225, 29, 72, 0.08), transparent 28rem),
+          linear-gradient(135deg, #ffffff 0%, var(--light) 100%);
         color: var(--dark);
         min-height: 100vh;
         display: flex;
@@ -50,30 +58,54 @@
       }
 
       .gradient-text {
-        background: linear-gradient(to right, var(--secondary), var(--accent));
+        background: linear-gradient(to right, var(--medical-red), var(--medical-red-dark));
         -webkit-background-clip: text;
         background-clip: text;
         color: transparent;
       }
 
       .btn-primary {
-        background-color: var(--secondary);
-        border-color: var(--secondary);
+        background-color: var(--medical-red);
+        border-color: var(--medical-red);
       }
 
       .btn-primary:hover {
-        background-color: #d35400;
-        border-color: #d35400;
+        background-color: var(--medical-red-dark);
+        border-color: var(--medical-red-dark);
       }
 
       .btn-secondary {
-        background-color: var(--primary);
-        border-color: var(--primary);
+        background-color: #1f2937;
+        border-color: #1f2937;
       }
 
       .btn-secondary:hover {
-        background-color: #0f2a40;
-        border-color: #0f2a40;
+        background-color: #111827;
+        border-color: #111827;
+      }
+
+      .card,
+      .dashboard-container,
+      .form-container,
+      .testimonial-card,
+      .feature-card {
+        border: 1px solid var(--medical-line) !important;
+        box-shadow: var(--medical-shadow) !important;
+      }
+
+      .card-header {
+        background: linear-gradient(135deg, var(--medical-red), var(--medical-red-dark)) !important;
+        color: #fff !important;
+        border-bottom: 0 !important;
+      }
+
+      .badge.bg-primary,
+      .bg-primary {
+        background-color: var(--medical-red) !important;
+      }
+
+      .text-primary {
+        color: var(--medical-red) !important;
       }
 
       .emergency-banner {
@@ -89,6 +121,5 @@
       }
     </style>
   </head>
-  <body></body>
-</html>
+  <body>
 

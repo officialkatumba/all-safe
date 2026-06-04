@@ -494,7 +494,7 @@ async function generateRiskWordBuffer({ assessment, sections }) {
   documentChildren.push(...createApprovalSection());
 
   const doc = new Document({
-    creator: "TrueSafe Risk Assessment System",
+    creator: "TrueSafe365 Risk Assessment System",
     title: cleanText(assessment.title || "Risk Assessment Report"),
     description: "Editable risk assessment Word document",
     sections: [

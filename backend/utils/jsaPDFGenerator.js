@@ -84,7 +84,7 @@ const generateJSAPDF = async ({
           margin: [40, 0, 0, 20],
         },
         {
-          text: "© TrueSafe Safety Management System",
+          text: "© TrueSafe365 Safety Management System",
           alignment: "right",
           style: "copyright",
           margin: [0, 0, 40, 20],

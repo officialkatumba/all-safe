@@ -477,7 +477,7 @@ async function generateSafetyAuditWordBuffer({ audit }) {
   children.push(createManagementSignOffBox());
 
   const doc = new Document({
-    creator: "TrueSafe AI Safety Audit Scorecard System",
+    creator: "TrueSafe365 AI Safety Audit Scorecard System",
     title: cleanText(audit.title || "AI Safety Audit Scorecard"),
     description: "AI-led safety audit scorecard and management report",
     sections: [

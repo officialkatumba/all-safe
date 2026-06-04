@@ -568,7 +568,7 @@ async function generateJSAWordBuffer({ jsa, jsaSections }) {
   documentChildren.push(...createApprovalSection());
 
   const doc = new Document({
-    creator: "TrueSafe JSA System",
+    creator: "TrueSafe365 JSA System",
     title: cleanText(jsa.title || jsa.jobTask || "Job Safety Analysis"),
     description: "Editable Job Safety Analysis Word document",
     sections: [

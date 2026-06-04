@@ -9,9 +9,9 @@ dotenv.config();
 const seedEmail =
   process.env.SEED_OFFICER_EMAIL ||
   process.env.SYSTEM_OWNER_EMAILS?.split(",")[0]?.trim() ||
-  "safety.officer@all-safe.local";
+  "safety.officer@truesafe365.local";
 const seedPassword = process.env.SEED_OFFICER_PASSWORD || "AllSafe@2026!";
-const seedName = process.env.SEED_OFFICER_NAME || "All-Safe Safety Officer";
+const seedName = process.env.SEED_OFFICER_NAME || "TrueSafe365 Safety Officer";
 
 async function seedSafetyOfficer() {
   if (!process.env.MONGO_URI) {

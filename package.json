@@ -1,7 +1,7 @@
 {
-  "name": "all-safe",
+  "name": "truesafe365",
   "version": "1.0.0",
-  "description": "Safety Management System built for standalone safety officers",
+  "description": "TrueSafe365 safety management system built for standalone safety officers",
   "main": "backend/server.js",
   "scripts": {
     "start": "node backend/server.js",
