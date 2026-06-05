@@ -1,22 +1,19 @@
 <!DOCTYPE html>
 <html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>TrueSafe365 | AI Safety Intelligence</title>
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=Plus+Jakarta+Sans:wght@500;600;700;800&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet">
-    <link
-      href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css"
-      rel="stylesheet"
-    />
-    <link
-      rel="stylesheet"
-      href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css"
-    />
-  </head>
-  <body>
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>TrueSafe365 | AI Safety Intelligence</title>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=Plus+Jakarta+Sans:wght@500;600;700;800&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet">
+
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet" />
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css" />
+</head>
+
+<body>
 
 <main class="truesafe365-landing" data-landing>
   <section class="ts-screen ts-screen-hero is-active" id="welcome" aria-labelledby="TrueSafe365-title">
@@ -29,7 +26,12 @@
         <span class="ts-mark"><i class="bi bi-shield-check"></i></span>
         <span>TrueSafe365</span>
       </a>
-      <div class="ts-nav-links">
+
+      <button class="ts-menu-toggle" type="button" data-menu-toggle aria-label="Open navigation">
+        <i class="bi bi-list"></i>
+      </button>
+
+      <div class="ts-nav-links" data-mobile-menu>
         <% if (user) { %>
           <a href="/dashboard/officer">Dashboard</a>
           <a href="/api/users/logout">Sign out</a>
@@ -43,9 +45,11 @@
     <div class="ts-hero-center">
       <p class="ts-eyebrow">Stop starting safety from an empty canvas</p>
       <h1 id="TrueSafe365-title">TrueSafe365</h1>
+
       <p class="ts-hero-copy">
         Safety officers are expected to imagine every accident, delay, fine, injury, equipment failure, and production stoppage before it happens. TrueSafe365 starts from your site description and real safety data, then uses AI to predict what ordinary paperwork can miss.
       </p>
+
       <button class="ts-primary-action" type="button" data-go-onboarding>
         How it Works
         <i class="bi bi-arrow-right-short"></i>
@@ -68,6 +72,7 @@
       <span>Risk</span>
       Predict before it costs you
     </div>
+
     <div class="ts-floating-note ts-note-right">
       <span>1000x</span>
       One officer, amplified
@@ -89,7 +94,12 @@
         <span class="ts-mark"><i class="bi bi-shield-check"></i></span>
         <span>TrueSafe365</span>
       </a>
-      <div class="ts-nav-links">
+
+      <button class="ts-menu-toggle" type="button" data-menu-toggle aria-label="Open navigation">
+        <i class="bi bi-list"></i>
+      </button>
+
+      <div class="ts-nav-links" data-mobile-menu>
         <a href="/">Home</a>
         <% if (user) { %>
           <a href="/dashboard/officer">Dashboard</a>
@@ -114,6 +124,7 @@
           Start onboarding
           <i class="bi bi-arrow-up-right"></i>
         </a>
+
         <ol class="ts-path-list">
           <li>
             <span>01</span>
@@ -122,6 +133,7 @@
               <p>Create the safety officer account that will own the work areas and documents.</p>
             </div>
           </li>
+
           <li>
             <span>02</span>
             <div>
@@ -129,6 +141,7 @@
               <p>Add the site, department, project, or operating area where safety risk must be managed.</p>
             </div>
           </li>
+
           <li>
             <span>03</span>
             <div>
@@ -136,6 +149,7 @@
               <p>Tell TrueSafe365 what work is being done, who is exposed, what equipment is used, and what could go wrong.</p>
             </div>
           </li>
+
           <li>
             <span>04</span>
             <div>
@@ -143,6 +157,7 @@
               <p>Capture known hazards, site conditions, emergency readiness, PPE needs, and worker concerns.</p>
             </div>
           </li>
+
           <li>
             <span>05</span>
             <div>
@@ -150,6 +165,7 @@
               <p>Generate safety documents such as risk assessments, JSA, safety talks, PPE, permits, audits, training, emergency plans, and environmental screenings.</p>
             </div>
           </li>
+
           <li>
             <span>06</span>
             <div>
@@ -224,7 +240,7 @@
     margin: 0 auto;
     max-width: 1180px;
     position: relative;
-    z-index: 3;
+    z-index: 20;
   }
 
   .ts-mini-brand,
@@ -270,6 +286,21 @@
     color: #fff;
   }
 
+  .ts-menu-toggle {
+    align-items: center;
+    background: #fff;
+    border: 1px solid var(--ts-line);
+    border-radius: 0.9rem;
+    box-shadow: 0 10px 30px rgba(23, 32, 51, 0.08);
+    color: var(--ts-red);
+    cursor: pointer;
+    display: none;
+    font-size: 1.7rem;
+    height: 2.8rem;
+    justify-content: center;
+    width: 2.8rem;
+  }
+
   .ts-hero-center {
     align-items: center;
     display: flex;
@@ -299,10 +330,10 @@
 
   .ts-hero-center h1 {
     font-family: "Space Grotesk", "Plus Jakarta Sans", sans-serif;
-    font-size: clamp(5rem, 18vw, 15.5rem);
+    font-size: clamp(2.5rem, 9vw, 7.75rem);
     font-weight: 700;
-    letter-spacing: -0.11em;
-    line-height: 0.82;
+    letter-spacing: -0.08em;
+    line-height: 0.9;
     margin: 0;
     padding-right: 0.1em;
     text-wrap: balance;
@@ -328,9 +359,7 @@
     font-weight: 800;
     gap: 0.35rem;
     padding: 1rem 1.45rem 1rem 1.7rem;
-    transition:
-      transform 0.25s ease,
-      box-shadow 0.25s ease;
+    transition: transform 0.25s ease, box-shadow 0.25s ease;
   }
 
   .ts-primary-action:hover {
@@ -426,13 +455,6 @@
     transform: rotate(4deg);
   }
 
-  .ts-onboarding-wrap {
-    margin: clamp(3rem, 7vh, 5.5rem) auto 0;
-    max-width: 1180px;
-    position: relative;
-    z-index: 2;
-  }
-
   .ts-home-video {
     background: #fff;
     border: 1px solid rgba(225, 29, 72, 0.14);
@@ -450,7 +472,6 @@
     aspect-ratio: 16 / 9;
     background: #0a0f1d;
     border-radius: 1.55rem;
-    box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.08);
     overflow: hidden;
     width: 100%;
   }
@@ -485,6 +506,13 @@
     color: var(--ts-red);
   }
 
+  .ts-onboarding-wrap {
+    margin: clamp(3rem, 7vh, 5.5rem) auto 0;
+    max-width: 1180px;
+    position: relative;
+    z-index: 2;
+  }
+
   .ts-onboarding-intro {
     max-width: 760px;
   }
@@ -498,18 +526,12 @@
     margin-bottom: 1.3rem;
   }
 
-  .ts-onboarding-intro p:not(.ts-eyebrow) {
-    color: var(--ts-muted);
-    font-size: 1.2rem;
-    line-height: 1.65;
-  }
-
   .ts-path-panel {
     background: rgba(255, 255, 255, 0.72);
     border: 1px solid rgba(255, 255, 255, 0.92);
     border-radius: 2rem;
     box-shadow: 0 24px 75px rgba(23, 32, 51, 0.12);
-    margin: 2rem 0 2rem;
+    margin: 2rem 0;
     overflow: hidden;
     padding: clamp(1rem, 3vw, 1.6rem);
     position: relative;
@@ -526,19 +548,14 @@
     margin-bottom: 1.2rem;
     padding: 0.95rem 1.25rem;
     text-decoration: none;
-    transition:
-      box-shadow 0.25s ease,
-      transform 0.25s ease;
   }
 
   .ts-path-action:hover {
-    box-shadow: 0 18px 45px rgba(23, 32, 51, 0.22);
     color: #fff;
     transform: translateY(-3px);
   }
 
   .ts-path-list {
-    counter-reset: path;
     display: grid;
     gap: 0.85rem;
     list-style: none;
@@ -555,10 +572,6 @@
     gap: 1rem;
     grid-template-columns: auto 1fr;
     padding: 1rem;
-    transition:
-      background 0.25s ease,
-      box-shadow 0.25s ease,
-      transform 0.25s ease;
   }
 
   .ts-path-list li:hover {
@@ -599,6 +612,7 @@
     0%, 100% {
       transform: translate3d(0, 0, 0) scale(1);
     }
+
     50% {
       transform: translate3d(0, -18px, 0) scale(1.04);
     }
@@ -609,6 +623,7 @@
       opacity: 0;
       transform: translateY(14px) scale(0.99);
     }
+
     to {
       opacity: 1;
       transform: translateY(0) scale(1);
@@ -616,12 +631,38 @@
   }
 
   @media (max-width: 900px) {
-    .ts-home-video {
-      grid-template-columns: 1fr;
-    }
-
     .ts-floating-note {
       display: none;
+    }
+  }
+
+  @media (max-width: 768px) {
+    .ts-menu-toggle {
+      display: inline-flex;
+    }
+
+    .ts-nav-links {
+      background: rgba(255, 255, 255, 0.96);
+      border: 1px solid var(--ts-line);
+      border-radius: 1.2rem;
+      box-shadow: 0 24px 70px rgba(23, 32, 51, 0.18);
+      display: none;
+      flex-direction: column;
+      min-width: 220px;
+      padding: 0.85rem;
+      position: absolute;
+      right: 0;
+      top: calc(100% + 0.75rem);
+      z-index: 999;
+    }
+
+    .ts-nav-links.show {
+      display: flex;
+    }
+
+    .ts-nav-links a {
+      justify-content: center;
+      width: 100%;
     }
   }
 
@@ -630,20 +671,14 @@
       padding: 1rem;
     }
 
-    .ts-topbar {
-      gap: 0.75rem;
-    }
-
-    .ts-nav-links {
-      justify-content: flex-start;
-    }
-
-    .ts-nav-links a {
-      padding: 0.65rem 0.85rem;
+    .ts-hero-center {
+      margin-top: 4rem;
+      min-height: auto;
     }
 
     .ts-hero-center h1 {
-      font-size: clamp(4.4rem, 26vw, 7rem);
+      font-size: clamp(2.8rem, 14vw, 4.5rem);
+      letter-spacing: -0.06em;
     }
 
     .ts-hero-copy {
@@ -653,7 +688,6 @@
     .ts-onboarding-intro h2 {
       font-size: clamp(2.35rem, 11vw, 3.4rem);
     }
-
   }
 </style>
 
@@ -687,11 +721,28 @@
       }
     };
 
+    document.querySelectorAll("[data-menu-toggle]").forEach(function (toggle) {
+      toggle.addEventListener("click", function () {
+        const nav = toggle.closest(".ts-topbar").querySelector("[data-mobile-menu]");
+        nav.classList.toggle("show");
+      });
+    });
+
+    document.addEventListener("click", function (event) {
+      document.querySelectorAll(".ts-topbar").forEach(function (topbar) {
+        if (!topbar.contains(event.target)) {
+          const nav = topbar.querySelector("[data-mobile-menu]");
+          nav?.classList.remove("show");
+        }
+      });
+    });
+
     syncScreenFromHash();
 
     goOnboardingButton?.addEventListener("click", showOnboarding);
     window.addEventListener("hashchange", syncScreenFromHash);
   });
 </script>
-  </body>
+
+</body>
 </html>
