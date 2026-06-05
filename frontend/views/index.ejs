@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>TrueSafe365 | AI-Powered Hazard Pattern Discovery</title>
+  <title>TrueSafe365 | AI-Powered Hazard Pattern Discovery &amp; Safety Talks</title>
 
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -44,11 +44,11 @@
     </nav>
 
     <div class="ts-hero-center">
-      <p class="ts-eyebrow">WHAT YOU MISS IS CAUSING YOUR NEXT EXTREME ACCIDENT</p>
-      <h1 id="TrueSafe365-title">Expose Hidden Risks. Prevent Catastrophe.</h1>
+      <p class="ts-eyebrow">PREDICTIVE PROTECTION &amp; DAILY TEAM ALIGNMENT</p>
+      <h1 id="TrueSafe365-title">Expose Hidden Risks. Generate Dynamic Safety Talks.</h1>
 
       <p class="ts-hero-copy">
-        Isolated near-misses and scattered field logs hide deadly patterns that human eyes overlook. <strong>TrueSafe365</strong> uses AI to analyze your work areas and continuous daily site feeds, uncovering complex hazard links before they trigger devastating loss of life, destroyed equipment, and ruinous operational downtime.
+        Isolated near-misses and scattered field logs hide deadly patterns that human eyes overlook. <strong>TrueSafe365</strong> uses AI to instantly turn your real-time site data into high-value safety insights and hyper-relevant, localized daily safety talk topics that keep your entire team safer every single shift.
       </p>
 
       <button class="ts-primary-action" type="button" data-go-onboarding>
@@ -70,19 +70,19 @@
     </div>
 
     <div class="ts-floating-note ts-note-left">
-      <span>Stop Loss</span>
-      Prevent Fatalities &amp; Equipment Damage
+      <span>Daily Safety Talks</span>
+      Instant Topic Briefs Derived From Real Site Hazards
     </div>
 
     <div class="ts-floating-note ts-note-right">
-      <span>$0 Costly Delays</span>
-      Eliminate Crippling Downtime
+      <span>Valuable Insights</span>
+      Uncover Deep Predictive Trends Humans Overlook
     </div>
 
     <footer class="ts-legal-links" aria-label="Legal links">
-      <a href="#">Privacy Notice</a>
-      <a href="#">Terms &amp; Privacy</a>
-      <a href="#">Third Party Notices</a>
+      <button type="button" class="ts-legal-trigger" data-legal-target="privacy">Privacy Notice</button>
+      <button type="button" class="ts-legal-trigger" data-legal-target="terms">Terms &amp; Privacy</button>
+      <button type="button" class="ts-legal-trigger" data-legal-target="disclosures">Compliance Disclosures</button>
     </footer>
   </section>
 
@@ -117,7 +117,7 @@
       <div class="ts-onboarding-intro">
         <p class="ts-eyebrow">The Predictive Safety Blueprint</p>
         <h2 id="onboarding-title">
-          Human intuition gathers data. AI reveals patterns. You retain full control. <span aria-hidden="true">🎯</span>
+          Human intuition gathers data. AI generates daily briefs. You protect the site. <span aria-hidden="true">📊</span>
         </h2>
       </div>
 
@@ -139,21 +139,13 @@
           <li>
             <span>02</span>
             <div>
-              <strong>Map Your Active Work Areas</strong>
-              <p>Define your specific dynamic operating locations—whether it's an excavation sector, a high-voltage assembly site, or a processing facility where risk changes by the hour.</p>
+              <strong>Map Active Environments &amp; Equipment</strong>
+              <p>Define your specific dynamic operating locations and assets—such as excavation sectors, high-voltage spaces, or processing facilities where environmental risks change by the hour.</p>
             </div>
           </li>
 
           <li>
             <span>03</span>
-            <div>
-              <strong>Profile Site Environments &amp; Machinery</strong>
-              <p>Input critical task descriptions, operational realities, handling equipment profiles, and personnel footprints so the background baseline is completely precise.</p>
-            </div>
-          </li>
-
-          <li>
-            <span>04</span>
             <div>
               <strong>Feed Continuous Raw Incident Data</strong>
               <p>Dump real-time field information directly into your terminal—including verbal worker updates, minor slips, near-miss entries, or messy site WhatsApp logs. Nothing gets lost.</p>
@@ -161,10 +153,18 @@
           </li>
 
           <li>
+            <span>04</span>
+            <div>
+              <strong>Extract High-Value Safety Insights</strong>
+              <p>The AI runs advanced cross-pattern processing over historical logs, flagging escalating risk combinations and surfacing valuable, predictive behavioral insights before an incident can manifest.</p>
+            </div>
+          </li>
+
+          <li>
             <span>05</span>
             <div>
-              <strong>Unleash AI Critical Threat Analysis</strong>
-              <p>Let the AI run cross-pattern processing across your historical site data. It immediately drafts bulletproof Risk Assessments, customized Toolbox Talks, and meticulous Safety Audits focused on the patterns humans miss.</p>
+              <strong>Generate Contextual Daily Safety Talks</strong>
+              <p>No more generic templates. Instantly generate highly relevant, custom daily safety talk topics engineered around your site’s real-time raw data to keep your team actively engaged and safer.</p>
             </div>
           </li>
 
@@ -172,7 +172,7 @@
             <span>06</span>
             <div>
               <strong>Human Sign-Off: Edit, Approve &amp; Deploy</strong>
-              <p>You are the ultimate authority. Tweak, edit, or append the generated text layouts right on your screen to match exact localized compliance requirements, then export clean, editable Word documents.</p>
+              <p>You are the ultimate authority. Tweak, edit, or append the generated insights and risk parameters right on your screen to match localized requirements, then export clean, editable documents.</p>
             </div>
           </li>
         </ol>
@@ -180,6 +180,18 @@
     </div>
   </section>
 </main>
+
+<!-- LEGAL MODALS OVERLAYS -->
+<div class="ts-modal-overlay" id="legal-modal" aria-hidden="true">
+  <div class="ts-modal-container">
+    <button type="button" class="ts-modal-close" id="close-modal-btn" aria-label="Close document panel">
+      <i class="bi bi-x-lg"></i>
+    </button>
+    <div class="ts-modal-body" id="modal-content-area">
+      <!-- Injected Document content populated via JS -->
+    </div>
+  </div>
+</div>
 
 <style>
   :root {
@@ -449,7 +461,7 @@
     color: var(--ts-red);
     display: block;
     font-family: "Space Grotesk", sans-serif;
-    font-size: 1.6rem;
+    font-size: 1.4rem;
     font-weight: 700;
     line-height: 1.1;
     margin-bottom: 0.25rem;
@@ -498,7 +510,7 @@
     align-items: center;
     display: flex;
     flex-wrap: wrap;
-    gap: 1.2rem;
+    gap: 1.8rem;
     justify-content: center;
     margin: 2rem auto 0;
     max-width: 720px;
@@ -507,14 +519,17 @@
     z-index: 2;
   }
 
-  .ts-legal-links a {
+  .ts-legal-trigger {
+    background: transparent;
+    border: 0;
     color: var(--ts-muted);
     font-size: 0.9rem;
     font-weight: 700;
-    text-decoration: none;
+    padding: 0;
+    transition: color 0.2s ease;
   }
 
-  .ts-legal-links a:hover {
+  .ts-legal-trigger:hover {
     color: var(--ts-red);
   }
 
@@ -627,39 +642,113 @@
     margin: 0;
   }
 
-  @keyframes tsFloat {
-    0%, 100% {
-      transform: translate3d(0, 0, 0) scale(1);
-    }
+  /* MODAL ARCHITECTURE STYLING */
+  .ts-modal-overlay {
+    align-items: center;
+    backdrop-filter: blur(12px);
+    background: rgba(15, 23, 42, 0.45);
+    display: flex;
+    height: 100%;
+    justify-content: center;
+    left: 0;
+    opacity: 0;
+    padding: 1.5rem;
+    pointer-events: none;
+    position: fixed;
+    top: 0;
+    transition: opacity 0.3s ease;
+    width: 100%;
+    z-index: 2000;
+  }
 
-    50% {
-      transform: translate3d(0, -15px, 0) scale(1.03);
-    }
+  .ts-modal-overlay.is-visible {
+    opacity: 1;
+    pointer-events: auto;
+  }
+
+  .ts-modal-container {
+    background: #ffffff;
+    border: 1px solid rgba(15, 23, 42, 0.08);
+    border-radius: 1.8rem;
+    box-shadow: 0 35px 90px rgba(15, 23, 42, 0.25);
+    max-height: 85vh;
+    max-width: 720px;
+    overflow-y: auto;
+    padding: clamp(1.5rem, 4vw, 3rem);
+    position: relative;
+    transform: translateY(20px) scale(0.98);
+    transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+    width: 100%;
+  }
+
+  .ts-modal-overlay.is-visible .ts-modal-container {
+    transform: translateY(0) scale(1);
+  }
+
+  .ts-modal-close {
+    align-items: center;
+    background: #f1f5f9;
+    border: 0;
+    border-radius: 50%;
+    color: var(--ts-muted);
+    display: inline-flex;
+    height: 2.5rem;
+    justify-content: center;
+    position: absolute;
+    right: 1.5rem;
+    top: 1.5rem;
+    width: 2.5rem;
+    transition: background 0.2s;
+  }
+
+  .ts-modal-close:hover {
+    background: #e2e8f0;
+    color: var(--ts-ink);
+  }
+
+  .ts-modal-body h3 {
+    font-family: "Space Grotesk", sans-serif;
+    font-size: 1.8rem;
+    font-weight: 800;
+    margin-bottom: 1.2rem;
+    color: var(--ts-ink);
+  }
+
+  .ts-modal-body h4 {
+    font-family: "Space Grotesk", sans-serif;
+    font-size: 1.15rem;
+    font-weight: 700;
+    margin-top: 1.6rem;
+    margin-bottom: 0.45rem;
+  }
+
+  .ts-modal-body p, .ts-modal-body li {
+    color: var(--ts-muted);
+    font-size: 0.95rem;
+    line-height: 1.6;
+  }
+
+  .ts-modal-body ul {
+    padding-left: 1.25rem;
+    margin-bottom: 1rem;
+  }
+
+  @keyframes tsFloat {
+    0%, 100% { transform: translate3d(0, 0, 0) scale(1); }
+    50% { transform: translate3d(0, -15px, 0) scale(1.03); }
   }
 
   @keyframes tsScreenIn {
-    from {
-      opacity: 0;
-      transform: translateY(12px) scale(0.995);
-    }
-
-    to {
-      opacity: 1;
-      transform: translateY(0) scale(1);
-    }
+    from { opacity: 0; transform: translateY(12px) scale(0.995); }
+    to { opacity: 1; transform: translateY(0) scale(1); }
   }
 
   @media (max-width: 992px) {
-    .ts-floating-note {
-      display: none;
-    }
+    .ts-floating-note { display: none; }
   }
 
   @media (max-width: 768px) {
-    .ts-menu-toggle {
-      display: inline-flex;
-    }
-
+    .ts-menu-toggle { display: inline-flex; }
     .ts-nav-links {
       background: rgba(255, 255, 255, 0.98);
       border: 1px solid var(--ts-line);
@@ -674,39 +763,16 @@
       top: calc(100% + 0.75rem);
       z-index: 999;
     }
-
-    .ts-nav-links.show {
-      display: flex;
-    }
-
-    .ts-nav-links a {
-      justify-content: center;
-      width: 100%;
-    }
+    .ts-nav-links.show { display: flex; }
+    .ts-nav-links a { justify-content: center; width: 100%; }
   }
 
   @media (max-width: 640px) {
-    .ts-screen {
-      padding: 1rem;
-    }
-
-    .ts-hero-center {
-      margin-top: 3.5rem;
-      min-height: auto;
-    }
-
-    .ts-hero-center h1 {
-      font-size: clamp(2.2rem, 12vw, 3.8rem);
-      letter-spacing: -0.04em;
-    }
-
-    .ts-hero-copy {
-      font-size: 1rem;
-    }
-
-    .ts-onboarding-intro h2 {
-      font-size: clamp(1.9rem, 10vw, 3rem);
-    }
+    .ts-screen { padding: 1rem; }
+    .ts-hero-center { margin-top: 3.5rem; min-height: auto; }
+    .ts-hero-center h1 { font-size: clamp(2.2rem, 12vw, 3.8rem); letter-spacing: -0.04em; }
+    .ts-hero-copy { font-size: 1rem; }
+    .ts-onboarding-intro h2 { font-size: clamp(1.9rem, 10vw, 3rem); }
   }
 </style>
 
@@ -716,6 +782,7 @@
     const onboarding = document.querySelector(".ts-screen-onboarding");
     const goOnboardingButton = document.querySelector("[data-go-onboarding]");
 
+    // Screen navigation logic
     const showScreen = function (screen, hash) {
       hero.classList.remove("is-active");
       onboarding.classList.remove("is-active");
@@ -724,13 +791,8 @@
       window.scrollTo({ top: 0, behavior: "smooth" });
     };
 
-    const showOnboarding = function () {
-      showScreen(onboarding, "#onboarding");
-    };
-
-    const showHero = function () {
-      showScreen(hero, window.location.pathname);
-    };
+    const showOnboarding = function () { showScreen(onboarding, "#onboarding"); };
+    const showHero = function () { showScreen(hero, window.location.pathname); };
 
     const syncScreenFromHash = function () {
       if (window.location.hash === "#onboarding") {
@@ -757,9 +819,72 @@
     });
 
     syncScreenFromHash();
-
     goOnboardingButton?.addEventListener("click", showOnboarding);
     window.addEventListener("hashchange", syncScreenFromHash);
+
+    // Dynamic Legal Content Strategy
+    const legalDocuments = {
+      privacy: `
+        <h3>Privacy Notice</h3>
+        <p><strong>Effective Date:</strong> June 2026</p>
+        <p>At TrueSafe365, we prioritize protecting the operational, spatial, and hazardous trend data handled by safety officers across dynamic environments. This document explains how raw environmental updates, near-miss profiles, and site parameters are managed inside your standalone terminal ecosystem.</p>
+        <h4>1. Information Capture & Bounds</h4>
+        <p>We process data fields provided voluntarily under your administrative authorization. This includes structural equipment layouts, local operational footprints, custom worker observations, and incident histories. This specific raw material is localized strictly to run predictive cross-pattern risk assessments and compile your dedicated Daily Safety Talks.</p>
+        <h4>2. Data Control and Sovereignty</h4>
+        <p>TrueSafe365 honors complete human-in-the-loop validation. Your parsed site information, workspace variables, and exported Word materials belong exclusively to your administrative portal dashboard. Data logs are never sold or pooled outside your structural node parameters.</p>
+        <h4>3. Structural Security Architecture</h4>
+        <p>We leverage industry-grade programmatic protocols and secure session parameters to safeguard tactical infrastructure notes and field profiles against unintended external visibility.</p>
+      `,
+      terms: `
+        <h3>Terms &amp; Privacy</h3>
+        <p><strong>Last Updated:</strong> June 2026</p>
+        <p>Welcome to TrueSafe365. By establishing your exclusive safety management account portal, tracking dynamic site configurations, or processing real-time workspace entries, you confirm complete adherence to these core operational terms.</p>
+        <h4>1. Scope of Safety Automation Assets</h4>
+        <p>TrueSafe365 functions strictly as an analytical tool to assist localized safety officers. The platform cross-references raw field feedback to draft Risk Assessments, compliance checklists, and localized safety talk scripts. The final text layouts require ultimate human verification, sign-off, and configuration prior to deployment.</p>
+        <h4>2. Account Portal Governance</h4>
+        <p>Safety administrators maintain full ownership of workspace settings, verification credentials, and analytical document repositories. Users are strictly responsible for checking generated materials against local compliance standards.</p>
+        <h4>3. Limitations of Liability</h4>
+        <p>TrueSafe365 acts as a predictive insight generator based exclusively on user-supplied parameter inputs. Operational safety enforcement, protective validation, and site monitoring protocols rest entirely on the supervising entities.</p>
+      `,
+      disclosures: `
+        <h3>Compliance &amp; Disclosures</h3>
+        <p>TrueSafe365 operates in strict alignment with regional corporate registrations and standardized workspace oversight guidelines. We remain focused on delivering robust toolsets for self-employed professionals, independent safety auditors, and enterprise field engineers alike.</p>
+        <h4>1. Advisory Notice &amp; Human Sign-Off</h4>
+        <p>All output text structures—including analytical insight summaries, hazard correlation vectors, and tool topic lists—are designed to augment your safety blueprint. They do not substitute for official on-site safety validation practices.</p>
+        <h4>2. Technical and Core Integrity Updates</h4>
+        <p>The system baseline and predictive mapping frameworks receive continuous iterations to address dynamic risk environments. For registration records, infrastructure queries, or specific portal support access, contact our technical team via your verified profile dashboard.</p>
+      `
+    };
+
+    const modalOverlay = document.getElementById("legal-modal");
+    const modalContent = document.getElementById("modal-content-area");
+    const closeModalBtn = document.getElementById("close-modal-btn");
+
+    document.querySelectorAll("[data-legal-target]").forEach(button => {
+      button.addEventListener("click", function() {
+        const docKey = this.getAttribute("data-legal-target");
+        if(legalDocuments[docKey]) {
+          modalContent.innerHTML = legalDocuments[docKey];
+          modalOverlay.classList.add("is-visible");
+          modalOverlay.setAttribute("aria-hidden", "false");
+          document.body.style.overflow = "hidden"; // Prevent background scroll
+        }
+      });
+    });
+
+    const hideModal = function() {
+      modalOverlay.classList.remove("is-visible");
+      modalOverlay.setAttribute("aria-hidden", "true");
+      document.body.style.overflow = "";
+    };
+
+    closeModalBtn?.addEventListener("click", hideModal);
+    modalOverlay?.addEventListener("click", function(e) {
+      if(e.target === modalOverlay) hideModal();
+    });
+    document.addEventListener("keydown", function(e) {
+      if(e.key === "Escape" && modalOverlay.classList.contains("is-visible")) hideModal();
+    });
   });
 </script>
 
